@@ -1,0 +1,6 @@
+{
+  "summary": "Implementation plan to transform the homepage into a completely fresh project showcase with step-by-step usage guidance, fix the theme toggle icon logic to display Sun for light mode and Moon for dark mode, purge lingering sample data from landing surfaces, and route authenticated users straight into the workspace upload view upon sign-in.",
+  "updatedAt": "2026-10-14T12:29:45.708120185Z",
+  "requestFeedback": true,
+  "userFacing": true
+}

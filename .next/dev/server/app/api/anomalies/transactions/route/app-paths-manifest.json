@@ -1,0 +1,3 @@
+{
+  "/api/anomalies/transactions/route": "app/api/anomalies/transactions/route.js"
+}

@@ -1,0 +1,32 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { databaseExists } from '@/server/db';
+import { generatePDFReport } from '@/server/report';
+
+export async function POST(request: NextRequest) {
+  if (!databaseExists()) {
+    return NextResponse.json(
+      { detail: 'No dataset has been uploaded yet. Upload a CSV first.' },
+      { status: 404 }
+    );
+  }
+
+  const body = (await request.json().catch(() => ({}))) || {};
+  const type = body?.type || 'executive';
+  const provider = body?.provider;
+
+  try {
+    const pdfBytes = await generatePDFReport(type, provider);
+    return new Response(Buffer.from(pdfBytes), {
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="ABIP_${type}_report.pdf"`,
+      },
+    });
+  } catch (err: any) {
+    console.error('Report generation error:', err);
+    return NextResponse.json(
+      { detail: `Could not build the report: ${err.message}` },
+      { status: 500 }
+    );
+  }
+}
