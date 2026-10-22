@@ -1,7 +1,5 @@
 {
   "/api/dashboard/overview/route": "app/api/dashboard/overview/route.js",
-  "/api/data/preview/route": "app/api/data/preview/route.js",
-  "/api/data/route": "app/api/data/route.js",
   "/api/data/status/route": "app/api/data/status/route.js",
   "/page": "app/page.js"
 }

@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
-import { databaseExists, getSalesSummary, getDatasetMeta } from '@/server/db';
+import { hydrate, databaseExists, getSalesSummary, getDatasetMeta } from '@/server/db';
+
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
+  await hydrate();
   if (!databaseExists()) {
     return NextResponse.json({
       database_exists: false,

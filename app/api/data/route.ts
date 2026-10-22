@@ -1,9 +1,14 @@
 import { NextResponse } from 'next/server';
-import { deleteDataset } from '../../../server/db';
+import { hydrate, deleteDataset } from '../../../server/db';
+
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 export async function DELETE() {
   try {
-    const existed = deleteDataset();
+    // Load the current dataset first so "existed" is accurate on a cold serverless instance
+    await hydrate();
+    const existed = await deleteDataset();
     if (!existed) {
       return NextResponse.json({ detail: 'No dataset found.' }, { status: 404 });
     }

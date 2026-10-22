@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { databaseExists } from '@/server/db';
+import { hydrate, databaseExists } from '@/server/db';
 import { askLLM, buildContext } from '@/server/llm';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
+  await hydrate();
   if (!databaseExists()) {
     return NextResponse.json(
       { detail: 'No dataset has been uploaded yet. Upload a CSV first.' },

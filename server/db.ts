@@ -1,136 +1,238 @@
 import fs from 'fs';
 import path from 'path';
+import { put, head, del, list } from '@vercel/blob';
 import { cleanSalesData, generateDemoDatasetCSV } from './cleaner';
 import { DataQuality, qualityFromRows } from './quality';
 import { DatasetMeta, KPIs, SaleRow } from './types';
 
-const DATA_DIR = path.resolve(process.cwd(), 'data');
-const DB_FILE = path.join(DATA_DIR, 'retail_bi.json');
-const META_FILE = path.join(DATA_DIR, 'dataset_meta.json');
-const SAMPLE_CSV = path.join(DATA_DIR, 'retail_sales.csv');
-
-// Metadata stored next to the data: file name, upload time and the validation / data quality summary
 export type StoredMeta = DatasetMeta & { quality?: DataQuality };
+type Pointer = { id: string; meta: StoredMeta };
 
-// In-memory cache for fast analytical aggregation
+/* ------------------------------------------------------------------ */
+/* Storage adapter: local files in dev, Vercel Blob in deployment      */
+/* ------------------------------------------------------------------ */
+
+// Blob on Vercel (VERCEL env var is set automatically), local files otherwise.
+// Override with STORAGE_BACKEND=local|blob if you ever need to.
+const BACKEND: 'local' | 'blob' =
+  (process.env.STORAGE_BACKEND as 'local' | 'blob' | undefined) ??
+  (process.env.VERCEL ? 'blob' : 'local');
+
+// Blob only: public-access blobs. See the access note in the reply.
+const BLOB_ACCESS = 'public' as const;
+
+const POINTER_PATH = 'abip/current.json';
+const DATASETS_PREFIX = 'abip/datasets/';
+
+interface Storage {
+  readPointer(): Promise<Pointer | null>;
+  readRows(id: string): Promise<SaleRow[]>;
+  writeRows(id: string, rows: SaleRow[]): Promise<void>;
+  writePointer(ptr: Pointer): Promise<void>; // the atomic "commit"
+  removeOtherDatasets(keepId: string | null): Promise<void>; // null = remove all
+  removePointer(): Promise<void>;
+}
+
+/* ---------- local filesystem backend ---------- */
+
+const DATA_DIR = path.resolve(process.cwd(), 'data');
+const LOCAL_POINTER = path.join(DATA_DIR, 'current.json');
+const LOCAL_DATASETS = path.join(DATA_DIR, 'datasets');
+
+const localStorage: Storage = {
+  async readPointer() {
+    try {
+      return JSON.parse(fs.readFileSync(LOCAL_POINTER, 'utf-8')) as Pointer;
+    } catch {
+      return null;
+    }
+  },
+  async readRows(id) {
+    return JSON.parse(fs.readFileSync(path.join(LOCAL_DATASETS, id, 'rows.json'), 'utf-8'));
+  },
+  async writeRows(id, rows) {
+    const dir = path.join(LOCAL_DATASETS, id);
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(path.join(dir, 'rows.json'), JSON.stringify(rows), 'utf-8');
+  },
+  async writePointer(ptr) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+    const tmp = `${LOCAL_POINTER}.tmp`;
+    fs.writeFileSync(tmp, JSON.stringify(ptr), 'utf-8');
+    fs.renameSync(tmp, LOCAL_POINTER); // rename is atomic
+  },
+  async removeOtherDatasets(keepId) {
+    if (!fs.existsSync(LOCAL_DATASETS)) return;
+    for (const name of fs.readdirSync(LOCAL_DATASETS)) {
+      if (name !== keepId) fs.rmSync(path.join(LOCAL_DATASETS, name), { recursive: true, force: true });
+    }
+  },
+  async removePointer() {
+    if (fs.existsSync(LOCAL_POINTER)) fs.unlinkSync(LOCAL_POINTER);
+  },
+};
+
+/* ---------- Vercel Blob backend ---------- */
+
+async function fetchJson<T>(url: string): Promise<T> {
+  const res = await fetch(url, { cache: 'no-store' });
+  if (!res.ok) throw new Error(`Blob fetch failed (${res.status})`);
+  return (await res.json()) as T;
+}
+
+const blobStorage: Storage = {
+  async readPointer() {
+    try {
+      const info = await head(POINTER_PATH);
+      return await fetchJson<Pointer>(`${info.url}?t=${Date.now()}`); // cache-bust
+    } catch {
+      return null;
+    }
+  },
+  async readRows(id) {
+    const info = await head(`${DATASETS_PREFIX}${id}/rows.json`);
+    return fetchJson<SaleRow[]>(info.url);
+  },
+  async writeRows(id, rows) {
+    await put(`${DATASETS_PREFIX}${id}/rows.json`, JSON.stringify(rows), {
+      access: BLOB_ACCESS,
+      contentType: 'application/json',
+      addRandomSuffix: false,
+    });
+  },
+  async writePointer(ptr) {
+    await put(POINTER_PATH, JSON.stringify(ptr), {
+      access: BLOB_ACCESS,
+      contentType: 'application/json',
+      addRandomSuffix: false,
+      allowOverwrite: true,
+      cacheControlMaxAge: 0,
+    });
+  },
+  async removeOtherDatasets(keepId) {
+    const { blobs } = await list({ prefix: DATASETS_PREFIX });
+    const stale = blobs.filter((b) => !keepId || !b.pathname.startsWith(`${DATASETS_PREFIX}${keepId}/`));
+    if (stale.length) await del(stale.map((b) => b.url));
+  },
+  async removePointer() {
+    try {
+      const info = await head(POINTER_PATH);
+      await del(info.url);
+    } catch {
+      /* no pointer */
+    }
+  },
+};
+
+const storage: Storage = BACKEND === 'blob' ? blobStorage : localStorage;
+
+/* ------------------------------------------------------------------ */
+/* Cache + public API (same exports as before)                         */
+/* ------------------------------------------------------------------ */
+
 let salesCache: SaleRow[] | null = null;
 let metaCache: StoredMeta | null = null;
+let cachedId: string | null = null;
+let seedPromise: Promise<void> | null = null;
 
-function ensureDataDir() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-  }
-}
+/** Call (and await) at the start of every data-accessing route. */
+export async function hydrate(): Promise<void> {
+  const ptr = await storage.readPointer();
 
-export function initDatabase() {
-  ensureDataDir();
-
-  if (fs.existsSync(DB_FILE) && fs.existsSync(META_FILE)) {
-    try {
-      salesCache = JSON.parse(fs.readFileSync(DB_FILE, 'utf-8'));
-      metaCache = JSON.parse(fs.readFileSync(META_FILE, 'utf-8'));
-      if (salesCache && salesCache.length > 0) {
-        console.log(`[DB] Loaded ${salesCache.length} rows from disk cache.`);
-        return;
+  if (ptr) {
+    if (ptr.id !== cachedId) {
+      try {
+        salesCache = await storage.readRows(ptr.id);
+        metaCache = ptr.meta;
+        cachedId = ptr.id;
+        console.log(`[DB:${BACKEND}] Loaded ${salesCache.length} rows.`);
+      } catch (e) {
+        console.error('[DB] Failed to load dataset:', e);
+        salesCache = null;
+        metaCache = null;
+        cachedId = null;
       }
-    } catch (e) {
-      console.warn('[DB] Failed to read disk cache, initializing fallback...');
     }
+    return;
   }
 
-  // Auto-seed with demo dataset so new sessions have active models and forecasts
-  try {
-    const csvContent = generateDemoDatasetCSV();
-    const { rows, quality } = cleanSalesData(csvContent);
-    saveSalesData(rows, 'demo_retail_sales.csv', quality);
-    console.log(`[DB] Auto-seeded demo dataset with ${rows.length} rows.`);
-  } catch (err) {
-    salesCache = null;
-    metaCache = null;
-    console.warn('[DB] Started clean without auto-seed:', err);
-  }
-}
+  salesCache = null;
+  metaCache = null;
+  cachedId = null;
 
-let isDbInit = false;
-export function ensureDatabase() {
-  if (!isDbInit) {
-    isDbInit = true;
-    initDatabase();
+  // Nothing stored: auto-seed the demo dataset once
+  if (!seedPromise) {
+    seedPromise = (async () => {
+      try {
+        const { rows, quality } = cleanSalesData(generateDemoDatasetCSV());
+        await saveSalesData(rows, 'demo_retail_sales.csv', quality);
+        console.log(`[DB:${BACKEND}] Auto-seeded demo dataset with ${rows.length} rows.`);
+      } catch (err) {
+        console.warn('[DB] Started clean without auto-seed:', err);
+      } finally {
+        seedPromise = null;
+      }
+    })();
   }
+  await seedPromise;
 }
 
 export function databaseExists(): boolean {
-  ensureDatabase();
-  if (salesCache && salesCache.length > 0) return true;
-  if (fs.existsSync(DB_FILE)) {
-    try {
-      salesCache = JSON.parse(fs.readFileSync(DB_FILE, 'utf-8'));
-      if (fs.existsSync(META_FILE)) {
-        metaCache = JSON.parse(fs.readFileSync(META_FILE, 'utf-8'));
-      }
-      return (salesCache && salesCache.length > 0) || false;
-    } catch {
-      return false;
-    }
-  }
-  return false;
+  return !!salesCache && salesCache.length > 0;
 }
 
 export function getSalesRows(): SaleRow[] {
-  ensureDatabase();
-  if (salesCache) return salesCache;
-  if (databaseExists() && salesCache) return salesCache;
-  return [];
+  return salesCache ?? [];
 }
 
-export function saveSalesData(rows: SaleRow[], filename: string, quality?: DataQuality): void {
-  ensureDataDir();
-  salesCache = rows;
-  metaCache = {
+/** Atomic replace: write new versioned data, flip pointer last, then clean up old versions. */
+export async function saveSalesData(
+  rows: SaleRow[],
+  filename: string,
+  quality?: DataQuality
+): Promise<void> {
+  const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const meta: StoredMeta = {
     filename,
     uploaded_at: new Date().toISOString(),
     ...(quality ? { quality } : {}),
   };
 
-  fs.writeFileSync(DB_FILE, JSON.stringify(rows), 'utf-8');
-  fs.writeFileSync(META_FILE, JSON.stringify(metaCache), 'utf-8');
+  await storage.writeRows(id, rows); // 1) new data under a fresh path
+  await storage.writePointer({ id, meta }); // 2) commit
+
+  salesCache = rows;
+  metaCache = meta;
+  cachedId = id;
+
+  try {
+    await storage.removeOtherDatasets(id); // 3) best-effort cleanup
+  } catch (e) {
+    console.warn('[DB] Old dataset cleanup failed (non-fatal):', e);
+  }
 }
 
-export function deleteDataset(): boolean {
+export async function deleteDataset(): Promise<boolean> {
   const existed = databaseExists();
   salesCache = null;
   metaCache = null;
+  cachedId = null;
 
   try {
-    if (fs.existsSync(DB_FILE)) fs.unlinkSync(DB_FILE);
-    if (fs.existsSync(META_FILE)) fs.unlinkSync(META_FILE);
+    await storage.removePointer(); // readers immediately see "no dataset"
+    await storage.removeOtherDatasets(null);
   } catch (e) {
-    console.error('Error deleting dataset files:', e);
+    console.error('Error deleting dataset:', e);
   }
-
   return existed;
 }
 
-function readMeta(): StoredMeta {
-  if (metaCache) return metaCache;
-  if (fs.existsSync(META_FILE)) {
-    try {
-      metaCache = JSON.parse(fs.readFileSync(META_FILE, 'utf-8'));
-      return metaCache!;
-    } catch {
-      // return default
-    }
-  }
-  return {
+export function getDatasetMeta(): StoredMeta {
+  const meta: StoredMeta = metaCache ?? {
     filename: 'Dataset',
     uploaded_at: new Date().toISOString(),
   };
-}
-
-export function getDatasetMeta(): StoredMeta {
-  const meta = readMeta();
   if (!meta.quality) {
-    // Datasets saved before validation summaries existed: recompute what we can from the stored rows
     const rows = getSalesRows();
     if (rows.length > 0) return { ...meta, quality: qualityFromRows(rows) };
   }
@@ -145,17 +247,11 @@ export function getSalesSummary(): {
 } {
   const rows = getSalesRows();
   if (rows.length === 0) {
-    return {
-      total_rows: 0,
-      total_quantity: 0,
-      total_sales: 0,
-      average_transaction: 0,
-    };
+    return { total_rows: 0, total_quantity: 0, total_sales: 0, average_transaction: 0 };
   }
 
   let totalQuantity = 0;
   let totalSales = 0;
-
   for (const row of rows) {
     totalQuantity += row.quantity;
     totalSales += row.total_amount;
@@ -170,16 +266,15 @@ export function getSalesSummary(): {
 }
 
 export function getKPIs(): KPIs {
-  const summary = getSalesSummary();
+  const s = getSalesSummary();
   return {
-    total_sales: summary.total_sales,
-    total_quantity: summary.total_quantity,
-    total_transactions: summary.total_rows,
-    average_transaction: summary.average_transaction,
+    total_sales: s.total_sales,
+    total_quantity: s.total_quantity,
+    total_transactions: s.total_rows,
+    average_transaction: s.average_transaction,
   };
 }
 
 export function getSalesPreview(limit = 10): SaleRow[] {
-  const rows = getSalesRows();
-  return rows.slice(0, Math.min(limit, 100));
+  return getSalesRows().slice(0, Math.min(limit, 100));
 }

@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { databaseExists, getSalesPreview } from '@/server/db';
+import { hydrate, databaseExists, getSalesPreview } from '@/server/db';
+
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
+  await hydrate();
   if (!databaseExists()) {
     return NextResponse.json({ detail: 'No dataset has been uploaded yet.' }, { status: 404 });
   }

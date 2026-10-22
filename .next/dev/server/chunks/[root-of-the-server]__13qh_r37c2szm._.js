@@ -5,14 +5,23 @@ module.exports = [
 
 __turbopack_context__.s([
     "POST",
-    ()=>POST
+    ()=>POST,
+    "dynamic",
+    ()=>dynamic,
+    "runtime",
+    ()=>runtime
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/server.js [app-route] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$server$2f$cleaner$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/server/cleaner.ts [app-route] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$server$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/server/db.ts [app-route] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$server$2f$quality$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/server/quality.ts [app-route] (ecmascript)");
 ;
 ;
 ;
+;
+const runtime = 'nodejs';
+const dynamic = 'force-dynamic';
+const MAX_FILE_BYTES = 25 * 1024 * 1024; // same 25MB limit the Express/multer setup used
 async function POST(request) {
     try {
         const formData = await request.formData();
@@ -32,22 +41,31 @@ async function POST(request) {
                 status: 400
             });
         }
-        const text = await file.text();
-        const { rows, report } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$server$2f$cleaner$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["cleanSalesData"])(text);
-        if (rows.length === 0) {
+        if (file.size > MAX_FILE_BYTES) {
             return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
-                detail: 'No valid rows remain after cleaning.'
+                detail: 'File is too large. The maximum size is 25 MB.'
             }, {
-                status: 400
+                status: 413
             });
         }
-        (0, __TURBOPACK__imported__module__$5b$project$5d2f$server$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["saveSalesData"])(rows, filename);
+        const text = await file.text();
+        const { rows, report, quality } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$server$2f$cleaner$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["cleanSalesData"])(text);
+        if (rows.length === 0) {
+            return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
+                detail: `No valid rows remain after validation. ${(0, __TURBOPACK__imported__module__$5b$project$5d2f$server$2f$quality$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["describeIssues"])(quality)}`.trim()
+            }, {
+                status: 422
+            });
+        }
+        (0, __TURBOPACK__imported__module__$5b$project$5d2f$server$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["saveSalesData"])(rows, filename, quality);
+        const dropped = report.rows_before - report.rows_after;
         return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
-            message: 'CSV uploaded and processed successfully.',
+            message: dropped > 0 ? `CSV uploaded. ${dropped} of ${report.rows_before} rows were dropped during validation.` : 'CSV uploaded and processed successfully.',
             filename,
             database: 'retail_bi.db',
             table: 'sales',
-            ...report
+            ...report,
+            quality
         });
     } catch (err) {
         console.error('Upload processing error:', err);

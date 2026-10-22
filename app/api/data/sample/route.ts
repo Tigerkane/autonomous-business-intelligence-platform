@@ -2,11 +2,15 @@ import { NextResponse } from 'next/server';
 import { generateDemoDatasetCSV, cleanSalesData } from '@/server/cleaner';
 import { saveSalesData } from '@/server/db';
 
+// db.ts uses Node APIs (fs locally, Vercel Blob when deployed), so this route must run on the Node.js runtime
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 export async function POST() {
   try {
     const csvContent = generateDemoDatasetCSV();
-    const { rows, report } = cleanSalesData(csvContent);
-    saveSalesData(rows, 'demo_retail_sales.csv');
+    const { rows, report, quality } = cleanSalesData(csvContent);
+    await saveSalesData(rows, 'demo_retail_sales.csv', quality);
 
     return NextResponse.json({
       message: 'Demo dataset generated and loaded successfully.',
@@ -14,6 +18,7 @@ export async function POST() {
       database: 'retail_bi.db',
       table: 'sales',
       ...report,
+      quality,
     });
   } catch (err: any) {
     return NextResponse.json(
