@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
   const provider = body?.provider;
 
   try {
-    const pdfBytes = await generatePDFReport(type, provider);
+    const pdfBytes = await generatePDFReport(uid, type, provider);
     return new Response(Buffer.from(pdfBytes), {
       headers: {
         'Content-Type': 'application/pdf',

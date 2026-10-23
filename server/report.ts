@@ -226,7 +226,7 @@ export async function generatePDFReport(uid: string, type: 'executive' | 'sales'
   if (type === 'ai') {
     const context = buildContext(uid);
     const prompt = 'Summarize key findings, risks, and recommendations for this retail dataset.';
-    const aiResult = await askLLM(prompt, context, provider);
+    const aiResult = await askLLM(uid, prompt, context, provider);
     const cleanLines = aiResult.answer
       .split('\n')
       .map((l) => l.replace(/[*#]/g, '').trim())
