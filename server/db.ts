@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { put, head, del, list } from '@vercel/blob';
-import { cleanSalesData, generateDemoDatasetCSV } from './cleaner';
+import { cleanSalesData } from './cleaner';
 import { DataQuality, qualityFromRows } from './quality';
 import { DatasetMeta, KPIs, SaleRow } from './types';
 
@@ -135,7 +135,6 @@ const storage: Storage = BACKEND === 'blob' ? blobStorage : localStorage;
 
 type State = { rows: SaleRow[] | null; meta: StoredMeta | null; id: string | null };
 const states = new Map<string, State>();
-const seeding = new Map<string, Promise<void>>();
 
 function st(uid: string): State {
   let s = states.get(uid);
@@ -169,24 +168,6 @@ export async function hydrate(uid: string): Promise<void> {
   s.meta = null;
   s.id = null;
 
-  // Nothing stored for this user: auto-seed demo dataset once
-  if (!seeding.has(uid)) {
-    seeding.set(
-      uid,
-      (async () => {
-        try {
-          const { rows, quality } = cleanSalesData(generateDemoDatasetCSV());
-          await saveSalesData(uid, rows, 'demo_retail_sales.csv', quality);
-          console.log(`[DB:${BACKEND}] Auto-seeded demo dataset (${rows.length} rows).`);
-        } catch (err) {
-          console.warn('[DB] Started clean without auto-seed:', err);
-        } finally {
-          seeding.delete(uid);
-        }
-      })()
-    );
-  }
-  await seeding.get(uid);
 }
 
 export function getSalesRows(uid: string): SaleRow[] {

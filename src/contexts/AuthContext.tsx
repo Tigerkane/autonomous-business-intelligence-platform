@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
 export interface UserProfile {
   id: string;
@@ -15,6 +15,7 @@ export type DemoProfileKey = 'analyst' | 'executive' | 'shreyas' | 'saniya' | 's
 interface AuthContextType {
   user: UserProfile | null;
   isAuthenticated: boolean;
+  sessionReady: boolean;
   login: (email: string, password?: string) => Promise<boolean>;
   signup: (name: string, email: string, password?: string, company?: string) => Promise<boolean>;
   loginAsDemo: (type: DemoProfileKey) => void;
@@ -113,6 +114,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'signin' | 'signup'>('signin');
+  const [sessionReady, setSessionReady] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -121,6 +123,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.removeItem(STORAGE_KEY);
     }
   }, [user]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setSessionReady(false);
+    fetch("/api/session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(user ? { email: user.email } : {}),
+    })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setSessionReady(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.email]);
 
   const openAuthModal = useCallback((mode: 'signin' | 'signup' = 'signin') => {
     setAuthModalMode(mode);
@@ -243,6 +262,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         user,
         isAuthenticated: !!user,
+        sessionReady,
         login,
         signup,
         loginAsDemo,

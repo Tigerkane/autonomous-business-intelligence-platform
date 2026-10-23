@@ -10,6 +10,7 @@ import React, {
   useState,
 } from 'react';
 import { DatasetStatus } from '../types';
+import { useAuth } from './AuthContext';
 
 interface DataContextType {
   dataset: DatasetStatus | null;
@@ -34,6 +35,7 @@ const DataContext = createContext<DataContextType | null>(null);
 const THEME_TRANSITION_MS = 350;
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user, sessionReady } = useAuth();
   const [dataset, setDataset] = useState<DatasetStatus | null>(null);
   const [ready, setReady] = useState(false);
   const [backendUp, setBackendUp] = useState(true);
@@ -129,9 +131,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
-    load(false);
-  }, [load]);
-
+    if (!sessionReady) return;
+    setDataset(null);
+    load(true);
+  }, [load, sessionReady, user?.email]);
   const refresh = useCallback(async () => {
     await load(true);
   }, [load]);
