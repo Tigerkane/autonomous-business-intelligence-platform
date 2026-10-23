@@ -1,3 +1,4 @@
+import { getUid } from '@/lib/user';
 import { NextResponse } from 'next/server';
 import { hydrate, deleteDataset } from '../../../server/db';
 
@@ -7,8 +8,9 @@ export const dynamic = 'force-dynamic';
 export async function DELETE() {
   try {
     // Load the current dataset first so "existed" is accurate on a cold serverless instance
-    await hydrate();
-    const existed = await deleteDataset();
+    const uid = await getUid();
+  await hydrate(uid);
+    const existed = await deleteDataset(uid);
     if (!existed) {
       return NextResponse.json({ detail: 'No dataset found.' }, { status: 404 });
     }

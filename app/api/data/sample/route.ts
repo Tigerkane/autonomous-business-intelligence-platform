@@ -1,3 +1,4 @@
+import { getUid } from '@/lib/user';
 import { NextResponse } from 'next/server';
 import { generateDemoDatasetCSV, cleanSalesData } from '@/server/cleaner';
 import { saveSalesData } from '@/server/db';
@@ -7,10 +8,11 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function POST() {
+  const uid = await getUid();
   try {
     const csvContent = generateDemoDatasetCSV();
     const { rows, report, quality } = cleanSalesData(csvContent);
-    await saveSalesData(rows, 'demo_retail_sales.csv', quality);
+    await saveSalesData(uid, rows, 'demo_retail_sales.csv', quality);
 
     return NextResponse.json({
       message: 'Demo dataset generated and loaded successfully.',

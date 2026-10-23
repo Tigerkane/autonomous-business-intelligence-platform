@@ -1,3 +1,4 @@
+import { getUid } from '@/lib/user';
 import { NextRequest, NextResponse } from 'next/server';
 import { cleanSalesData } from '@/server/cleaner';
 import { saveSalesData } from '@/server/db';
@@ -10,6 +11,7 @@ export const dynamic = 'force-dynamic';
 const MAX_FILE_BYTES = 25 * 1024 * 1024; // same 25MB limit the Express/multer setup used
 
 export async function POST(request: NextRequest) {
+  const uid = await getUid();
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
@@ -42,7 +44,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    await saveSalesData(rows, filename, quality);
+    await saveSalesData(uid, rows, filename, quality);
 
     const dropped = report.rows_before - report.rows_after;
     return NextResponse.json({

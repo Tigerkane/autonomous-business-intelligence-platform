@@ -46,25 +46,25 @@ export function availableProviders(): ProviderInfo[] {
   ];
 }
 
-export function buildContext(): string {
-  if (!databaseExists()) {
+export function buildContext(uid: string): string {
+  if (!databaseExists(uid)) {
     return 'No dataset loaded.';
   }
 
-  const rows = getSalesRows();
-  const meta = getDatasetMeta();
-  const ov = getOverview(rows);
-  const sa = getSalesAnalysis(rows);
+  const rows = getSalesRows(uid);
+  const meta = getDatasetMeta(uid);
+  const ov = getOverview(uid, rows);
+  const sa = getSalesAnalysis(uid, rows);
 
   let fcSummary = 'Forecast not available (insufficient months).';
   try {
-    const fc = getForecast(rows);
+    const fc = getForecast(uid, rows);
     fcSummary = `Best model: ${fc.model}, Backtest MAPE: ${fc.mape}%, Accuracy: ${fc.accuracy}%. Next month forecasted revenue: ₹${Math.round(fc.next_month_predicted).toLocaleString('en-IN')}.`;
   } catch {
     // continue
   }
 
-  const an = getAnomalies(rows, 5, ANOMALY_THRESHOLD);
+  const an = getAnomalies(uid, rows, 5, ANOMALY_THRESHOLD);
   const anomalySummary =
     an.total > 0
       ? `Detected ${an.total} anomalous days (rolling 31-day median baseline, threshold z >= ${ANOMALY_THRESHOLD}). Top anomaly: Date ${an.data[0]?.date}, Actual: ₹${Math.round(an.data[0]?.value).toLocaleString('en-IN')}, Expected: ₹${Math.round(an.data[0]?.expected).toLocaleString('en-IN')} (${an.data[0]?.deviation}).`
@@ -130,6 +130,7 @@ ${sa.insights.join('\n')}
 // ---------------------------------------------------------------------------
 
 export async function askLLM(
+  uid: string,
   question: string,
   context: string,
   requestedProvider?: string
@@ -160,7 +161,7 @@ export async function askLLM(
     }
 
     return {
-      answer: solveDeterministic(question),
+      answer: solveDeterministic(uid, question),
       model: 'Deterministic Mathematical Solver (Ollama unavailable)',
       provider: 'ollama',
     };
@@ -206,7 +207,7 @@ export async function askLLM(
     }
 
     return {
-      answer: solveDeterministic(question),
+      answer: solveDeterministic(uid, question),
       model: 'Deterministic Mathematical Solver (Ollama Cloud unavailable)',
       provider: 'ollama_cloud',
     };
@@ -214,7 +215,7 @@ export async function askLLM(
 
   // 3. Deterministic Mathematical Solver (default; also catches any stale saved provider id)
   return {
-    answer: solveDeterministic(question),
+    answer: solveDeterministic(uid, question),
     model: 'Deterministic Mathematical Solver',
     provider: 'deterministic',
   };
@@ -257,12 +258,12 @@ function has(q: string, ...words: string[]) {
   });
 }
 
-export function solveDeterministic(question: string): string {
-  if (!databaseExists()) {
+export function solveDeterministic(uid: string, question: string): string {
+  if (!databaseExists(uid)) {
     return 'No dataset is loaded yet. Upload a CSV or load the sample dataset first.';
   }
 
-  const rows = getSalesRows();
+  const rows = getSalesRows(uid);
   if (rows.length === 0) {
     return 'The loaded dataset has no valid rows.';
   }
@@ -275,7 +276,7 @@ export function solveDeterministic(question: string): string {
   // Forecast
   if (has(q, 'forecast', 'predict', 'future', 'next month', 'projection')) {
     try {
-      const fc = getForecast(rows);
+      const fc = getForecast(uid, rows);
       return `### Sales Forecast
 - **Selected model**: ${fc.model}
 - **Backtest MAPE**: ${fc.mape}% (accuracy ${fc.accuracy}%)
@@ -289,7 +290,7 @@ The model was chosen by walk-forward backtesting on your own monthly history.${r
 
   // Anomalies
   if (has(q, 'anomal', 'outlier', 'spike', 'unusual', 'drop', 'dip')) {
-    const an = getAnomalies(rows, 5, ANOMALY_THRESHOLD);
+    const an = getAnomalies(uid, rows, 5, ANOMALY_THRESHOLD);
     if (an.total === 0) {
       return `### Anomaly Detection\nNo anomalies were detected at the current threshold (z >= ${ANOMALY_THRESHOLD}).${receipt}`;
     }
@@ -367,7 +368,7 @@ ${top}${receipt}`;
 
   // Monthly trends
   if (has(q, 'month', 'trend', 'growth', 'mom', 'season', 'best period', 'peak')) {
-    const ov = getOverview(rows);
+    const ov = getOverview(uid, rows);
     const full = ov.monthly.filter((m: any) => !m.partial);
     const list = ov.monthly
       .map((m: any) => `- ${m.month}: ${money(m.total_revenue)}${m.partial ? ' (partial month)' : ''}`)

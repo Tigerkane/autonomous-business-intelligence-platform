@@ -1,13 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { hydrate, databaseExists } from '@/server/db';
+import { getUid } from '@/lib/user';
+import { databaseExists, hydrate } from '@/server/db';
 import { askLLM, buildContext } from '@/server/llm';
+import { NextRequest, NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
-  await hydrate();
-  if (!databaseExists()) {
+  const uid = await getUid();
+  await hydrate(uid);
+  if (!databaseExists(uid)) {
     return NextResponse.json(
       { detail: 'No dataset has been uploaded yet. Upload a CSV first.' },
       { status: 404 }
@@ -20,8 +22,8 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const context = buildContext();
-    const result = await askLLM(question.trim(), context, provider);
+    const context = buildContext(uid);
+    const result = await askLLM(uid, question.trim(), context, provider);
     return NextResponse.json({
       question,
       answer: result.answer,

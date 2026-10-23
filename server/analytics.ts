@@ -56,8 +56,8 @@ function fitLinear(y: number[]): (step: number) => number {
   return (step: number) => slope * step + intercept;
 }
 
-export function getMonthlyHistory(rows?: SaleRow[]) {
-  const data = rows || getSalesRows();
+export function getMonthlyHistory(uid: string, rows?: SaleRow[]) {
+  const data = rows || getSalesRows(uid);
   const monthMap = new Map<string, { total: number; dates: Set<string>; year: number; month: number }>();
 
   for (const row of data) {
@@ -91,8 +91,8 @@ export function getMonthlyHistory(rows?: SaleRow[]) {
   };
 }
 
-export function getOverview(rows?: SaleRow[]) {
-  const data = rows || getSalesRows();
+export function getOverview(uid: string, rows?: SaleRow[]) {
+  const data = rows || getSalesRows(uid);
   if (data.length === 0) {
     throw new Error('No dataset has been uploaded yet.');
   }
@@ -292,13 +292,13 @@ export function getOverview(rows?: SaleRow[]) {
   };
 }
 
-export function getSalesAnalysis(rows?: SaleRow[]) {
-  const data = rows || getSalesRows();
-  const ov = getOverview(data);
+export function getSalesAnalysis(uid: string, rows?: SaleRow[]) {
+  const data = rows || getSalesRows(uid);
+  const ov = getOverview(uid, data);
   const total = ov.kpis.total_sales;
 
   // Stacked monthly category revenue for full months
-  const { fullMonths, droppedMonths } = getMonthlyHistory(data);
+  const { fullMonths, droppedMonths } = getMonthlyHistory(uid, data);
   const fullYMs = new Set(fullMonths.map((m) => m.ym));
 
   const allCategories = Array.from(new Set(data.map((r) => r.product_category))).sort();
@@ -439,9 +439,9 @@ export function getSalesAnalysis(rows?: SaleRow[]) {
   };
 }
 
-export function getForecast(rows?: SaleRow[]) {
-  const data = rows || getSalesRows();
-  const { fullMonths, droppedMonths } = getMonthlyHistory(data);
+export function getForecast(uid: string, rows?: SaleRow[]) {
+  const data = rows || getSalesRows(uid);
+  const { fullMonths, droppedMonths } = getMonthlyHistory(uid, data);
 
   const HORIZON = 6;
   const MIN_MONTHS = 6;
@@ -564,8 +564,8 @@ const ANOMALY_WINDOW_RADIUS_DAYS = 15; // 31-day centered window
 const ANOMALY_MIN_PERIODS = 7;
 const ANOMALY_HIGH_Z = 5; // fixed severity band, independent of the sensitivity slider
 
-export function getAnomalies(rows?: SaleRow[], limit = 500, threshold = 3.5) {
-  const data = rows || getSalesRows();
+export function getAnomalies(uid: string, rows?: SaleRow[], limit = 500, threshold = 3.5) {
+  const data = rows || getSalesRows(uid);
   const dailyMap = new Map<string, number>();
 
   for (const row of data) {
@@ -712,8 +712,8 @@ function quantileSorted(sorted: number[], q: number): number {
 // this dataset); 3.0 is the "far out" fence (flags almost nothing). 2.0 keeps the table focused.
 export const UNUSUAL_TX_FENCE = 2.0;
 
-export function getUnusualTransactions(rows?: SaleRow[], limit = 200, fence = UNUSUAL_TX_FENCE) {
-  const data = rows || getSalesRows();
+export function getUnusualTransactions(uid: string, rows?: SaleRow[], limit = 200, fence = UNUSUAL_TX_FENCE) {
+  const data = rows || getSalesRows(uid);
   const byCategory = new Map<string, SaleRow[]>();
   for (const r of data) {
     const list = byCategory.get(r.product_category);

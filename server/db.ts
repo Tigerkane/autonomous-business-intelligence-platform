@@ -10,65 +10,67 @@ type Pointer = { id: string; meta: StoredMeta };
 
 /* ------------------------------------------------------------------ */
 /* Storage adapter: local files in dev, Vercel Blob in deployment      */
+/* All data is scoped per user id (uid).                               */
 /* ------------------------------------------------------------------ */
 
-// Blob on Vercel (VERCEL env var is set automatically), local files otherwise.
-// Override with STORAGE_BACKEND=local|blob if you ever need to.
 const BACKEND: 'local' | 'blob' =
   (process.env.STORAGE_BACKEND as 'local' | 'blob' | undefined) ??
   (process.env.VERCEL ? 'blob' : 'local');
 
-// Blob only: public-access blobs. See the access note in the reply.
 const BLOB_ACCESS = 'public' as const;
 
-const POINTER_PATH = 'abip/current.json';
-const DATASETS_PREFIX = 'abip/datasets/';
+const safe = (uid: string) => uid.replace(/[^a-zA-Z0-9_-]/g, '_');
+const pointerPath = (uid: string) => `abip/${safe(uid)}/current.json`;
+const datasetsPrefix = (uid: string) => `abip/${safe(uid)}/datasets/`;
 
 interface Storage {
-  readPointer(): Promise<Pointer | null>;
-  readRows(id: string): Promise<SaleRow[]>;
-  writeRows(id: string, rows: SaleRow[]): Promise<void>;
-  writePointer(ptr: Pointer): Promise<void>; // the atomic "commit"
-  removeOtherDatasets(keepId: string | null): Promise<void>; // null = remove all
-  removePointer(): Promise<void>;
+  readPointer(uid: string): Promise<Pointer | null>;
+  readRows(uid: string, id: string): Promise<SaleRow[]>;
+  writeRows(uid: string, id: string, rows: SaleRow[]): Promise<void>;
+  writePointer(uid: string, ptr: Pointer): Promise<void>; // atomic commit
+  removeOtherDatasets(uid: string, keepId: string | null): Promise<void>;
+  removePointer(uid: string): Promise<void>;
 }
 
 /* ---------- local filesystem backend ---------- */
 
 const DATA_DIR = path.resolve(process.cwd(), 'data');
-const LOCAL_POINTER = path.join(DATA_DIR, 'current.json');
-const LOCAL_DATASETS = path.join(DATA_DIR, 'datasets');
+const userDir = (uid: string) => path.join(DATA_DIR, safe(uid));
+const localPointer = (uid: string) => path.join(userDir(uid), 'current.json');
+const localDatasets = (uid: string) => path.join(userDir(uid), 'datasets');
 
 const localStorage: Storage = {
-  async readPointer() {
+  async readPointer(uid) {
     try {
-      return JSON.parse(fs.readFileSync(LOCAL_POINTER, 'utf-8')) as Pointer;
+      return JSON.parse(fs.readFileSync(localPointer(uid), 'utf-8')) as Pointer;
     } catch {
       return null;
     }
   },
-  async readRows(id) {
-    return JSON.parse(fs.readFileSync(path.join(LOCAL_DATASETS, id, 'rows.json'), 'utf-8'));
+  async readRows(uid, id) {
+    return JSON.parse(fs.readFileSync(path.join(localDatasets(uid), id, 'rows.json'), 'utf-8'));
   },
-  async writeRows(id, rows) {
-    const dir = path.join(LOCAL_DATASETS, id);
+  async writeRows(uid, id, rows) {
+    const dir = path.join(localDatasets(uid), id);
     fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(path.join(dir, 'rows.json'), JSON.stringify(rows), 'utf-8');
   },
-  async writePointer(ptr) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-    const tmp = `${LOCAL_POINTER}.tmp`;
+  async writePointer(uid, ptr) {
+    fs.mkdirSync(userDir(uid), { recursive: true });
+    const tmp = `${localPointer(uid)}.tmp`;
     fs.writeFileSync(tmp, JSON.stringify(ptr), 'utf-8');
-    fs.renameSync(tmp, LOCAL_POINTER); // rename is atomic
+    fs.renameSync(tmp, localPointer(uid)); // rename is atomic
   },
-  async removeOtherDatasets(keepId) {
-    if (!fs.existsSync(LOCAL_DATASETS)) return;
-    for (const name of fs.readdirSync(LOCAL_DATASETS)) {
-      if (name !== keepId) fs.rmSync(path.join(LOCAL_DATASETS, name), { recursive: true, force: true });
+  async removeOtherDatasets(uid, keepId) {
+    const dir = localDatasets(uid);
+    if (!fs.existsSync(dir)) return;
+    for (const name of fs.readdirSync(dir)) {
+      if (name !== keepId) fs.rmSync(path.join(dir, name), { recursive: true, force: true });
     }
   },
-  async removePointer() {
-    if (fs.existsSync(LOCAL_POINTER)) fs.unlinkSync(LOCAL_POINTER);
+  async removePointer(uid) {
+    const p = localPointer(uid);
+    if (fs.existsSync(p)) fs.unlinkSync(p);
   },
 };
 
@@ -81,27 +83,27 @@ async function fetchJson<T>(url: string): Promise<T> {
 }
 
 const blobStorage: Storage = {
-  async readPointer() {
+  async readPointer(uid) {
     try {
-      const info = await head(POINTER_PATH);
+      const info = await head(pointerPath(uid));
       return await fetchJson<Pointer>(`${info.url}?t=${Date.now()}`); // cache-bust
     } catch {
       return null;
     }
   },
-  async readRows(id) {
-    const info = await head(`${DATASETS_PREFIX}${id}/rows.json`);
+  async readRows(uid, id) {
+    const info = await head(`${datasetsPrefix(uid)}${id}/rows.json`);
     return fetchJson<SaleRow[]>(info.url);
   },
-  async writeRows(id, rows) {
-    await put(`${DATASETS_PREFIX}${id}/rows.json`, JSON.stringify(rows), {
+  async writeRows(uid, id, rows) {
+    await put(`${datasetsPrefix(uid)}${id}/rows.json`, JSON.stringify(rows), {
       access: BLOB_ACCESS,
       contentType: 'application/json',
       addRandomSuffix: false,
     });
   },
-  async writePointer(ptr) {
-    await put(POINTER_PATH, JSON.stringify(ptr), {
+  async writePointer(uid, ptr) {
+    await put(pointerPath(uid), JSON.stringify(ptr), {
       access: BLOB_ACCESS,
       contentType: 'application/json',
       addRandomSuffix: false,
@@ -109,14 +111,15 @@ const blobStorage: Storage = {
       cacheControlMaxAge: 0,
     });
   },
-  async removeOtherDatasets(keepId) {
-    const { blobs } = await list({ prefix: DATASETS_PREFIX });
-    const stale = blobs.filter((b) => !keepId || !b.pathname.startsWith(`${DATASETS_PREFIX}${keepId}/`));
+  async removeOtherDatasets(uid, keepId) {
+    const prefix = datasetsPrefix(uid);
+    const { blobs } = await list({ prefix });
+    const stale = blobs.filter((b) => !keepId || !b.pathname.startsWith(`${prefix}${keepId}/`));
     if (stale.length) await del(stale.map((b) => b.url));
   },
-  async removePointer() {
+  async removePointer(uid) {
     try {
-      const info = await head(POINTER_PATH);
+      const info = await head(pointerPath(uid));
       await del(info.url);
     } catch {
       /* no pointer */
@@ -127,66 +130,76 @@ const blobStorage: Storage = {
 const storage: Storage = BACKEND === 'blob' ? blobStorage : localStorage;
 
 /* ------------------------------------------------------------------ */
-/* Cache + public API (same exports as before)                         */
+/* Per-user cache + public API                                         */
 /* ------------------------------------------------------------------ */
 
-let salesCache: SaleRow[] | null = null;
-let metaCache: StoredMeta | null = null;
-let cachedId: string | null = null;
-let seedPromise: Promise<void> | null = null;
+type State = { rows: SaleRow[] | null; meta: StoredMeta | null; id: string | null };
+const states = new Map<string, State>();
+const seeding = new Map<string, Promise<void>>();
+
+function st(uid: string): State {
+  let s = states.get(uid);
+  if (!s) {
+    s = { rows: null, meta: null, id: null };
+    states.set(uid, s);
+  }
+  return s;
+}
 
 /** Call (and await) at the start of every data-accessing route. */
-export async function hydrate(): Promise<void> {
-  const ptr = await storage.readPointer();
+export async function hydrate(uid: string): Promise<void> {
+  const s = st(uid);
 
-  if (ptr) {
-    if (ptr.id !== cachedId) {
-      try {
-        salesCache = await storage.readRows(ptr.id);
-        metaCache = ptr.meta;
-        cachedId = ptr.id;
-        console.log(`[DB:${BACKEND}] Loaded ${salesCache.length} rows.`);
-      } catch (e) {
-        console.error('[DB] Failed to load dataset:', e);
-        salesCache = null;
-        metaCache = null;
-        cachedId = null;
-      }
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const ptr = await storage.readPointer(uid);
+    if (!ptr) break;
+    if (ptr.id === s.id) return;
+    try {
+      s.rows = await storage.readRows(uid, ptr.id);
+      s.meta = ptr.meta;
+      s.id = ptr.id;
+      console.log(`[DB:${BACKEND}] Loaded ${s.rows.length} rows for ${safe(uid).slice(0, 8)}.`);
+      return;
+    } catch (e) {
+      console.error('[DB] Failed to load dataset, retrying:', e);
     }
-    return;
   }
 
-  salesCache = null;
-  metaCache = null;
-  cachedId = null;
+  s.rows = null;
+  s.meta = null;
+  s.id = null;
 
-  // Nothing stored: auto-seed the demo dataset once
-  if (!seedPromise) {
-    seedPromise = (async () => {
-      try {
-        const { rows, quality } = cleanSalesData(generateDemoDatasetCSV());
-        await saveSalesData(rows, 'demo_retail_sales.csv', quality);
-        console.log(`[DB:${BACKEND}] Auto-seeded demo dataset with ${rows.length} rows.`);
-      } catch (err) {
-        console.warn('[DB] Started clean without auto-seed:', err);
-      } finally {
-        seedPromise = null;
-      }
-    })();
+  // Nothing stored for this user: auto-seed demo dataset once
+  if (!seeding.has(uid)) {
+    seeding.set(
+      uid,
+      (async () => {
+        try {
+          const { rows, quality } = cleanSalesData(generateDemoDatasetCSV());
+          await saveSalesData(uid, rows, 'demo_retail_sales.csv', quality);
+          console.log(`[DB:${BACKEND}] Auto-seeded demo dataset (${rows.length} rows).`);
+        } catch (err) {
+          console.warn('[DB] Started clean without auto-seed:', err);
+        } finally {
+          seeding.delete(uid);
+        }
+      })()
+    );
   }
-  await seedPromise;
+  await seeding.get(uid);
 }
 
-export function databaseExists(): boolean {
-  return !!salesCache && salesCache.length > 0;
+export function getSalesRows(uid: string): SaleRow[] {
+  return st(uid).rows ?? [];
 }
 
-export function getSalesRows(): SaleRow[] {
-  return salesCache ?? [];
+export function databaseExists(uid: string): boolean {
+  return getSalesRows(uid).length > 0;
 }
 
-/** Atomic replace: write new versioned data, flip pointer last, then clean up old versions. */
+/** Atomic replace: write new versioned data, flip pointer last, then clean up. */
 export async function saveSalesData(
+  uid: string,
   rows: SaleRow[],
   filename: string,
   quality?: DataQuality
@@ -198,54 +211,50 @@ export async function saveSalesData(
     ...(quality ? { quality } : {}),
   };
 
-  await storage.writeRows(id, rows); // 1) new data under a fresh path
-  await storage.writePointer({ id, meta }); // 2) commit
+  await storage.writeRows(uid, id, rows); // 1) new data under a fresh path
+  await storage.writePointer(uid, { id, meta }); // 2) commit
 
-  salesCache = rows;
-  metaCache = meta;
-  cachedId = id;
+  Object.assign(st(uid), { rows, meta, id });
 
   try {
-    await storage.removeOtherDatasets(id); // 3) best-effort cleanup
+    await storage.removeOtherDatasets(uid, id); // 3) best-effort cleanup
   } catch (e) {
     console.warn('[DB] Old dataset cleanup failed (non-fatal):', e);
   }
 }
 
-export async function deleteDataset(): Promise<boolean> {
-  const existed = databaseExists();
-  salesCache = null;
-  metaCache = null;
-  cachedId = null;
+export async function deleteDataset(uid: string): Promise<boolean> {
+  const existed = databaseExists(uid);
+  Object.assign(st(uid), { rows: null, meta: null, id: null });
 
   try {
-    await storage.removePointer(); // readers immediately see "no dataset"
-    await storage.removeOtherDatasets(null);
+    await storage.removePointer(uid);
+    await storage.removeOtherDatasets(uid, null);
   } catch (e) {
     console.error('Error deleting dataset:', e);
   }
   return existed;
 }
 
-export function getDatasetMeta(): StoredMeta {
-  const meta: StoredMeta = metaCache ?? {
+export function getDatasetMeta(uid: string): StoredMeta {
+  const meta: StoredMeta = st(uid).meta ?? {
     filename: 'Dataset',
     uploaded_at: new Date().toISOString(),
   };
   if (!meta.quality) {
-    const rows = getSalesRows();
+    const rows = getSalesRows(uid);
     if (rows.length > 0) return { ...meta, quality: qualityFromRows(rows) };
   }
   return meta;
 }
 
-export function getSalesSummary(): {
+export function getSalesSummary(uid: string): {
   total_rows: number;
   total_quantity: number;
   total_sales: number;
   average_transaction: number;
 } {
-  const rows = getSalesRows();
+  const rows = getSalesRows(uid);
   if (rows.length === 0) {
     return { total_rows: 0, total_quantity: 0, total_sales: 0, average_transaction: 0 };
   }
@@ -265,8 +274,8 @@ export function getSalesSummary(): {
   };
 }
 
-export function getKPIs(): KPIs {
-  const s = getSalesSummary();
+export function getKPIs(uid: string): KPIs {
+  const s = getSalesSummary(uid);
   return {
     total_sales: s.total_sales,
     total_quantity: s.total_quantity,
@@ -275,6 +284,6 @@ export function getKPIs(): KPIs {
   };
 }
 
-export function getSalesPreview(limit = 10): SaleRow[] {
-  return getSalesRows().slice(0, Math.min(limit, 100));
+export function getSalesPreview(uid: string, limit = 10): SaleRow[] {
+  return getSalesRows(uid).slice(0, Math.min(limit, 100));
 }

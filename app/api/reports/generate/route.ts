@@ -1,3 +1,4 @@
+import { getUid } from '@/lib/user';
 import { NextRequest, NextResponse } from 'next/server';
 import { hydrate, databaseExists } from '@/server/db';
 import { generatePDFReport } from '@/server/report';
@@ -6,8 +7,9 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
-  await hydrate();
-  if (!databaseExists()) {
+  const uid = await getUid();
+  await hydrate(uid);
+  if (!databaseExists(uid)) {
     return NextResponse.json(
       { detail: 'No dataset has been uploaded yet. Upload a CSV first.' },
       { status: 404 }

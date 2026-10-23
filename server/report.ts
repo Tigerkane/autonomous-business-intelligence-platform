@@ -5,7 +5,7 @@ import { askLLM, buildContext } from './llm';
 
 const ANOMALY_THRESHOLD = 3.5;
 
-export async function generatePDFReport(type: 'executive' | 'sales' | 'forecast' | 'ai', provider?: string): Promise<Uint8Array> {
+export async function generatePDFReport(uid: string, type: 'executive' | 'sales' | 'forecast' | 'ai', provider?: string): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.create();
   const page = pdfDoc.addPage([595.28, 841.89]); // A4 in points
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
@@ -20,10 +20,10 @@ export async function generatePDFReport(type: 'executive' | 'sales' | 'forecast'
   const grayColor = rgb(0.4, 0.45, 0.55);
   const lightBgColor = rgb(0.957, 0.969, 0.996);
 
-  const rows = getSalesRows();
-  const meta = getDatasetMeta();
-  const ov = getOverview(rows);
-  const sa = getSalesAnalysis(rows);
+  const rows = getSalesRows(uid);
+  const meta = getDatasetMeta(uid);
+  const ov = getOverview(uid, rows);
+  const sa = getSalesAnalysis(uid, rows);
 
   const reportTitles: Record<string, string> = {
     executive: 'Executive Summary Report',
@@ -172,7 +172,7 @@ export async function generatePDFReport(type: 'executive' | 'sales' | 'forecast'
     drawSection('Predictive Forecasting & Anomaly Status');
 
     try {
-      const fc = getForecast(rows);
+      const fc = getForecast(uid, rows);
       page.drawText(`Selected Forecast Model: ${fc.model} (MAPE: ${fc.mape}%, Backtest Accuracy: ${fc.accuracy}%)`, {
         x: margin,
         y: cursorY,
@@ -191,7 +191,7 @@ export async function generatePDFReport(type: 'executive' | 'sales' | 'forecast'
       cursorY -= 20;
     }
 
-    const an = getAnomalies(rows, 3, ANOMALY_THRESHOLD);
+    const an = getAnomalies(uid, rows, 3, ANOMALY_THRESHOLD);
     page.drawText(
       `Anomaly Detection: ${an.total} unusual days flagged (rolling 31-day median baseline, threshold z >= ${ANOMALY_THRESHOLD}).`,
       {
@@ -224,7 +224,7 @@ export async function generatePDFReport(type: 'executive' | 'sales' | 'forecast'
 
   let findings: string[] = sa.insights;
   if (type === 'ai') {
-    const context = buildContext();
+    const context = buildContext(uid);
     const prompt = 'Summarize key findings, risks, and recommendations for this retail dataset.';
     const aiResult = await askLLM(prompt, context, provider);
     const cleanLines = aiResult.answer
