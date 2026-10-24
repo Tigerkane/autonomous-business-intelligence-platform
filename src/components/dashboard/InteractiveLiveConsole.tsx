@@ -10,7 +10,7 @@ import {
   ChevronRight,
   Send,
   CheckCircle2,
-  DollarSign,
+  IndianRupee,
   ShoppingCart,
   Layers,
 } from 'lucide-react';
@@ -31,7 +31,7 @@ export const InteractiveLiveConsole: React.FC<InteractiveLiveConsoleProps> = ({
   // Exact 4 Tabs from Brief: Dashboard | Forecast | Anomalies | Ask
   const [activeTab, setActiveTab] = useState<'dashboard' | 'forecast' | 'anomalies' | 'ask'>('dashboard');
 
-  // Dashboard Toggle: Revenue ($) vs Orders (Count)
+  // Dashboard Toggle: Revenue (₹) vs Orders (Count)
   const [dashboardMetric, setDashboardMetric] = useState<'revenue' | 'orders'>('revenue');
 
   // Forecast Tab: 80% Range Switch
@@ -70,14 +70,14 @@ export const InteractiveLiveConsole: React.FC<InteractiveLiveConsoleProps> = ({
     let metricText = '';
 
     if (q.includes('category') || q.includes('highest')) {
-      fullText = 'Outerwear & Jackets leads gross revenue at $700,321 (38% category share) with an 18.5% year-over-year unit velocity across 8,932 customer orders.';
+      fullText = 'Outerwear & Jackets leads gross revenue at ₹7,00,321 (38% category share) with an 18.5% year-over-year unit velocity across 8,932 customer orders.';
       metricText = 'Top Category: Outerwear & Jackets · Share: 38% · Unit Volume: 8,932';
     } else if (q.includes('outlier') || q.includes('spikes') || q.includes('Q3')) {
-      fullText = 'Two prominent volume spikes were detected: October 24 ($9,800) and November 27 ($14,200), exceeding the rolling 31-day 3.5 MAD modified z-score threshold.';
-      metricText = 'Peak Anomaly: Nov 27 ($14.2k) · Deviation: +4.9σ above median';
+      fullText = 'Two prominent volume spikes were detected: October 24 (₹9,800) and November 27 (₹14,200), exceeding the rolling 31-day 3.5 MAD modified z-score threshold.';
+      metricText = 'Peak Anomaly: Nov 27 (₹14.2k) · Deviation: +4.9σ above median';
     } else {
-      fullText = 'Average Order Value (AOV) across the verified retail dataset is $78.40, with basket sizes peaking during weekend promotional windows.';
-      metricText = 'Verified AOV: $78.40 · Median Transactions/Day: 78 · Zero Negative Records';
+      fullText = 'Average Order Value (AOV) across the verified retail dataset is ₹78.40, with basket sizes peaking during weekend promotional windows.';
+      metricText = 'Verified AOV: ₹78.40 · Median Transactions/Day: 78 · Zero Negative Records';
     }
 
     setAnswerMetric(metricText);
@@ -185,7 +185,7 @@ export const InteractiveLiveConsole: React.FC<InteractiveLiveConsoleProps> = ({
           <span className="text-xs text-slate-500 dark:text-slate-400 block mb-1">Gross Annual Revenue</span>
           <div className="flex items-baseline gap-2">
             <span className="text-xl sm:text-2xl font-bold font-mono text-slate-900 dark:text-white tabular-nums">
-              ${data.kpis.grossRevenue.toLocaleString()}
+              ₹{data.kpis.grossRevenue.toLocaleString('en-IN')}
             </span>
             <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
               +{data.kpis.momGrowthPercent}%
@@ -200,7 +200,7 @@ export const InteractiveLiveConsole: React.FC<InteractiveLiveConsoleProps> = ({
           <span className="text-xs text-slate-500 dark:text-slate-400 block mb-1">Average Order Value</span>
           <div className="flex items-baseline gap-2">
             <span className="text-xl sm:text-2xl font-bold font-mono text-slate-900 dark:text-white tabular-nums">
-              ${data.kpis.averageOrderValue.toFixed(2)}
+              ₹{data.kpis.averageOrderValue.toFixed(2)}
             </span>
             <span className="text-xs text-slate-500 dark:text-slate-400">/ basket</span>
           </div>
@@ -303,7 +303,7 @@ export const InteractiveLiveConsole: React.FC<InteractiveLiveConsoleProps> = ({
                     : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
-                Revenue ($)
+                Revenue (₹)
               </button>
               <button
                 onClick={() => setDashboardMetric('orders')}
@@ -363,7 +363,7 @@ export const InteractiveLiveConsole: React.FC<InteractiveLiveConsoleProps> = ({
                 </span>
                 {hoveredPoint && (
                   <div className="px-2.5 py-1 rounded-md bg-indigo-600 text-white font-mono text-xs font-semibold">
-                    {hoveredPoint.label}: {dashboardMetric === 'revenue' ? `$${hoveredPoint.value.toLocaleString()}` : `${hoveredPoint.value.toLocaleString()} orders`}
+                    {hoveredPoint.label}: {dashboardMetric === 'revenue' ? `₹${hoveredPoint.value.toLocaleString('en-IN')}` : `${hoveredPoint.value.toLocaleString('en-IN')} orders`}
                   </div>
                 )}
               </div>
@@ -553,22 +553,22 @@ export const InteractiveLiveConsole: React.FC<InteractiveLiveConsoleProps> = ({
                       <tr>
                         <td className="py-2 px-3 font-bold text-slate-900 dark:text-white">Month +1 (Est)</td>
                         <td className="py-2 px-3"><span className="px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-600 dark:text-teal-400 text-[10px] font-bold">Predicted</span></td>
-                        <td className="py-2 px-3 font-semibold text-teal-600 dark:text-teal-400">$107,166</td>
-                        <td className="py-2 px-3 text-slate-500">$103,170 – $111,163</td>
+                        <td className="py-2 px-3 font-semibold text-teal-600 dark:text-teal-400">₹1,07,166</td>
+                        <td className="py-2 px-3 text-slate-500">₹1,03,170 – ₹1,11,163</td>
                         <td className="py-2 px-3 text-[10px] font-sans">Linear Trend (MAPE 2.1%)</td>
                       </tr>
                       <tr>
                         <td className="py-2 px-3 font-bold text-slate-900 dark:text-white">Month +2 (Est)</td>
                         <td className="py-2 px-3"><span className="px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-600 dark:text-teal-400 text-[10px] font-bold">Predicted</span></td>
-                        <td className="py-2 px-3 font-semibold text-teal-600 dark:text-teal-400">$109,420</td>
-                        <td className="py-2 px-3 text-slate-500">$104,800 – $113,850</td>
+                        <td className="py-2 px-3 font-semibold text-teal-600 dark:text-teal-400">₹1,09,420</td>
+                        <td className="py-2 px-3 text-slate-500">₹1,04,800 – ₹1,13,850</td>
                         <td className="py-2 px-3 text-[10px] font-sans">Linear Trend (MAPE 2.1%)</td>
                       </tr>
                       <tr>
                         <td className="py-2 px-3 font-bold text-slate-900 dark:text-white">Month +3 (Est)</td>
                         <td className="py-2 px-3"><span className="px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-600 dark:text-teal-400 text-[10px] font-bold">Predicted</span></td>
-                        <td className="py-2 px-3 font-semibold text-teal-600 dark:text-teal-400">$112,890</td>
-                        <td className="py-2 px-3 text-slate-500">$107,200 – $117,900</td>
+                        <td className="py-2 px-3 font-semibold text-teal-600 dark:text-teal-400">₹1,12,890</td>
+                        <td className="py-2 px-3 text-slate-500">₹1,07,200 – ₹1,17,900</td>
                         <td className="py-2 px-3 text-[10px] font-sans">Linear Trend (MAPE 2.1%)</td>
                       </tr>
                     </tbody>
@@ -711,24 +711,24 @@ export const InteractiveLiveConsole: React.FC<InteractiveLiveConsoleProps> = ({
                       <tr className="bg-rose-50/40 dark:bg-rose-950/20">
                         <td className="py-2 px-3 font-bold text-slate-900 dark:text-white">Nov 27</td>
                         <td className="py-2 px-3"><span className="px-2 py-0.5 rounded-md bg-rose-500/10 text-rose-500 text-[10px] font-bold">High Spike</span></td>
-                        <td className="py-2 px-3 font-semibold text-rose-500">$14,200</td>
-                        <td className="py-2 px-3 text-slate-500">$6,800</td>
+                        <td className="py-2 px-3 font-semibold text-rose-500">₹14,200</td>
+                        <td className="py-2 px-3 text-slate-500">₹6,800</td>
                         <td className="py-2 px-3 font-bold text-rose-500">+108%</td>
                         <td className="py-2 px-3 font-bold text-rose-500">+4.9σ</td>
                       </tr>
                       <tr className="bg-rose-50/40 dark:bg-rose-950/20">
                         <td className="py-2 px-3 font-bold text-slate-900 dark:text-white">Oct 24</td>
                         <td className="py-2 px-3"><span className="px-2 py-0.5 rounded-md bg-rose-500/10 text-rose-500 text-[10px] font-bold">High Spike</span></td>
-                        <td className="py-2 px-3 font-semibold text-rose-500">$9,800</td>
-                        <td className="py-2 px-3 text-slate-500">$5,900</td>
+                        <td className="py-2 px-3 font-semibold text-rose-500">₹9,800</td>
+                        <td className="py-2 px-3 text-slate-500">₹5,900</td>
                         <td className="py-2 px-3 font-bold text-rose-500">+66%</td>
                         <td className="py-2 px-3 font-bold text-rose-500">+4.1σ</td>
                       </tr>
                       <tr>
                         <td className="py-2 px-3 font-bold text-slate-900 dark:text-white">Aug 14</td>
                         <td className="py-2 px-3"><span className="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-500 text-[10px] font-bold">Dip</span></td>
-                        <td className="py-2 px-3 font-semibold text-amber-600 dark:text-amber-400">$3,200</td>
-                        <td className="py-2 px-3 text-slate-500">$5,200</td>
+                        <td className="py-2 px-3 font-semibold text-amber-600 dark:text-amber-400">₹3,200</td>
+                        <td className="py-2 px-3 text-slate-500">₹5,200</td>
                         <td className="py-2 px-3 text-rose-500">-38%</td>
                         <td className="py-2 px-3 text-amber-600 dark:text-amber-400">-3.8σ</td>
                       </tr>

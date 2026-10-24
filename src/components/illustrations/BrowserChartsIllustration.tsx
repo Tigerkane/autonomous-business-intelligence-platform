@@ -86,7 +86,7 @@ export const BrowserChartsIllustration: React.FC<Props> = ({
         <rect x="195" y="60" width="90" height="44" rx="10" fill={bg} stroke={border} strokeWidth="1" />
         <rect x="205" y="70" width="34" height="5" rx="2" fill={muted} />
         <text x="205" y="92" fontSize="13" fontWeight="700" fill={text} fontFamily="sans-serif">
-          $124.8k
+          ₹124.8k
         </text>
         <circle cx="270" cy="82" r="4" fill={success} />
       </g>

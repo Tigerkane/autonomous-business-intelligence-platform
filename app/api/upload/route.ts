@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cleanSalesData } from '@/server/cleaner';
 import { saveSalesData } from '@/server/db';
 import { describeIssues } from '@/server/quality';
+import { createClient } from '@/lib/supabase/server';
 
 // db.ts uses Node APIs (fs locally, Vercel Blob when deployed), so this route must run on the Node.js runtime
 export const runtime = 'nodejs';
@@ -45,6 +46,14 @@ export async function POST(request: NextRequest) {
     }
 
     await saveSalesData(uid, rows, filename, quality);
+
+    try {
+      const supabase = await createClient();
+      await supabase.from('datasets').delete().eq('user_id', uid);
+      await supabase.from('datasets').insert({ user_id: uid, filename, total_rows: rows.length });
+    } catch (e) {
+      console.error('Failed to record dataset:', e);
+    }
 
     const dropped = report.rows_before - report.rows_after;
     return NextResponse.json({

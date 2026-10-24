@@ -1,4 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { createClient } from '../../lib/supabase/client';
+import type { User } from '@supabase/supabase-js';
 
 export interface UserProfile {
   id: string;
@@ -25,8 +27,6 @@ interface AuthContextType {
   authModalOpen: boolean;
   authModalMode: 'signin' | 'signup';
 }
-
-const STORAGE_KEY = 'abip_auth_user';
 
 export const DEMO_PROFILES: Record<DemoProfileKey, UserProfile> = {
   analyst: {
@@ -88,58 +88,77 @@ export const DEMO_PROFILES: Record<DemoProfileKey, UserProfile> = {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-const USERS_STORAGE_KEY = 'abip_registered_users';
+const supabase = createClient();
 
-interface RegisteredAccount {
-  id: string;
-  name: string;
-  email: string;
-  password?: string;
-  company?: string;
-  role: string;
-  joinedAt: string;
+function formatJoinedAt(isoDate: string): string {
+  const d = new Date(isoDate);
+  return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
 }
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<UserProfile | null>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) return JSON.parse(saved);
-    } catch {
-      // ignore
-    }
-    // Start unauthenticated so landing page shows fresh sign-in experience
-    return null;
-  });
+async function mapUserToProfile(sbUser: User): Promise<UserProfile> {
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('name, company, role')
+    .eq('id', sbUser.id)
+    .single();
 
+  const name =
+    profile?.name ||
+    sbUser.user_metadata?.name ||
+    sbUser.email?.split('@')[0] ||
+    'User';
+  const company = profile?.company || 'Retail Enterprise';
+  const role = profile?.role || 'Enterprise Business Analyst';
+
+  return {
+    id: sbUser.id,
+    email: sbUser.email || '',
+    name,
+    company,
+    role,
+    joinedAt: formatJoinedAt(sbUser.created_at),
+  };
+}
+
+const DEMO_ACCOUNTS: Record<string, string> = {
+  analyst: 'analyst@retailbi.ai',
+  executive: 'director@retailbi.ai',
+  shreyas: 'analyst@retailbi.ai',
+  saniya: 'director@retailbi.ai',
+  shlok: 'analyst@retailbi.ai',
+  navya: 'director@retailbi.ai',
+};
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'signin' | 'signup'>('signin');
   const [sessionReady, setSessionReady] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
-    } else {
-      localStorage.removeItem(STORAGE_KEY);
-    }
-  }, [user]);
+    supabase.auth.getUser().then(async ({ data: { user: sbUser } }) => {
+      if (sbUser) {
+        setUser(await mapUserToProfile(sbUser));
+      }
+      setSessionReady(true);
+    });
 
-  useEffect(() => {
-    let cancelled = false;
-    setSessionReady(false);
-    fetch("/api/session", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(user ? { email: user.email } : {}),
-    })
-      .catch(() => {})
-      .finally(() => {
-        if (!cancelled) setSessionReady(true);
-      });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (_event, session) => {
+        setSessionReady(false);
+        if (session?.user) {
+          setUser(await mapUserToProfile(session.user));
+        } else {
+          setUser(null);
+        }
+        setSessionReady(true);
+      }
+    );
+
     return () => {
-      cancelled = true;
+      subscription.unsubscribe();
     };
-  }, [user?.email]);
+  }, []);
 
   const openAuthModal = useCallback((mode: 'signin' | 'signup' = 'signin') => {
     setAuthModalMode(mode);
@@ -151,110 +170,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = useCallback(async (email: string, password?: string) => {
-    const cleanEmail = email.trim().toLowerCase();
-
-    let registeredUsers: Record<string, RegisteredAccount> = {};
-    try {
-      const stored = localStorage.getItem(USERS_STORAGE_KEY);
-      if (stored) registeredUsers = JSON.parse(stored);
-    } catch {
-      registeredUsers = {};
-    }
-
-    const existing = registeredUsers[cleanEmail];
-    if (existing) {
-      if (existing.password && password && existing.password !== password) {
-        throw new Error('Invalid password. Please check your credentials and try again.');
-      }
-      const userProfile: UserProfile = {
-        id: existing.id,
-        name: existing.name,
-        email: existing.email,
-        role: existing.role,
-        company: existing.company || 'Retail Enterprise',
-        joinedAt: existing.joinedAt,
-      };
-      setUser(userProfile);
-      setAuthModalOpen(false);
-      return true;
-    }
-
-    // Provision new user session for valid credentials
-    const namePart = email.split('@')[0] || 'Analyst';
-    const formattedName =
-      namePart
-        .split(/[._-]/)
-        .filter(Boolean)
-        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-        .join(' ') || 'Retail Analyst';
-
-    const authenticatedUser: UserProfile = {
-      id: `usr_${cleanEmail.replace(/[^a-zA-Z0-9]/g, '_')}`,
-      name: formattedName,
+    const { error } = await supabase.auth.signInWithPassword({
       email: email.trim(),
-      role: 'Business Intelligence Analyst',
-      company: 'Enterprise Retail Operations',
-      joinedAt: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
-    };
-
-    registeredUsers[cleanEmail] = {
-      ...authenticatedUser,
       password: password || '',
-    };
-    try {
-      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(registeredUsers));
-    } catch {
-      // ignore
-    }
-
-    setUser(authenticatedUser);
+    });
+    if (error) throw new Error('Invalid email or password.');
     setAuthModalOpen(false);
     return true;
   }, []);
 
   const signup = useCallback(async (name: string, email: string, password?: string, company?: string) => {
-    const cleanEmail = email.trim().toLowerCase();
-
-    let registeredUsers: Record<string, RegisteredAccount> = {};
-    try {
-      const stored = localStorage.getItem(USERS_STORAGE_KEY);
-      if (stored) registeredUsers = JSON.parse(stored);
-    } catch {
-      registeredUsers = {};
-    }
-
-    if (registeredUsers[cleanEmail]) {
-      throw new Error('An account with this email address already exists. Please sign in instead.');
-    }
-
-    const newAccount: RegisteredAccount = {
-      id: `usr_${cleanEmail.replace(/[^a-zA-Z0-9]/g, '_')}`,
-      name: name.trim(),
+    const { error } = await supabase.auth.signUp({
       email: email.trim(),
       password: password || '',
-      role: 'Enterprise Business Analyst',
-      company: company?.trim() || 'Retail Enterprise',
-      joinedAt: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
-    };
-
-    registeredUsers[cleanEmail] = newAccount;
-    try {
-      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(registeredUsers));
-    } catch {
-      // ignore
-    }
-
-    // Direct back to sign in (do NOT auto-login user on signup)
+      options: {
+        data: { name: name.trim(), company: company?.trim() || '' },
+      },
+    });
+    if (error) throw new Error(error.message);
+    await supabase.auth.signOut();
     return true;
   }, []);
 
-  const loginAsDemo = useCallback((type: DemoProfileKey) => {
-    setUser(DEMO_PROFILES[type]);
+  const loginAsDemo = useCallback(async (type: DemoProfileKey) => {
+    const demoEmail = DEMO_ACCOUNTS[type];
+    const { error } = await supabase.auth.signInWithPassword({
+      email: demoEmail,
+      password: 'Demo@12345',
+    });
+    if (error) {
+      console.error('Demo login failed:', error.message);
+      return;
+    }
     setAuthModalOpen(false);
   }, []);
 
-  const logout = useCallback(() => {
-    setUser(null);
+  const logout = useCallback(async () => {
+    await supabase.auth.signOut();
   }, []);
 
   return (
