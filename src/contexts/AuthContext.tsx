@@ -96,11 +96,18 @@ function formatJoinedAt(isoDate: string): string {
 }
 
 async function mapUserToProfile(sbUser: User): Promise<UserProfile> {
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('name, company, role')
-    .eq('id', sbUser.id)
-    .single();
+  let profile: { name?: string; company?: string; role?: string } | null = null;
+  try {
+    const { data } = await supabase
+      .from('profiles')
+      .select('name, company, role')
+      .eq('id', sbUser.id)
+      .single();
+    profile = data;
+  } catch {
+    // profiles table missing or blocked by RLS: fall back to auth metadata
+    profile = null;
+  }
 
   const name =
     profile?.name ||
@@ -136,26 +143,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [sessionReady, setSessionReady] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getUser().then(async ({ data: { user: sbUser } }) => {
-      if (sbUser) {
-        setUser(await mapUserToProfile(sbUser));
-      }
-      setSessionReady(true);
-    });
+    let cancelled = false;
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setSessionReady(false);
-        if (session?.user) {
-          setUser(await mapUserToProfile(session.user));
-        } else {
-          setUser(null);
+    // Initial session check
+    supabase.auth
+      .getUser()
+      .then(async ({ data: { user: sbUser } }) => {
+        if (sbUser) {
+          const profile = await mapUserToProfile(sbUser);
+          if (!cancelled) setUser(profile);
         }
-        setSessionReady(true);
+      })
+      .catch(() => {
+        // no session or network error: treat as logged out
+      })
+      .finally(() => {
+        if (!cancelled) setSessionReady(true);
+      });
+
+    // Do NOT await other Supabase calls directly inside this callback: it can
+    // deadlock the auth client. Defer the work with setTimeout instead.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        // INITIAL_SESSION is handled by getUser() above.
+        // TOKEN_REFRESHED does not change who the user is.
+        if (event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') return;
+
+        setTimeout(async () => {
+          if (cancelled) return;
+          setSessionReady(false);
+          if (session?.user) {
+            const profile = await mapUserToProfile(session.user);
+            if (!cancelled) setUser(profile);
+          } else {
+            setUser(null);
+          }
+          if (!cancelled) setSessionReady(true);
+        }, 0);
       }
     );
 
     return () => {
+      cancelled = true;
       subscription.unsubscribe();
     };
   }, []);

@@ -2,7 +2,10 @@ import { createClient } from '@/lib/supabase/server';
 
 export async function getUid(): Promise<string> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Unauthorized');
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+  if (error || !user) throw new Error('Unauthorized');
   return user.id;
 }
