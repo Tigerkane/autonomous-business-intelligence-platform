@@ -10,6 +10,9 @@ export const metadata: Metadata = {
     description:
       'Enterprise AI platform for autonomous retail business intelligence, KPI dashboards, sales forecasting, anomaly detection, natural-language analytics queries, and automated reports.',
   },
+  icons: {
+    icon: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({

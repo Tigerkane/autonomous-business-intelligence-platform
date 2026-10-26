@@ -10,6 +10,9 @@ export const dynamic = 'force-dynamic';
 
 export async function POST() {
   const uid = await getUid();
+  if (!uid) {
+    return NextResponse.json({ detail: 'Not signed in.' }, { status: 401 });
+  }
   try {
     const csvContent = generateDemoDatasetCSV();
     const { rows, report, quality } = cleanSalesData(csvContent);

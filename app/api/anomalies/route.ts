@@ -10,6 +10,9 @@ const DEFAULT_THRESHOLD = 3.5;
 
 export async function GET(request: NextRequest) {
   const uid = await getUid();
+  if (!uid) {
+    return NextResponse.json({ detail: 'No dataset has been uploaded yet.' }, { status: 404 });
+  }
   await hydrate(uid);
   if (!databaseExists(uid)) {
     return NextResponse.json({ detail: 'No dataset has been uploaded yet.' }, { status: 404 });

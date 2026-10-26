@@ -8,6 +8,12 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   const uid = await getUid();
+  if (!uid) {
+    return NextResponse.json(
+      { detail: 'No dataset has been uploaded yet. Upload a CSV first.' },
+      { status: 404 }
+    );
+  }
   await hydrate(uid);
   if (!databaseExists(uid)) {
     return NextResponse.json(

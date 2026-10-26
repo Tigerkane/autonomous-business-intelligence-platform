@@ -13,6 +13,9 @@ const MAX_FILE_BYTES = 25 * 1024 * 1024; // same 25MB limit the Express/multer s
 
 export async function POST(request: NextRequest) {
   const uid = await getUid();
+  if (!uid) {
+    return NextResponse.json({ detail: 'Not signed in.' }, { status: 401 });
+  }
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File | null;

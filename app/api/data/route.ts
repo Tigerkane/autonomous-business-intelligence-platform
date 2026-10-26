@@ -10,7 +10,10 @@ export async function DELETE() {
   try {
     // Load the current dataset first so "existed" is accurate on a cold serverless instance
     const uid = await getUid();
-  await hydrate(uid);
+    if (!uid) {
+      return NextResponse.json({ detail: 'Not signed in.' }, { status: 401 });
+    }
+    await hydrate(uid);
     const existed = await deleteDataset(uid);
     if (!existed) {
       return NextResponse.json({ detail: 'No dataset found.' }, { status: 404 });

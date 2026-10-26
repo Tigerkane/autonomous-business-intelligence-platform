@@ -7,6 +7,12 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   const uid = await getUid();
+  if (!uid) {
+    return NextResponse.json({
+      database_exists: false,
+      rows: 0,
+    });
+  }
   await hydrate(uid);
   if (!databaseExists(uid)) {
     return NextResponse.json({
