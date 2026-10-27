@@ -74,8 +74,29 @@ export interface OverviewData {
   categories: { category: string; sales: number }[];
   segments: {
     age: { segment: string; count: number; revenue: number }[];
-    gender: { segment: string; count: number; revenue: number }[];
+    gender: { segment: string; count: number; revenue: number; unique_customers?: number }[];
   };
+  customer_gender_split?: {
+    male: number;
+    female: number;
+    unknown: number;
+  };
+}
+
+export interface GenderStat {
+  gender: string;
+  orders: number;
+  units: number;
+  revenue: number;
+  avg_basket: number;
+  unique_customers: number;
+  share: number;
+}
+
+export interface GenderCategoryMatrix {
+  categories: string[];
+  genders: string[];
+  series: { gender: string; values: number[] }[];
 }
 
 export interface SalesAnalysisData {
@@ -101,6 +122,11 @@ export interface SalesAnalysisData {
     avg_order: number;
   }[];
   weekday: { day: string; avg_daily_revenue: number }[];
+  gender_analysis?: {
+    stats: GenderStat[];
+    matrix: GenderCategoryMatrix;
+    insight: string;
+  };
   insights: string[];
   partial_months_excluded: string[];
 }

@@ -7,6 +7,7 @@ import {
   ArrowUpRight,
   BarChart2,
   Table as TableIcon,
+  Users,
 } from 'lucide-react';
 import {
   Chart as ChartJS,
@@ -15,15 +16,17 @@ import {
   PointElement,
   LineElement,
   BarElement,
+  ArcElement,
   Filler,
   Tooltip,
   Legend,
 } from 'chart.js';
-import { Line, Bar } from 'react-chartjs-2';
+import { Line, Bar, Doughnut } from 'react-chartjs-2';
 import { useData } from '../contexts/DataContext';
 import { SalesAnalysisData } from '../types';
 import { EmptyState } from '../components/common/EmptyState';
 import { NavTab } from '../components/layout/Sidebar';
+import { getCategoryColor, getGenderColor } from '../design/tokens';
 
 ChartJS.register(
   CategoryScale,
@@ -31,13 +34,13 @@ ChartJS.register(
   PointElement,
   LineElement,
   BarElement,
+  ArcElement,
   Filler,
   Tooltip,
   Legend
 );
 
 const inr = (v: number) => '₹' + Math.round(v || 0).toLocaleString('en-IN');
-const PALETTE = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#8b5cf6'];
 
 interface SalesAnalysisViewProps {
   onNavigate: (tab: NavTab) => void;
@@ -145,7 +148,7 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
           return gradient;
         },
         fill: true,
-        tension: 0.38,
+        tension: 0,
         borderWidth: 2.5,
         pointRadius: grain === 'weekly' ? 2 : 4,
         pointHoverRadius: 6,
@@ -174,13 +177,18 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
         grid: { color: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.05)' },
         ticks: {
           color: isDark ? '#94a3b8' : '#64748b',
-          callback: (v: any) => '₹' + (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v),
+          callback: (v: any) => {
+            const num = Number(v);
+            if (Math.abs(num) >= 1_000_000) return '₹' + (num / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+            if (Math.abs(num) >= 1_000) return '₹' + (num / 1_000).toFixed(1).replace(/\.0$/, '') + 'k';
+            return '₹' + Math.round(num);
+          },
         },
       },
     },
   };
 
-  // Stacked Category Chart
+  // Stacked Category Chart with shared deterministic category colors
   const stackedLabels = data.stacked.months.map((ym) => {
     const [y, mon] = ym.split('-');
     const d = new Date(Number(y), Number(mon) - 1, 1);
@@ -192,7 +200,7 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
     datasets: data.stacked.series.map((s, idx) => ({
       label: s.category,
       data: s.values,
-      backgroundColor: PALETTE[idx % PALETTE.length],
+      backgroundColor: getCategoryColor(s.category, idx),
       borderRadius: 4,
     })),
   };
@@ -227,7 +235,12 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
         grid: { color: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.05)' },
         ticks: {
           color: isDark ? '#94a3b8' : '#64748b',
-          callback: (v: any) => '₹' + (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v),
+          callback: (v: any) => {
+            const num = Number(v);
+            if (Math.abs(num) >= 1_000_000) return '₹' + (num / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+            if (Math.abs(num) >= 1_000) return '₹' + (num / 1_000).toFixed(1).replace(/\.0$/, '') + 'k';
+            return '₹' + Math.round(num);
+          },
         },
       },
     },
@@ -267,7 +280,95 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
         grid: { color: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.05)' },
         ticks: {
           color: isDark ? '#94a3b8' : '#64748b',
-          callback: (v: any) => '₹' + (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v),
+          callback: (v: any) => {
+            const num = Number(v);
+            if (Math.abs(num) >= 1_000_000) return '₹' + (num / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+            if (Math.abs(num) >= 1_000) return '₹' + (num / 1_000).toFixed(1).replace(/\.0$/, '') + 'k';
+            return '₹' + Math.round(num);
+          },
+        },
+      },
+    },
+  };
+
+  // Gender Analysis Data
+  const genderStats = data.gender_analysis?.stats || [];
+  const genderMatrix = data.gender_analysis?.matrix;
+  const genderInsight = data.gender_analysis?.insight || 'Spending is similar across genders.';
+
+  const genderDonutData = {
+    labels: genderStats.map((s) => s.gender),
+    datasets: [
+      {
+        data: genderStats.map((s) => s.revenue),
+        backgroundColor: genderStats.map((s) => getGenderColor(s.gender)),
+        borderWidth: 2,
+        borderColor: isDark ? '#0d1527' : '#ffffff',
+        hoverOffset: 6,
+      },
+    ],
+  };
+
+  const genderDonutOptions: any = {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '70%',
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: isDark ? '#0f172a' : '#1e293b',
+        callbacks: {
+          label: (ctx: any) => ` ${ctx.label}: ₹${Math.round(ctx.parsed).toLocaleString('en-IN')}`,
+        },
+      },
+    },
+  };
+
+  // Gender x Category grouped bar chart
+  const genderCatData = {
+    labels: genderMatrix?.categories || [],
+    datasets: (genderMatrix?.series || []).map((s) => ({
+      label: s.gender,
+      data: s.values,
+      backgroundColor: getGenderColor(s.gender),
+      borderRadius: 4,
+    })),
+  };
+
+  const genderCatOptions: any = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top' as const,
+        labels: {
+          color: isDark ? '#e2e8f0' : '#334155',
+          font: { size: 11, weight: 'bold' },
+          boxWidth: 12,
+        },
+      },
+      tooltip: {
+        backgroundColor: isDark ? '#0f172a' : '#1e293b',
+        callbacks: {
+          label: (ctx: any) => ` ${ctx.dataset.label}: ₹${Math.round(ctx.parsed.y).toLocaleString('en-IN')}`,
+        },
+      },
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        ticks: { color: isDark ? '#94a3b8' : '#64748b', font: { size: 11 } },
+      },
+      y: {
+        grid: { color: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.05)' },
+        ticks: {
+          color: isDark ? '#94a3b8' : '#64748b',
+          callback: (v: any) => {
+            const num = Number(v);
+            if (Math.abs(num) >= 1_000_000) return '₹' + (num / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+            if (Math.abs(num) >= 1_000) return '₹' + (num / 1_000).toFixed(1).replace(/\.0$/, '') + 'k';
+            return '₹' + Math.round(num);
+          },
         },
       },
     },
@@ -412,7 +513,7 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
                     <div className="flex items-center gap-2">
                       <span
                         className="w-2.5 h-2.5 rounded-full"
-                        style={{ backgroundColor: PALETTE[i % PALETTE.length] }}
+                        style={{ backgroundColor: getCategoryColor(c.category, i) }}
                       />
                       <span>{c.category}</span>
                     </div>
@@ -427,7 +528,7 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
                           className="h-full rounded-full"
                           style={{
                             width: `${c.share}%`,
-                            backgroundColor: PALETTE[i % PALETTE.length],
+                            backgroundColor: getCategoryColor(c.category, i),
                           }}
                         />
                       </div>
@@ -451,6 +552,106 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
           </table>
         </div>
       </div>
+
+      {/* Row 4: Customer Gender Distribution & Category Correlation */}
+      {genderStats.length > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Card 1: Revenue by Gender Donut & Metrics Table */}
+          <div className="p-6 rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                    Revenue by Gender
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Distribution of orders, units, sales, and average basket size by customer gender
+                  </p>
+                </div>
+                <Users className="w-5 h-5 text-indigo-500" />
+              </div>
+
+              {/* Donut Chart */}
+              <div className="h-48 w-full relative mb-4">
+                <Doughnut data={genderDonutData} options={genderDonutOptions} />
+              </div>
+
+              {/* Gender Metrics Table */}
+              <div className="overflow-x-auto border border-slate-200/80 dark:border-white/10 rounded-xl">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-slate-50 dark:bg-white/[0.03] border-b border-slate-200/80 dark:border-white/10 text-slate-500 dark:text-slate-400">
+                      <th className="px-3 py-2 font-bold uppercase text-[10px]">Gender</th>
+                      <th className="px-3 py-2 font-bold uppercase text-[10px]">Orders</th>
+                      <th className="px-3 py-2 font-bold uppercase text-[10px]">Units</th>
+                      <th className="px-3 py-2 font-bold uppercase text-[10px]">Revenue</th>
+                      <th className="px-3 py-2 font-bold uppercase text-[10px]">Avg Basket</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+                    {genderStats.map((s) => (
+                      <tr key={s.gender} className="hover:bg-slate-50/80 dark:hover:bg-white/[0.02]">
+                        <td className="px-3 py-2.5 font-bold text-slate-900 dark:text-white">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className="w-2.5 h-2.5 rounded-full"
+                              style={{ backgroundColor: getGenderColor(s.gender) }}
+                            />
+                            <span>{s.gender}</span>
+                          </div>
+                        </td>
+                        <td className="px-3 py-2.5 text-slate-600 dark:text-slate-300 font-mono">
+                          {s.orders.toLocaleString()}
+                        </td>
+                        <td className="px-3 py-2.5 text-slate-600 dark:text-slate-300 font-mono">
+                          {s.units.toLocaleString()}
+                        </td>
+                        <td className="px-3 py-2.5 font-semibold text-slate-900 dark:text-white">
+                          {inr(s.revenue)}
+                        </td>
+                        <td className="px-3 py-2.5 font-semibold text-slate-900 dark:text-white">
+                          {inr(s.avg_basket)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Guarded Insight badge */}
+            <div className="mt-4 p-3 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 text-xs text-slate-600 dark:text-slate-300 flex items-center gap-2">
+              <Lightbulb className="w-4 h-4 text-amber-500 shrink-0" />
+              <span>{genderInsight}</span>
+            </div>
+          </div>
+
+          {/* Card 2: Gender x Category Grouped Bar Chart */}
+          <div className="p-6 rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                    Gender × Product Category Revenue
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Category preference comparison for Male and Female customer segments
+                  </p>
+                </div>
+                <Layers className="w-5 h-5 text-indigo-500" />
+              </div>
+
+              <div className="h-72 w-full">
+                <Bar data={genderCatData} options={genderCatOptions} />
+              </div>
+            </div>
+
+            <div className="mt-4 p-3 rounded-xl bg-indigo-50/50 dark:bg-indigo-950/30 border border-indigo-200/40 dark:border-indigo-800/30 text-xs text-indigo-700 dark:text-indigo-300">
+              Correlating customer segments with product categories to optimize targeted merchandising.
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

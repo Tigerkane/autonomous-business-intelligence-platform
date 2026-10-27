@@ -72,3 +72,49 @@ export const tokens = {
     glow: '0 0 20px -3px rgba(99, 102, 241, 0.45)',
   },
 } as const;
+
+export const CATEGORY_COLORS: Record<string, string> = {
+  Electronics: '#6366f1', // Indigo
+  Clothing: '#10b981',    // Emerald
+  Beauty: '#f59e0b',      // Amber
+};
+
+export const FALLBACK_CATEGORY_PALETTE = [
+  '#6366f1',
+  '#10b981',
+  '#f59e0b',
+  '#8b5cf6',
+  '#ec4899',
+  '#06b6d4',
+  '#3b82f6',
+];
+
+export const GENDER_COLORS: Record<string, string> = {
+  Male: '#6366f1',
+  Female: '#ec4899',
+  Unknown: '#64748b',
+};
+
+export function getCategoryColor(category: string, index = 0): string {
+  const trimmed = (category || '').trim();
+  const direct = CATEGORY_COLORS[trimmed];
+  if (direct) return direct;
+
+  const lower = trimmed.toLowerCase();
+  for (const [key, color] of Object.entries(CATEGORY_COLORS)) {
+    if (key.toLowerCase() === lower) return color;
+  }
+  return FALLBACK_CATEGORY_PALETTE[index % FALLBACK_CATEGORY_PALETTE.length];
+}
+
+export function getGenderColor(gender: string): string {
+  const trimmed = (gender || '').trim();
+  const direct = GENDER_COLORS[trimmed];
+  if (direct) return direct;
+
+  const lower = trimmed.toLowerCase();
+  for (const [key, color] of Object.entries(GENDER_COLORS)) {
+    if (key.toLowerCase() === lower) return color;
+  }
+  return GENDER_COLORS.Unknown;
+}

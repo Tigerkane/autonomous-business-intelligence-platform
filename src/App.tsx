@@ -1,19 +1,32 @@
-import React, { useState } from 'react';
+import React, { Suspense, useState, lazy } from 'react';
 import { DataProvider, useData } from './contexts/DataContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Sidebar, NavTab } from './components/layout/Sidebar';
 import { Navbar } from './components/layout/Navbar';
 import { AuthModal } from './components/auth/AuthModal';
-import { HomepageView } from './views/HomepageView';
 import { AuthView } from './views/AuthView';
 import { ErrorView } from './views/ErrorView';
-import { DashboardView } from './views/DashboardView';
 import { UploadDatasetView } from './views/UploadDatasetView';
-import { SalesAnalysisView } from './views/SalesAnalysisView';
-import { ForecastAnomaliesView } from './views/ForecastAnomaliesView';
 import { AskYourDataView } from './views/AskYourDataView';
-import { ReportsView } from './views/ReportsView';
 import { SettingsView } from './views/SettingsView';
+
+/* ------------------------------------------------------------------ */
+/* Lazy-loaded views (Chart.js, pdf-lib, canvas-confetti heavy)        */
+/* These get code-split into separate chunks to reduce initial bundle  */
+/* ------------------------------------------------------------------ */
+const HomepageView = lazy(() => import('./views/HomepageView').then(m => ({ default: m.HomepageView })));
+const DashboardView = lazy(() => import('./views/DashboardView').then(m => ({ default: m.DashboardView })));
+const SalesAnalysisView = lazy(() => import('./views/SalesAnalysisView').then(m => ({ default: m.SalesAnalysisView })));
+const ForecastAnomaliesView = lazy(() => import('./views/ForecastAnomaliesView').then(m => ({ default: m.ForecastAnomaliesView })));
+const ReportsView = lazy(() => import('./views/ReportsView').then(m => ({ default: m.ReportsView })));
+
+/** Minimal loading spinner shown while lazy chunks stream in */
+const ViewFallback = () => (
+  <div className="flex items-center justify-center h-64 gap-3 animate-pulse">
+    <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+    <span className="text-sm text-slate-400 font-medium">Loading view…</span>
+  </div>
+);
 
 // Workspace pages that require a signed-in user
 const PROTECTED_TABS: NavTab[] = [
@@ -102,7 +115,9 @@ function AppContent() {
   if (currentTab === 'home' || blocked) {
     return (
       <>
-        <HomepageView onLaunchPlatform={(tab = 'upload') => goToTab(tab)} />
+        <Suspense fallback={<ViewFallback />}>
+          <HomepageView onLaunchPlatform={(tab = 'upload') => goToTab(tab)} />
+        </Suspense>
         <AuthModal onAuthSuccess={handleAuthSuccess} />
       </>
     );
@@ -170,24 +185,26 @@ function AppContent() {
           onGoToSettings={() => setCurrentTab('settings')}
         />
 
-        <main className="flex-1 p-4 md:p-8">
-          {currentTab === 'dashboard' && (
-            <DashboardView onNavigate={(tab) => setCurrentTab(tab)} />
-          )}
+        <main className="flex-1 p-4 md:p-8" role="main" aria-label="Platform workspace">
+          <Suspense fallback={<ViewFallback />}>
+            {currentTab === 'dashboard' && (
+              <DashboardView onNavigate={(tab) => setCurrentTab(tab)} />
+            )}
+            {currentTab === 'sales-analysis' && (
+              <SalesAnalysisView onNavigate={(tab) => setCurrentTab(tab)} />
+            )}
+            {currentTab === 'forecast-anomalies' && (
+              <ForecastAnomaliesView onNavigate={(tab) => setCurrentTab(tab)} />
+            )}
+            {currentTab === 'reports' && (
+              <ReportsView onNavigate={(tab) => setCurrentTab(tab)} />
+            )}
+          </Suspense>
           {currentTab === 'upload' && (
             <UploadDatasetView onNavigate={(tab) => setCurrentTab(tab)} />
           )}
-          {currentTab === 'sales-analysis' && (
-            <SalesAnalysisView onNavigate={(tab) => setCurrentTab(tab)} />
-          )}
-          {currentTab === 'forecast-anomalies' && (
-            <ForecastAnomaliesView onNavigate={(tab) => setCurrentTab(tab)} />
-          )}
           {currentTab === 'ask-data' && (
             <AskYourDataView onNavigate={(tab) => setCurrentTab(tab)} />
-          )}
-          {currentTab === 'reports' && (
-            <ReportsView onNavigate={(tab) => setCurrentTab(tab)} />
           )}
           {currentTab === 'settings' && <SettingsView />}
         </main>

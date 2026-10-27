@@ -234,7 +234,7 @@ export function getOverview(uid: string, rows?: SaleRow[]) {
     { label: '55+', min: 55, max: 200, count: 0, revenue: 0 },
   ];
 
-  const genderMap = new Map<string, { count: number; revenue: number }>();
+  const genderMap = new Map<string, { count: number; revenue: number; customers: Set<string> }>();
 
   for (const row of data) {
     for (const b of ageBuckets) {
@@ -245,11 +245,12 @@ export function getOverview(uid: string, rows?: SaleRow[]) {
       }
     }
 
-    const g = row.gender || 'Other';
-    if (!genderMap.has(g)) genderMap.set(g, { count: 0, revenue: 0 });
+    const g = row.gender ? (row.gender.trim() || 'Unknown') : 'Unknown';
+    if (!genderMap.has(g)) genderMap.set(g, { count: 0, revenue: 0, customers: new Set() });
     const gEntry = genderMap.get(g)!;
     gEntry.count++;
     gEntry.revenue += row.total_amount;
+    if (row.customer_id) gEntry.customers.add(row.customer_id);
   }
 
   const ageSegments = ageBuckets.map((b) => ({
@@ -262,7 +263,14 @@ export function getOverview(uid: string, rows?: SaleRow[]) {
     segment: g,
     count: v.count,
     revenue: Math.round(v.revenue * 100) / 100,
+    unique_customers: v.customers.size,
   }));
+
+  const customerGenderSplit = {
+    male: genderMap.get('Male')?.customers.size || 0,
+    female: genderMap.get('Female')?.customers.size || 0,
+    unknown: genderMap.get('Unknown')?.customers.size || 0,
+  };
 
   return {
     dataset: {
@@ -289,6 +297,7 @@ export function getOverview(uid: string, rows?: SaleRow[]) {
       age: ageSegments,
       gender: genderSegments,
     },
+    customer_gender_split: customerGenderSplit,
   };
 }
 
@@ -392,10 +401,18 @@ export function getSalesAnalysis(uid: string, rows?: SaleRow[]) {
   }
 
   if (weekday.length > 0) {
-    const bestDay = [...weekday].sort((a, b) => b.avg_daily_revenue - a.avg_daily_revenue)[0];
-    insights.push(
-      `${bestDay.day} is the strongest weekday, averaging ₹${Math.round(bestDay.avg_daily_revenue).toLocaleString('en-IN')} per day.`
-    );
+    const sorted = [...weekday].sort((a, b) => b.avg_daily_revenue - a.avg_daily_revenue);
+    const maxVal = sorted[0].avg_daily_revenue;
+    const minVal = sorted[sorted.length - 1].avg_daily_revenue;
+    const meanVal = weekday.reduce((acc, w) => acc + w.avg_daily_revenue, 0) / weekday.length;
+    const diffRatio = meanVal > 0 ? (maxVal - minVal) / meanVal : 0;
+    if (diffRatio > 0.25) {
+      insights.push(
+        `${sorted[0].day} is the strongest weekday, averaging ₹${Math.round(sorted[0].avg_daily_revenue).toLocaleString('en-IN')} per day.`
+      );
+    } else {
+      insights.push('Sales are fairly even across weekdays.');
+    }
   }
 
   // Latest month-over-month change and the category that drove it
@@ -423,6 +440,88 @@ export function getSalesAnalysis(uid: string, rows?: SaleRow[]) {
     }
   }
 
+  // Gender analysis: orders, units, revenue, avg_basket, unique_customers per gender
+  const genderData = new Map<
+    string,
+    { orders: number; units: number; revenue: number; customers: Set<string> }
+  >();
+  const genderCatData = new Map<string, Map<string, number>>();
+
+  for (const row of data) {
+    const g = row.gender ? (row.gender.trim() || 'Unknown') : 'Unknown';
+    if (!genderData.has(g)) {
+      genderData.set(g, { orders: 0, units: 0, revenue: 0, customers: new Set() });
+    }
+    const gEntry = genderData.get(g)!;
+    gEntry.orders++;
+    gEntry.units += row.quantity;
+    gEntry.revenue += row.total_amount;
+    if (row.customer_id) gEntry.customers.add(row.customer_id);
+
+    if (!genderCatData.has(g)) genderCatData.set(g, new Map());
+    const gCatMap = genderCatData.get(g)!;
+    gCatMap.set(row.product_category, (gCatMap.get(row.product_category) || 0) + row.total_amount);
+  }
+
+  const totalRev = ov.kpis.total_sales;
+  const genderStats: {
+    gender: string;
+    orders: number;
+    units: number;
+    revenue: number;
+    avg_basket: number;
+    unique_customers: number;
+    share: number;
+  }[] = [];
+  const knownGenders = ['Female', 'Male', 'Unknown'];
+  const allGendersInMap = Array.from(genderData.keys());
+  const orderedGenders = [
+    ...knownGenders.filter((kg) => allGendersInMap.includes(kg)),
+    ...allGendersInMap.filter((g) => !knownGenders.includes(g)),
+  ];
+
+  for (const g of orderedGenders) {
+    const entry = genderData.get(g);
+    if (!entry) continue;
+    if (g === 'Unknown' && entry.orders === 0) continue;
+    const rev = Math.round(entry.revenue * 100) / 100;
+    genderStats.push({
+      gender: g,
+      orders: entry.orders,
+      units: entry.units,
+      revenue: rev,
+      avg_basket: entry.orders > 0 ? Math.round((entry.revenue / entry.orders) * 100) / 100 : 0,
+      unique_customers: entry.customers.size,
+      share: totalRev > 0 ? Math.round((entry.revenue / totalRev) * 1000) / 10 : 0,
+    });
+  }
+
+  const matrixCats = categories.map((c) => c.category);
+  const matrixGenders = genderStats.map((s) => s.gender);
+  const matrixSeries = matrixGenders.map((g) => ({
+    gender: g,
+    values: matrixCats.map((cat) => Math.round((genderCatData.get(g)?.get(cat) || 0) * 100) / 100),
+  }));
+
+  // Gender spending insight guard (> 25% of mean)
+  let genderInsight = 'Spending is similar across genders.';
+  const maleStat = genderStats.find((s) => s.gender.toLowerCase() === 'male');
+  const femaleStat = genderStats.find((s) => s.gender.toLowerCase() === 'female');
+  if (maleStat && femaleStat && (maleStat.orders > 0 || femaleStat.orders > 0)) {
+    const mBasket = maleStat.avg_basket;
+    const fBasket = femaleStat.avg_basket;
+    const meanBasket = (mBasket + fBasket) / 2;
+    const diff = Math.abs(mBasket - fBasket);
+    const ratio = meanBasket > 0 ? diff / meanBasket : 0;
+    if (ratio > 0.25) {
+      const top = mBasket > fBasket ? 'Male' : 'Female';
+      const topVal = Math.round(Math.max(mBasket, fBasket));
+      genderInsight = `${top} customers spend more, averaging ₹${topVal.toLocaleString('en-IN')} per order.`;
+    }
+  }
+
+  insights.push(genderInsight);
+
   return {
     trend: {
       weekly: ov.weekly,
@@ -434,6 +533,15 @@ export function getSalesAnalysis(uid: string, rows?: SaleRow[]) {
     },
     categories,
     weekday,
+    gender_analysis: {
+      stats: genderStats,
+      matrix: {
+        categories: matrixCats,
+        genders: matrixGenders,
+        series: matrixSeries,
+      },
+      insight: genderInsight,
+    },
     insights,
     partial_months_excluded: droppedMonths,
   };

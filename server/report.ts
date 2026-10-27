@@ -165,7 +165,41 @@ export async function generatePDFReport(uid: string, type: 'executive' | 'sales'
       cursorY -= 20;
     });
 
-    cursorY -= 10;
+    cursorY -= 6;
+
+    // Customer Gender Demographics Split
+    drawSection('Customer Gender Distribution');
+    const genderStats = sa.gender_analysis?.stats || [];
+    if (genderStats.length > 0) {
+      page.drawText('Gender', { x: margin + 10, y: cursorY, size: 9, font: fontBold, color: darkTextColor });
+      page.drawText('Orders', { x: margin + 120, y: cursorY, size: 9, font: fontBold, color: darkTextColor });
+      page.drawText('Units', { x: margin + 200, y: cursorY, size: 9, font: fontBold, color: darkTextColor });
+      page.drawText('Revenue', { x: margin + 270, y: cursorY, size: 9, font: fontBold, color: darkTextColor });
+      page.drawText('Avg Basket', { x: margin + 370, y: cursorY, size: 9, font: fontBold, color: darkTextColor });
+      page.drawText('Share', { x: margin + 450, y: cursorY, size: 9, font: fontBold, color: darkTextColor });
+      cursorY -= 14;
+
+      genderStats.forEach((gStat: any, idx: number) => {
+        const isAlt = idx % 2 === 1;
+        if (isAlt) {
+          page.drawRectangle({
+            x: margin,
+            y: cursorY - 4,
+            width: width - margin * 2,
+            height: 18,
+            color: rgb(0.97, 0.98, 1.0),
+          });
+        }
+        page.drawText(gStat.gender, { x: margin + 10, y: cursorY, size: 9, font, color: darkTextColor });
+        page.drawText(gStat.orders.toLocaleString(), { x: margin + 120, y: cursorY, size: 9, font, color: darkTextColor });
+        page.drawText(gStat.units.toLocaleString(), { x: margin + 200, y: cursorY, size: 9, font, color: darkTextColor });
+        page.drawText(`Rs ${Math.round(gStat.revenue).toLocaleString('en-IN')}`, { x: margin + 270, y: cursorY, size: 9, font, color: darkTextColor });
+        page.drawText(`Rs ${Math.round(gStat.avg_basket).toLocaleString('en-IN')}`, { x: margin + 370, y: cursorY, size: 9, font, color: darkTextColor });
+        page.drawText(`${gStat.share}%`, { x: margin + 450, y: cursorY, size: 9, font, color: darkTextColor });
+        cursorY -= 18;
+      });
+      cursorY -= 6;
+    }
   }
 
   if (type === 'forecast' || type === 'executive') {

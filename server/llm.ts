@@ -2,7 +2,15 @@ import { getAnomalies, getForecast, getOverview, getSalesAnalysis } from './anal
 import { databaseExists, getDatasetMeta, getSalesRows } from './db';
 import type { SaleRow } from './types';
 
-export const DEFAULT_PROVIDER = 'deterministic';
+export const DEFAULT_PROVIDER = process.env.LLM_PROVIDER || 'deterministic';
+
+export function getLLMConfig() {
+  const provider = process.env.LLM_PROVIDER || 'ollama';
+  const baseUrl = (process.env.LLM_BASE_URL || 'http://localhost:11434').replace(/\/+$/, '');
+  const model = process.env.LLM_MODEL || 'llama3.2';
+  const apiKey = process.env.LLM_API_KEY || process.env.OLLAMA_API_KEY || '';
+  return { provider, baseUrl, model, apiKey };
+}
 
 // Change this if your data is not in rupees (the homepage demo uses $)
 const CUR = '₹';
@@ -19,7 +27,8 @@ export interface ProviderInfo {
 }
 
 export function availableProviders(): ProviderInfo[] {
-  const ollamaCloudConfigured = Boolean(process.env.OLLAMA_API_KEY);
+  const cfg = getLLMConfig();
+  const ollamaCloudConfigured = Boolean(process.env.OLLAMA_API_KEY || (cfg.provider === 'ollama_cloud' && cfg.apiKey));
 
   return [
     {
@@ -27,21 +36,21 @@ export function availableProviders(): ProviderInfo[] {
       label: 'Deterministic Mathematical Solver',
       model: 'In-memory solver',
       configured: true,
-      note: 'Scans 100% of all rows (e.g. 1,000 rows) directly in memory and answers with zero hallucination.',
+      note: 'Scans 100% of all rows directly in memory and answers with zero hallucination.',
     },
     {
       id: 'ollama',
-      label: 'Local Ollama · Llama 3.2',
-      model: 'llama3.2',
-      configured: false, // local port 11434 probe
-      note: 'Local Ollama daemon running on http://localhost:11434.',
+      label: `Local Ollama · ${cfg.model}`,
+      model: cfg.model,
+      configured: true,
+      note: `Configured via LLM_BASE_URL (${cfg.baseUrl}) with model ${cfg.model}.`,
     },
     {
       id: 'ollama_cloud',
       label: 'Ollama Cloud · GPT-OSS 120B',
       model: 'gpt-oss:120b',
       configured: ollamaCloudConfigured,
-      note: 'Hosted Ollama Cloud (ollama.com) running GPT-OSS 120B via OLLAMA_API_KEY.',
+      note: 'Hosted Ollama Cloud (ollama.com) running GPT-OSS 120B via OLLAMA_API_KEY or LLM_API_KEY.',
     },
   ];
 }
@@ -137,83 +146,88 @@ export async function askLLM(
 ): Promise<{ answer: string; model: string; provider: string }> {
   const provider = requestedProvider || DEFAULT_PROVIDER;
 
-  // 1. Local Ollama (llama3.2)
-  if (provider === 'ollama') {
+  // 1. Local or custom Ollama daemon / OpenAI-compatible endpoint
+  if (provider === 'ollama' || provider === 'custom') {
+    const cfg = getLLMConfig();
+    const endpoint = `${cfg.baseUrl}/api/generate`;
     try {
-      const res = await fetch('http://localhost:11434/api/generate', {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 20000);
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (cfg.apiKey) {
+        headers['Authorization'] = `Bearer ${cfg.apiKey}`;
+      }
+
+      const res = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
-          model: 'llama3.2',
+          model: cfg.model,
           prompt: `You are an Autonomous Business Intelligence Analyst. Based on the dataset summary below, answer the question accurately:\n\n${context}\n\nQuestion: ${question}`,
           stream: false,
+        }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
+      if (res.ok) {
+        const data = (await res.json()) as any;
+        if (data.response) {
+          return { answer: data.response, model: cfg.model, provider: 'ollama' };
+        }
+      }
+      const errText = await res.text().catch(() => '');
+      throw new Error(`LLM endpoint returned HTTP ${res.status}: ${errText || res.statusText}`);
+    } catch (err: any) {
+      const friendlyDetail =
+        err.name === 'AbortError'
+          ? `Connection to LLM provider at ${cfg.baseUrl} timed out after 20 seconds.`
+          : `Unable to reach LLM provider at ${cfg.baseUrl} (${err.message}). Please ensure your Ollama service is running ('ollama serve') or select the Deterministic Mathematical Solver.`;
+      throw new Error(friendlyDetail);
+    }
+  }
+
+  // 2. Ollama Cloud (hosted API, GPT-OSS 120B)
+  if (provider === 'ollama_cloud') {
+    const key = process.env.OLLAMA_API_KEY || process.env.LLM_API_KEY;
+    if (!key) {
+      throw new Error('Ollama Cloud is not configured. Please set OLLAMA_API_KEY or LLM_API_KEY in your environment.');
+    }
+    try {
+      const res = await fetch('https://ollama.com/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${key}`,
+        },
+        body: JSON.stringify({
+          model: 'gpt-oss:120b',
+          stream: false,
+          messages: [
+            {
+              role: 'system',
+              content:
+                'You are the lead analytical AI engine for the Autonomous Business Intelligence Platform. Answer the user question strictly using the provided dataset aggregate statistics. Use bullet points and exact metrics. If the context does not contain the answer, say so.',
+            },
+            { role: 'user', content: `CONTEXT:\n${context}\n\nQUESTION:\n${question}` },
+          ],
         }),
       });
 
       if (res.ok) {
         const data = (await res.json()) as any;
-        if (data.response) {
-          return { answer: data.response, model: 'llama3.2', provider: 'ollama' };
+        const text = data.message?.content;
+        if (text) {
+          return { answer: text, model: 'gpt-oss:120b', provider: 'ollama_cloud' };
         }
       }
-    } catch {
-      // local daemon not running or unreachable
+      throw new Error(`Ollama Cloud returned status ${res.status}`);
+    } catch (err: any) {
+      throw new Error(`Ollama Cloud query failed: ${err.message}. Please verify your API key and connection.`);
     }
-
-    return {
-      answer: solveDeterministic(uid, question),
-      model: 'Deterministic Mathematical Solver (Ollama unavailable)',
-      provider: 'ollama',
-    };
   }
 
-  // 2. Ollama Cloud (hosted API, GPT-OSS 120B)
-  if (provider === 'ollama_cloud') {
-    const key = process.env.OLLAMA_API_KEY;
-    if (key) {
-      try {
-        const res = await fetch('https://ollama.com/api/chat', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${key}`,
-          },
-          body: JSON.stringify({
-            model: 'gpt-oss:120b',
-            stream: false,
-            messages: [
-              {
-                role: 'system',
-                content:
-                  'You are the lead analytical AI engine for the Autonomous Business Intelligence Platform. Answer the user question strictly using the provided dataset aggregate statistics. Use bullet points and exact metrics. If the context does not contain the answer, say so.',
-              },
-              { role: 'user', content: `CONTEXT:\n${context}\n\nQUESTION:\n${question}` },
-            ],
-          }),
-        });
-
-        if (res.ok) {
-          const data = (await res.json()) as any;
-          const text = data.message?.content;
-          if (text) {
-            return { answer: text, model: 'gpt-oss:120b', provider: 'ollama_cloud' };
-          }
-        } else {
-          console.warn('Ollama Cloud returned status', res.status);
-        }
-      } catch (err: any) {
-        console.warn('Ollama Cloud query failed:', err.message);
-      }
-    }
-
-    return {
-      answer: solveDeterministic(uid, question),
-      model: 'Deterministic Mathematical Solver (Ollama Cloud unavailable)',
-      provider: 'ollama_cloud',
-    };
-  }
-
-  // 3. Deterministic Mathematical Solver (default; also catches any stale saved provider id)
+  // 3. Deterministic Mathematical Solver (default; zero hallucination in-memory solver)
   return {
     answer: solveDeterministic(uid, question),
     model: 'Deterministic Mathematical Solver',

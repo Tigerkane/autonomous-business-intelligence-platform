@@ -52,8 +52,21 @@ export async function POST(request: NextRequest) {
 
     try {
       const supabase = await createClient();
+      let totalQuantity = 0;
+      let totalSales = 0;
+      for (const r of rows) { totalQuantity += r.quantity; totalSales += r.total_amount; }
+      const avgTx = rows.length > 0 ? Math.round((totalSales / rows.length) * 100) / 100 : 0;
+
       await supabase.from('datasets').delete().eq('user_id', uid);
-      await supabase.from('datasets').insert({ user_id: uid, filename, total_rows: rows.length });
+      await supabase.from('datasets').insert({
+        user_id: uid,
+        filename,
+        total_rows: rows.length,
+        total_quantity: totalQuantity,
+        total_sales: Math.round(totalSales * 100) / 100,
+        average_transaction: avgTx,
+        quality_report: quality ?? {},
+      });
     } catch (e) {
       console.error('Failed to record dataset:', e);
     }

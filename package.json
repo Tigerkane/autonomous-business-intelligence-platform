@@ -9,7 +9,8 @@
     "start": "next start -H 0.0.0.0 -p 3000",
     "preview": "next start -H 0.0.0.0 -p 3000",
     "clean": "rm -rf .next dist",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "test": "tsx tests/run-all.ts"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",

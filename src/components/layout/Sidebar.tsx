@@ -148,7 +148,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Navigation List */}
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto" aria-label="Platform navigation">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = currentTab === item.id;
@@ -159,6 +159,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onSelectTab(item.id);
                 onCloseMobile();
               }}
+              aria-current={isActive ? 'page' : undefined}
               className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                 isActive
                   ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold'
@@ -170,6 +171,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   className={`w-4 h-4 shrink-0 ${
                     isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'
                   }`}
+                  aria-hidden="true"
                 />
                 <span className="truncate">{item.label}</span>
               </div>

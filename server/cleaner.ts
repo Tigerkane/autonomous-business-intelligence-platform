@@ -88,7 +88,11 @@ export function parseCSV(csvText: string): {
 // Helpers
 // ---------------------------------------------------------------------------
 
-const normalizeName = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+const normalizeName = (s: string) =>
+  s
+    .replace(/\s*\([^)]*\)/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '');
 
 function levenshtein(a: string, b: string): number {
   const dp: number[] = Array.from({ length: b.length + 1 }, (_, j) => j);
@@ -282,7 +286,28 @@ export function cleanSalesData(csvContent: string): {
     const transactionId = (row[colIndexes['Transaction ID']] || '').trim();
     const rawDate = row[colIndexes['Date']] || '';
     const customerId = (row[colIndexes['Customer ID']] || 'Unknown').trim();
-    const gender = (row[colIndexes['Gender']] || 'Unknown').trim();
+    const rawGender = row[colIndexes['Gender']];
+    let gender = 'Unknown';
+    if (rawGender === undefined || rawGender.trim() === '') {
+      gender = 'Unknown';
+    } else {
+      const gTrim = rawGender.trim();
+      const gLower = gTrim.toLowerCase();
+      if (gLower === 'male') {
+        gender = 'Male';
+      } else if (gLower === 'female') {
+        gender = 'Female';
+      } else {
+        tracker.add(
+          'invalid_gender',
+          'with invalid Gender value (accepted: Male, Female; blank becomes Unknown)',
+          'warning',
+          line,
+          `"${gTrim}"`
+        );
+        gender = 'Unknown';
+      }
+    }
     const rawAge = row[colIndexes['Age']];
     const category = (row[colIndexes['Product Category']] || 'Unknown').trim();
     const rawQuantity = row[colIndexes['Quantity']];
@@ -408,6 +433,34 @@ export function cleanSalesData(csvContent: string): {
         'warning',
         line,
         `"${rawDate.trim()}"`
+      );
+    }
+    if (!/^\d{4}-\d{2}-\d{2}/.test(rawDate.trim())) {
+      tracker.add(
+        'wrong_date_format',
+        'with non-standard date format (expected YYYY-MM-DD, e.g. DD/MM/YYYY)',
+        'warning',
+        line,
+        `"${rawDate.trim()}"`
+      );
+    }
+    const todayIso = new Date().toISOString().slice(0, 10);
+    if (parsedDate.iso > todayIso) {
+      tracker.add(
+        'future_date',
+        'with future transaction dates',
+        'warning',
+        line,
+        `"${parsedDate.iso}"`
+      );
+    }
+    if (!ageBlank && (age < 0 || age > 120)) {
+      tracker.add(
+        'invalid_age',
+        'with Age outside valid range (0-120 years)',
+        'warning',
+        line,
+        `Age ${age}`
       );
     }
     if (Math.abs(t - q * p) > Math.max(1, 0.01 * t)) {

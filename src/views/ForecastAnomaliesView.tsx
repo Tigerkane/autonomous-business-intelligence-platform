@@ -472,16 +472,16 @@ export const ForecastAnomaliesView: React.FC<ForecastAnomaliesViewProps> = ({ on
           </span>
         </div>
 
-        {/* Backtest Accuracy */}
+        {/* Backtest MAPE & Accuracy */}
         <div className="p-5 rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200/80 dark:border-white/10 shadow-xs">
           <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
-            Backtest Accuracy
+            Backtest MAPE
           </p>
-          <h4 className="text-xl font-black text-emerald-500">
-            {forecast ? `${forecast.accuracy}%` : '—'}
+          <h4 className="text-xl font-black text-indigo-500 dark:text-indigo-400 font-mono">
+            {forecast ? `${forecast.mape}%` : '—'}
           </h4>
           <span className="text-xs text-slate-400 font-medium mt-1 inline-block">
-            MAPE: {forecast ? `${forecast.mape}%` : '—'}
+            Cross-validation accuracy: {forecast ? `${forecast.accuracy}%` : '—'}
           </span>
         </div>
 

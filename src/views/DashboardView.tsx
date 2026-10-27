@@ -31,6 +31,7 @@ import { useData } from '../contexts/DataContext';
 import { OverviewData } from '../types';
 import { EmptyState } from '../components/common/EmptyState';
 import { NavTab } from '../components/layout/Sidebar';
+import { getCategoryColor, getGenderColor } from '../design/tokens';
 
 ChartJS.register(
   CategoryScale,
@@ -152,7 +153,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
           return gradient;
         },
         fill: true,
-        tension: 0.38,
+        tension: 0,
         pointRadius: trendGrain === 'weekly' ? 2 : 4,
         pointHoverRadius: 6,
         borderWidth: 2.5,
@@ -197,20 +198,24 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
         ticks: {
           color: isDark ? '#94a3b8' : '#64748b',
           font: { size: 11 },
-          callback: (v: any) => '₹' + (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v),
+          callback: (v: any) => {
+            const num = Number(v);
+            if (Math.abs(num) >= 1_000_000) return '₹' + (num / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+            if (Math.abs(num) >= 1_000) return '₹' + (num / 1_000).toFixed(1).replace(/\.0$/, '') + 'k';
+            return '₹' + Math.round(num);
+          },
         },
       },
     },
   };
 
-  // Category Donut
-  const catPalette = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#8b5cf6'];
+  // Category Donut with shared deterministic colors
   const donutData = {
     labels: data.categories.map((c) => c.category),
     datasets: [
       {
         data: data.categories.map((c) => c.sales),
-        backgroundColor: catPalette.slice(0, data.categories.length),
+        backgroundColor: data.categories.map((c, i) => getCategoryColor(c.category, i)),
         borderWidth: 2,
         borderColor: isDark ? '#0d1527' : '#ffffff',
         hoverOffset: 6,
@@ -517,7 +522,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                   <div className="flex items-center gap-2">
                     <span
                       className="w-2.5 h-2.5 rounded-full"
-                      style={{ backgroundColor: catPalette[i % catPalette.length] }}
+                      style={{ backgroundColor: getCategoryColor(c.category, i) }}
                     />
                     <span className="font-semibold text-slate-700 dark:text-slate-300">
                       {c.category}
@@ -554,6 +559,73 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
           <div className="h-60 w-full">
             <Bar data={ageBarData} options={ageBarOptions} />
           </div>
+
+          {/* Compact Male / Female Customer Split */}
+          {(() => {
+            const maleCust = data.customer_gender_split?.male ?? (data.segments.gender.find((g) => g.segment.toLowerCase() === 'male')?.unique_customers ?? 0);
+            const femaleCust = data.customer_gender_split?.female ?? (data.segments.gender.find((g) => g.segment.toLowerCase() === 'female')?.unique_customers ?? 0);
+            const unknownCust = data.customer_gender_split?.unknown ?? (data.segments.gender.find((g) => g.segment.toLowerCase() === 'unknown')?.unique_customers ?? 0);
+            const totalCust = maleCust + femaleCust + unknownCust || 1;
+            const malePct = (maleCust / totalCust) * 100;
+            const femalePct = (femaleCust / totalCust) * 100;
+            const unknownPct = (unknownCust / totalCust) * 100;
+
+            return (
+              <div className="mt-5 pt-4 border-t border-slate-100 dark:border-white/5">
+                <div className="flex items-center justify-between text-xs mb-2">
+                  <span className="font-bold text-slate-700 dark:text-slate-300">
+                    Customer Gender Split (Unique Customers)
+                  </span>
+                  <span className="text-slate-400 font-medium font-mono">
+                    {maleCust + femaleCust + unknownCust} unique customers
+                  </span>
+                </div>
+                
+                <div className="h-2.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 flex overflow-hidden">
+                  <div
+                    style={{ width: `${malePct}%`, backgroundColor: getGenderColor('Male') }}
+                    title={`Male: ${maleCust} (${malePct.toFixed(1)}%)`}
+                    className="h-full transition-all"
+                  />
+                  <div
+                    style={{ width: `${femalePct}%`, backgroundColor: getGenderColor('Female') }}
+                    title={`Female: ${femaleCust} (${femalePct.toFixed(1)}%)`}
+                    className="h-full transition-all"
+                  />
+                  {unknownCust > 0 && (
+                    <div
+                      style={{ width: `${unknownPct}%`, backgroundColor: getGenderColor('Unknown') }}
+                      title={`Unknown: ${unknownCust} (${unknownPct.toFixed(1)}%)`}
+                      className="h-full transition-all"
+                    />
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between mt-2.5 text-xs">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: getGenderColor('Male') }} />
+                    <span className="text-slate-600 dark:text-slate-400 font-medium">Male:</span>
+                    <span className="font-bold text-slate-900 dark:text-white font-mono">{maleCust}</span>
+                    <span className="text-slate-400">({malePct.toFixed(1)}%)</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: getGenderColor('Female') }} />
+                    <span className="text-slate-600 dark:text-slate-400 font-medium">Female:</span>
+                    <span className="font-bold text-slate-900 dark:text-white font-mono">{femaleCust}</span>
+                    <span className="text-slate-400">({femalePct.toFixed(1)}%)</span>
+                  </div>
+                  {unknownCust > 0 && (
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: getGenderColor('Unknown') }} />
+                      <span className="text-slate-600 dark:text-slate-400 font-medium">Unknown:</span>
+                      <span className="font-bold text-slate-900 dark:text-white font-mono">{unknownCust}</span>
+                      <span className="text-slate-400">({unknownPct.toFixed(1)}%)</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
         </div>
 
         {/* Feature Navigation Cards */}
