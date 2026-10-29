@@ -176,16 +176,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onAuthSuccess }) => {
       }
     }
 
-    // 4. Security Verification (CAPTCHA)
-    if (!captchaInput.trim()) {
-      setError('Please enter the security verification code (CAPTCHA).');
-      return;
-    }
+    // 4. Security Verification (CAPTCHA) — Only required for Sign In, removed while registering
+    if (mode === 'signin') {
+      if (!captchaInput.trim()) {
+        setError('Please enter the security verification code (CAPTCHA).');
+        return;
+      }
 
-    if (captchaInput.trim().toUpperCase() !== captchaCode.toUpperCase()) {
-      setError('Incorrect CAPTCHA code. A new security code has been generated. Please try again.');
-      refreshCaptcha();
-      return;
+      if (captchaInput.trim().toUpperCase() !== captchaCode.toUpperCase()) {
+        setError('Incorrect CAPTCHA code. A new security code has been generated. Please try again.');
+        refreshCaptcha();
+        return;
+      }
     }
 
     setLoading(true);
@@ -255,22 +257,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onAuthSuccess }) => {
           <button
             type="button"
             onClick={() => handleSwitchMode('signin')}
-            className={`pb-2 text-xs font-semibold border-b-2 mr-4 transition-colors cursor-pointer ${
-              mode === 'signin'
-                ? 'border-slate-900 dark:border-white text-slate-900 dark:text-white'
-                : 'border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-white'
-            }`}
+            className={`pb-2 text-xs font-semibold border-b-2 mr-4 transition-colors cursor-pointer ${mode === 'signin'
+              ? 'border-slate-900 dark:border-white text-slate-900 dark:text-white'
+              : 'border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-white'
+              }`}
           >
             Sign In
           </button>
           <button
             type="button"
             onClick={() => handleSwitchMode('signup')}
-            className={`pb-2 text-xs font-semibold border-b-2 transition-colors cursor-pointer ${
-              mode === 'signup'
-                ? 'border-slate-900 dark:border-white text-slate-900 dark:text-white'
-                : 'border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-white'
-            }`}
+            className={`pb-2 text-xs font-semibold border-b-2 transition-colors cursor-pointer ${mode === 'signup'
+              ? 'border-slate-900 dark:border-white text-slate-900 dark:text-white'
+              : 'border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-white'
+              }`}
           >
             Register
           </button>
@@ -429,107 +429,109 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onAuthSuccess }) => {
             </div>
           )}
 
-          {/* Security Verification (CAPTCHA) */}
-          <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80">
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-medium text-slate-700 dark:text-slate-300">
-                Security Verification (CAPTCHA) <span className="text-rose-500">*</span>
-              </label>
-              <span className="text-[10px] text-slate-400">Case-insensitive</span>
-            </div>
-
-            {/* Captcha Image & Refresh Button */}
-            <div className="flex items-center gap-2 mb-2">
-              <div
-                className="relative flex-1 h-12 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center overflow-hidden select-none px-2"
-                title="Security verification code"
-                aria-label={`Security CAPTCHA: ${captchaCode}`}
-              >
-                <svg
-                  className="w-full h-full max-w-[210px]"
-                  viewBox="0 0 200 46"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <defs>
-                    <pattern id={`grid-${patternId}`} width="10" height="10" patternUnits="userSpaceOnUse">
-                      <path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(100, 116, 139, 0.12)" strokeWidth="0.5" />
-                    </pattern>
-                  </defs>
-                  {/* Grid background */}
-                  <rect width="200" height="46" fill={`url(#grid-${patternId})`} />
-
-                  {/* Anti-bot wavy noise lines */}
-                  <path
-                    d="M 5 23 Q 45 6 95 24 T 195 22"
-                    fill="none"
-                    stroke="rgba(99, 102, 241, 0.35)"
-                    strokeWidth="1.5"
-                  />
-                  <path
-                    d="M 10 32 Q 55 42 110 20 T 190 28"
-                    fill="none"
-                    stroke="rgba(14, 165, 233, 0.3)"
-                    strokeWidth="1.2"
-                  />
-                  <path
-                    d="M 15 14 Q 75 30 130 12 T 185 34"
-                    fill="none"
-                    stroke="rgba(148, 163, 184, 0.35)"
-                    strokeWidth="1"
-                    strokeDasharray="4 3"
-                  />
-
-                  {/* Noise dots */}
-                  <circle cx="28" cy="12" r="1.5" fill="rgba(99, 102, 241, 0.4)" />
-                  <circle cx="78" cy="38" r="1.5" fill="rgba(14, 165, 233, 0.4)" />
-                  <circle cx="122" cy="10" r="1.5" fill="rgba(99, 102, 241, 0.4)" />
-                  <circle cx="168" cy="36" r="1.5" fill="rgba(148, 163, 184, 0.4)" />
-
-                  {/* Captcha characters */}
-                  {captchaChars.map((item, idx) => (
-                    <text
-                      key={idx}
-                      x={item.x}
-                      y={item.y}
-                      fill={item.color}
-                      fontSize="22"
-                      fontWeight="800"
-                      fontFamily="monospace"
-                      letterSpacing="2"
-                      transform={`rotate(${item.rotation}, ${item.x}, ${item.y})`}
-                    >
-                      {item.char}
-                    </text>
-                  ))}
-                </svg>
+          {/* Security Verification (CAPTCHA) — Only for Sign In, removed while registering */}
+          {mode === 'signin' && (
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80">
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300">
+                  Security Verification (CAPTCHA) <span className="text-rose-500">*</span>
+                </label>
+                <span className="text-[10px] text-slate-400">Case-insensitive</span>
               </div>
 
-              <button
-                type="button"
-                onClick={refreshCaptcha}
-                title="Change verification code"
-                aria-label="Generate new security code"
-                className="h-12 px-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-850 transition-colors flex items-center justify-center shrink-0 cursor-pointer"
-              >
-                <RotateCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              </button>
-            </div>
+              {/* Captcha Image & Refresh Button */}
+              <div className="flex items-center gap-2 mb-2">
+                <div
+                  className="relative flex-1 h-12 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center overflow-hidden select-none px-2"
+                  title="Security verification code"
+                  aria-label={`Security CAPTCHA: ${captchaCode}`}
+                >
+                  <svg
+                    className="w-full h-full max-w-[210px]"
+                    viewBox="0 0 200 46"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <defs>
+                      <pattern id={`grid-${patternId}`} width="10" height="10" patternUnits="userSpaceOnUse">
+                        <path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(100, 116, 139, 0.12)" strokeWidth="0.5" />
+                      </pattern>
+                    </defs>
+                    {/* Grid background */}
+                    <rect width="200" height="46" fill={`url(#grid-${patternId})`} />
 
-            {/* Captcha text input */}
-            <div className="relative">
-              <ShieldCheck className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                required
-                autoComplete="off"
-                placeholder="Type the 5 characters above"
-                value={captchaInput}
-                onChange={(e) => setCaptchaInput(e.target.value)}
-                maxLength={6}
-                className="w-full pl-9 pr-3 py-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-mono uppercase tracking-wider text-slate-900 dark:text-white placeholder:font-sans placeholder:normal-case placeholder:tracking-normal placeholder-slate-400 focus:outline-hidden focus:border-slate-900 dark:focus:border-white transition-colors"
-              />
+                    {/* Anti-bot wavy noise lines */}
+                    <path
+                      d="M 5 23 Q 45 6 95 24 T 195 22"
+                      fill="none"
+                      stroke="rgba(99, 102, 241, 0.35)"
+                      strokeWidth="1.5"
+                    />
+                    <path
+                      d="M 10 32 Q 55 42 110 20 T 190 28"
+                      fill="none"
+                      stroke="rgba(14, 165, 233, 0.3)"
+                      strokeWidth="1.2"
+                    />
+                    <path
+                      d="M 15 14 Q 75 30 130 12 T 185 34"
+                      fill="none"
+                      stroke="rgba(148, 163, 184, 0.35)"
+                      strokeWidth="1"
+                      strokeDasharray="4 3"
+                    />
+
+                    {/* Noise dots */}
+                    <circle cx="28" cy="12" r="1.5" fill="rgba(99, 102, 241, 0.4)" />
+                    <circle cx="78" cy="38" r="1.5" fill="rgba(14, 165, 233, 0.4)" />
+                    <circle cx="122" cy="10" r="1.5" fill="rgba(99, 102, 241, 0.4)" />
+                    <circle cx="168" cy="36" r="1.5" fill="rgba(148, 163, 184, 0.4)" />
+
+                    {/* Captcha characters */}
+                    {captchaChars.map((item, idx) => (
+                      <text
+                        key={idx}
+                        x={item.x}
+                        y={item.y}
+                        fill={item.color}
+                        fontSize="22"
+                        fontWeight="800"
+                        fontFamily="monospace"
+                        letterSpacing="2"
+                        transform={`rotate(${item.rotation}, ${item.x}, ${item.y})`}
+                      >
+                        {item.char}
+                      </text>
+                    ))}
+                  </svg>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={refreshCaptcha}
+                  title="Change verification code"
+                  aria-label="Generate new security code"
+                  className="h-12 px-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-850 transition-colors flex items-center justify-center shrink-0 cursor-pointer"
+                >
+                  <RotateCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                </button>
+              </div>
+
+              {/* Captcha text input */}
+              <div className="relative">
+                <ShieldCheck className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  required
+                  autoComplete="off"
+                  placeholder="Type the 5 characters above"
+                  value={captchaInput}
+                  onChange={(e) => setCaptchaInput(e.target.value)}
+                  maxLength={6}
+                  className="w-full pl-9 pr-3 py-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-mono uppercase tracking-wider text-slate-900 dark:text-white placeholder:font-sans placeholder:normal-case placeholder:tracking-normal placeholder-slate-400 focus:outline-hidden focus:border-slate-900 dark:focus:border-white transition-colors"
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Submit Button */}
           <button

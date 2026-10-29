@@ -87,8 +87,11 @@ function AppContent() {
   }, []);
 
   // Navigate to a tab; protected tabs open the sign-in modal for signed-out users
-  // and remember where the user wanted to go.
   const goToTab = (tab: NavTab) => {
+    if (tab === 'signin' || tab === 'signup') {
+      openAuthModal(tab);
+      return;
+    }
     if (PROTECTED_TABS.includes(tab) && !isAuthenticated) {
       setPendingTab(tab);
       openAuthModal('signin');

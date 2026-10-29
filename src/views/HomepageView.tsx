@@ -1,59 +1,304 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   ArrowRight,
   UploadCloud,
-  CheckCircle2,
   LineChart,
   Bot,
   FileText,
-  Sun,
-  Moon,
   LogOut,
-  User,
   Sliders,
   ShieldCheck,
   TrendingUp,
   BarChart3,
-  Layers,
   Database,
   ChevronDown,
-  ChevronUp,
-  FileSpreadsheet,
-  HelpCircle,
   Sparkles,
   Menu,
   X,
+  Zap,
+  Eye,
 } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
 import { NavTab } from '../components/layout/Sidebar';
 import { GithubIcon } from '../components/common/GithubIcon';
 import { BrandLogo } from '../components/common/BrandLogo';
-import { BrowserChartsIllustration } from '../components/illustrations/BrowserChartsIllustration';
-import { CsvUploadIllustration } from '../components/illustrations/CsvUploadIllustration';
-import { MagnifierChartIllustration } from '../components/illustrations/MagnifierChartIllustration';
-import { PdfReportIllustration } from '../components/illustrations/PdfReportIllustration';
-import { ChatSparkleIllustration } from '../components/illustrations/ChatSparkleIllustration';
-import { ShieldLockIllustration } from '../components/illustrations/ShieldLockIllustration';
 import { InteractiveLiveConsole } from '../components/dashboard/InteractiveLiveConsole';
 
+/* ------------------------------------------------------------------ */
+/* Floating Dots Background (Canvas) — Spread across entire page       */
+/* ------------------------------------------------------------------ */
+const FloatingParticles: React.FC<{ className?: string }> = ({ className = '' }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animId: number;
+    interface DotParticle {
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      r: number;
+      opacity: number;
+      baseOpacity: number;
+      pulseSpeed: number;
+      pulseOffset: number;
+      color: string;
+    }
+    const particles: DotParticle[] = [];
+
+    const resize = () => {
+      canvas.width = window.innerWidth * window.devicePixelRatio;
+      canvas.height = window.innerHeight * window.devicePixelRatio;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    // Harmonious palette precisely matching the interactive console & dark theme
+    const palette = [
+      'rgba(129, 140, 248,', // soft indigo (accuracy & chart line)
+      'rgba(167, 139, 250,', // vibrant violet
+      'rgba(56, 189, 248,',  // electric cyan
+      'rgba(52, 211, 153,',  // emerald green (growth & live badges)
+      'rgba(244, 114, 182,', // rose accent (outlier spikes)
+    ];
+
+    // Spread floating dots across the whole screen till end
+    const count = Math.min(110, Math.max(65, Math.floor((window.innerWidth * window.innerHeight) / 10000)));
+    for (let i = 0; i < count; i++) {
+      const baseOp = Math.random() * 0.5 + 0.2;
+      const color = palette[Math.floor(Math.random() * palette.length)];
+      particles.push({
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        vx: (Math.random() - 0.5) * 0.35,
+        vy: (Math.random() - 0.5) * 0.35,
+        r: Math.random() * 2.0 + 0.8,
+        opacity: baseOp,
+        baseOpacity: baseOp,
+        pulseSpeed: Math.random() * 0.02 + 0.01,
+        pulseOffset: Math.random() * Math.PI * 2,
+        color,
+      });
+    }
+
+    let time = 0;
+    const draw = () => {
+      time += 1;
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+      for (const p of particles) {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0) p.x = window.innerWidth;
+        if (p.x > window.innerWidth) p.x = 0;
+        if (p.y < 0) p.y = window.innerHeight;
+        if (p.y > window.innerHeight) p.y = 0;
+
+        // Gentle organic twinkle
+        const currentOpacity = p.baseOpacity + Math.sin(time * p.pulseSpeed + p.pulseOffset) * 0.15;
+        const clampedOpacity = Math.max(0.12, Math.min(0.85, currentOpacity));
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `${p.color} ${clampedOpacity})`;
+        ctx.shadowBlur = p.r * 2.5;
+        ctx.shadowColor = `${p.color} ${clampedOpacity * 0.75})`;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+
+      animId = requestAnimationFrame(draw);
+    };
+    draw();
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener('resize', resize);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className={`fixed inset-0 w-full h-full pointer-events-none z-30 ${className}`}
+      style={{ opacity: 0.95 }}
+    />
+  );
+};
+
+/* ------------------------------------------------------------------ */
+/* Stat badge used in dynamic metrics row below hero                   */
+/* ------------------------------------------------------------------ */
+const StatBadge: React.FC<{
+  icon: React.ReactNode;
+  value: string | number;
+  suffix?: string;
+  label: string;
+  sublabel?: string;
+  live?: boolean;
+}> = ({ icon, value, suffix = '', label, sublabel, live = false }) => {
+  return (
+    <div className="flex items-center gap-3.5 group">
+      <div className="w-11 h-11 rounded-2xl bg-indigo-500/10 dark:bg-indigo-400/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform duration-300 shadow-xs">
+        {icon}
+      </div>
+      <div>
+        <div className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tabular-nums tracking-tight flex items-center gap-2">
+          <span>{typeof value === 'number' ? value.toLocaleString() : value}{suffix}</span>
+          {live && (
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+            </span>
+          )}
+        </div>
+        <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">{label}</div>
+        {sublabel && (
+          <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">{sublabel}</div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+/* ------------------------------------------------------------------ */
+/* Feature Card with soft elevation & glow, NO harsh borders          */
+/* ------------------------------------------------------------------ */
+const FeatureCard: React.FC<{
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  accentColor: string;
+  glowColor: string;
+  cta: string;
+  onClick: () => void;
+}> = ({ icon, title, description, accentColor, glowColor, cta, onClick }) => (
+  <div
+    onClick={onClick}
+    className="homepage-feature-card relative p-6 rounded-3xl bg-white/85 dark:bg-slate-800/60 backdrop-blur-sm shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group overflow-hidden"
+  >
+    {/* Ambient hover glow */}
+    <div
+      className="absolute -inset-1 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl -z-10"
+      style={{ background: glowColor }}
+    />
+
+    <div className="flex items-center justify-between mb-4">
+      <div className={`w-11 h-11 rounded-2xl flex items-center justify-center font-bold ${accentColor} group-hover:scale-110 transition-transform duration-300 shadow-xs`}>
+        {icon}
+      </div>
+      <span className={`text-[11px] font-semibold ${accentColor} opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all duration-300 flex items-center gap-1`}>
+        <span>{cta}</span>
+        <ArrowRight className="w-3 h-3" />
+      </span>
+    </div>
+    <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-300">
+      {title}
+    </h3>
+    <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+      {description}
+    </p>
+  </div>
+);
+
+/* ------------------------------------------------------------------ */
+/* Step Card for "How It Works" with clean rounded background         */
+/* ------------------------------------------------------------------ */
+const StepCard: React.FC<{
+  stepNumber: string;
+  stepColor: string;
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+}> = ({ stepNumber, stepColor, title, description, icon }) => (
+  <div className="relative p-7 rounded-3xl bg-white/85 dark:bg-slate-800/60 backdrop-blur-sm shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
+    <div className="flex items-center justify-between mb-5">
+      <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black text-white ${stepColor} shadow-md`}>
+        {stepNumber}
+      </div>
+      <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+        Phase {stepNumber}
+      </span>
+    </div>
+    <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-700/50 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
+      {icon}
+    </div>
+    <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2">{title}</h3>
+    <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{description}</p>
+  </div>
+);
+
+/* ------------------------------------------------------------------ */
+/* Main HomepageView Component                                         */
+/* ------------------------------------------------------------------ */
 interface HomepageViewProps {
   onLaunchPlatform: (initialTab?: NavTab) => void;
 }
 
 export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) => {
-  const { loaded, theme, toggleTheme, loadSample } = useData();
+  const { loaded } = useData();
   const { user, isAuthenticated, logout, openAuthModal } = useAuth();
-  const [loadingSample, setLoadingSample] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [navScrolled, setNavScrolled] = useState(false);
 
-  // Hero interactive live preview toggle
+  // Enforce pure dark mode on homepage
+  useEffect(() => {
+    document.documentElement.classList.add('dark');
+    document.documentElement.style.colorScheme = 'dark';
+    try {
+      localStorage.setItem('abip_theme', 'dark');
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  // Hero interactive metric toggle
   const [heroMetric, setHeroMetric] = useState<'revenue' | 'orders'>('revenue');
 
-  // FAQ Accordion open states
-  const [openFaq, setOpenFaq] = useState<number | null>(0);
+  // Continuously fluctuating values that update every time
+  const [revenueValue, setRevenueValue] = useState(1842950);
+  const [ordersValue, setOrdersValue] = useState(23507);
+  const [growthRate, setGrowthRate] = useState(14.2);
+  const [processedRows, setProcessedRows] = useState(128450);
+  const [avgLatency, setAvgLatency] = useState(14);
+  const [forecastConf, setForecastConf] = useState(82);
+  const [sparklineData, setSparklineData] = useState([38, 45, 52, 48, 62, 68, 64, 58, 74, 82, 92, 100]);
 
-  // Mobile navigation sidebar drawer state
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setRevenueValue((prev) => prev + Math.floor(Math.random() * 380) + 95);
+      setOrdersValue((prev) => prev + Math.floor(Math.random() * 4) + 1);
+      setGrowthRate((prev) => +(14.0 + Math.random() * 0.6).toFixed(1));
+      setProcessedRows((prev) => prev + Math.floor(Math.random() * 18) + 6);
+      setAvgLatency(11 + Math.floor(Math.random() * 5));
+      setForecastConf(81 + Math.floor(Math.random() * 4));
+      setSparklineData((prev) => {
+        const next = [...prev.slice(1)];
+        const last = prev[prev.length - 1];
+        const step = Math.floor((Math.random() - 0.45) * 14);
+        next.push(Math.min(100, Math.max(35, last + step)));
+        return next;
+      });
+    }, 2800);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  // Nav background on scroll
+  useEffect(() => {
+    const handleScroll = () => setNavScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handlePrimaryLaunch = () => {
     if (!isAuthenticated) {
@@ -63,17 +308,13 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
     }
   };
 
-  const handleQuickLoadSample = async () => {
-    setLoadingSample(true);
-    try {
-      await loadSample();
-      onLaunchPlatform('dashboard');
-    } catch {
-      onLaunchPlatform('upload');
-    } finally {
-      setLoadingSample(false);
-    }
-  };
+  const navLinks = [
+    { label: 'Features', href: '#features' },
+    { label: 'Interactive Demo', href: '#interactive-demo' },
+    { label: 'How It Works', href: '#how-it-works' },
+    { label: 'FAQ', href: '#faq' },
+    { label: 'Team', href: '#team' },
+  ];
 
   const faqs = [
     {
@@ -99,11 +340,28 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0f172a] text-slate-900 dark:text-slate-100 transition-colors selection:bg-indigo-600 selection:text-white">
+    <div className="relative min-h-screen bg-[#0a0f1e] text-slate-100 selection:bg-indigo-600 selection:text-white overflow-x-hidden">
+      {/* Global ambient background glow that extends smoothly till the end of the entire page */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="homepage-gradient-orb homepage-gradient-orb-1" />
+        <div className="homepage-gradient-orb homepage-gradient-orb-2" />
+        <div className="homepage-gradient-orb homepage-gradient-orb-3" />
+        <div className="homepage-gradient-orb homepage-gradient-orb-4" />
+      </div>
+
+      {/* Floating dots spread across entire page till end — No lines */}
+      <FloatingParticles />
+
       {/* ============================================================ */}
-      {/* 1. STICKY TOP NAV */}
+      {/* 1. STICKY TOP NAV                                            */}
       {/* ============================================================ */}
-      <header className="sticky top-0 z-40 backdrop-blur-md bg-white/90 dark:bg-[#0f172a]/90 border-b border-slate-200 dark:border-slate-800 transition-colors">
+      <header
+        className={`sticky top-0 z-40 transition-all duration-500 ${
+          navScrolled
+            ? 'backdrop-blur-xl bg-[#0a0f1e]/85 shadow-md shadow-indigo-950/5'
+            : 'bg-transparent'
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-6">
           {/* Logo */}
           <button
@@ -114,62 +372,42 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
             <BrandLogo size="md" variant="full" />
           </button>
 
-          {/* Clean Anchor Navigation Links */}
-          <nav className="hidden md:flex items-center gap-6 text-xs font-semibold text-slate-600 dark:text-slate-400">
-            <a href="#features" className="hover:text-slate-900 dark:hover:text-white transition-colors">
-              Features
-            </a>
-            <a href="#interactive-demo" className="hover:text-slate-900 dark:hover:text-white transition-colors">
-              Interactive Demo
-            </a>
-            <a href="#how-it-works" className="hover:text-slate-900 dark:hover:text-white transition-colors">
-              How It Works
-            </a>
-            <a href="#faq" className="hover:text-slate-900 dark:hover:text-white transition-colors">
-              FAQ
-            </a>
-            <a href="#team" className="hover:text-slate-900 dark:hover:text-white transition-colors">
-              Team
-            </a>
+          {/* Navigation Links */}
+          <nav className="hidden md:flex items-center gap-7 text-[13px] font-semibold text-slate-600 dark:text-slate-400">
+            {navLinks.map((item) => (
+              <a
+                key={item.label}
+                href={item.href}
+                className="relative py-1 hover:text-slate-900 dark:hover:text-white transition-colors duration-300 after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-indigo-500 after:transition-all after:duration-300 hover:after:w-full"
+              >
+                {item.label}
+              </a>
+            ))}
           </nav>
 
-          {/* Right Action Cluster */}
+          {/* Right Actions */}
           <div className="flex items-center gap-2.5 shrink-0">
-            {/* GitHub Repo */}
+            {/* GitHub */}
             <a
               href="https://github.com/Tigerkane/autonomous-business-intelligence-platform"
               target="_blank"
               rel="noreferrer"
-              className="p-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors"
+              className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-400 transition-all duration-300 hover:scale-105"
               title="View Repository on GitHub"
               aria-label="View Repository on GitHub"
             >
               <GithubIcon className="w-4 h-4" />
             </a>
 
-            {/* Theme Toggle (Light / Dark mode) */}
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer"
-              title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
-              aria-label="Toggle visual theme"
-            >
-              {theme === 'light' ? (
-                <Sun className="w-4 h-4 text-amber-500" />
-              ) : (
-                <Moon className="w-4 h-4 text-indigo-400" />
-              )}
-            </button>
-
-            {/* User Account / Sign In */}
+            {/* User / Sign In */}
             {isAuthenticated && user ? (
-              <div className="flex items-center gap-2 pl-2 border-l border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-2 pl-2">
                 <span className="hidden sm:inline text-xs font-semibold text-slate-800 dark:text-slate-200 truncate max-w-[120px]">
                   {user.name.split(' ')[0]}
                 </span>
                 <button
                   onClick={logout}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-300 cursor-pointer"
                   title="Sign Out"
                   aria-label="Sign Out"
                 >
@@ -178,100 +416,71 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
               </div>
             ) : (
               <button
-                onClick={() => onLaunchPlatform('signin')}
-                className="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                onClick={() => openAuthModal('signin')}
+                className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-300 cursor-pointer"
               >
                 Sign In
               </button>
             )}
 
-            {/* Mobile Sidebar Navigation Toggle */}
+            {/* Mobile menu toggle */}
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="md:hidden p-2 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-              title="Open navigation sidebar"
+              className="md:hidden p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all duration-300 cursor-pointer"
               aria-label="Open navigation sidebar"
             >
               <Menu className="w-4 h-4" />
             </button>
 
-            {/* Get Started CTA */}
+            {/* Primary Action Button */}
             <button
               onClick={handlePrimaryLaunch}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs hover:shadow-indigo-500/25 transition-all cursor-pointer"
+              className="homepage-cta-btn inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/20 hover:shadow-indigo-500/40 transition-all duration-300 cursor-pointer hover:scale-[1.03]"
             >
-              <span>{isAuthenticated ? (loaded ? 'Open Dashboard' : 'Upload Data') : 'Get Started'}</span>
+              <span>{isAuthenticated ? (loaded ? 'Dashboard' : 'Upload') : 'Get Started'}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
       </header>
 
-      {/* Mobile Navigation Sidebar Drawer */}
+      {/* Mobile Navigation Drawer */}
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-50 md:hidden flex">
           <div
-            className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <div className="relative flex flex-col w-72 max-w-[85vw] h-full bg-white dark:bg-[#060b19] border-r border-slate-200 dark:border-slate-800 shadow-2xl z-10 p-5">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
+          <div className="relative flex flex-col w-72 max-w-[85vw] h-full bg-white dark:bg-[#0c1222] shadow-2xl z-10 p-5">
+            <div className="flex items-center justify-between pb-4">
               <BrandLogo size="md" variant="full" />
               <button
                 onClick={() => setMobileMenuOpen(false)}
                 className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
-                title="Hide sidebar"
                 aria-label="Close navigation sidebar"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-
             <nav className="flex-1 py-4 space-y-1 overflow-y-auto">
-              <a
-                href="#features"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center px-3 py-2.5 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors"
-              >
-                Features
-              </a>
-              <a
-                href="#interactive-demo"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center px-3 py-2.5 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors"
-              >
-                Interactive Demo
-              </a>
-              <a
-                href="#how-it-works"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center px-3 py-2.5 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors"
-              >
-                How It Works
-              </a>
-              <a
-                href="#faq"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center px-3 py-2.5 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors"
-              >
-                FAQ
-              </a>
-              <a
-                href="#team"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center px-3 py-2.5 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors"
-              >
-                Project Team
-              </a>
+              {navLinks.map((item) => (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center px-3 py-2.5 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors"
+                >
+                  {item.label}
+                </a>
+              ))}
             </nav>
-
-            <div className="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-2">
+            <div className="pt-4">
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
                   handlePrimaryLaunch();
                 }}
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 shadow-xs cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-500 shadow-lg cursor-pointer"
               >
                 <span>{isAuthenticated ? (loaded ? 'Open Dashboard' : 'Upload Data') : 'Get Started'}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -282,105 +491,123 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
       )}
 
       {/* ============================================================ */}
-      {/* 2. HERO SECTION */}
-      {/* H1: "Turn a sales CSV into decisions." + 2 CTAs + interactive sample-chart card + hero art */}
+      {/* 2. HERO SECTION                                              */}
       {/* ============================================================ */}
-      <section className="pt-16 pb-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+      <section className="relative pt-10 pb-12 sm:pt-14 sm:pb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-            {/* Left Content Column */}
+            {/* Left Content */}
             <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-              {/* Unboxed Metadata Header */}
-              <div className="inline-flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-mono">
-                <span>Autonomous Business Intelligence</span>
-                <span aria-hidden="true">·</span>
-                <span>Retail Data Pipelines</span>
-                <span aria-hidden="true">·</span>
-                <span>Time-Series ML</span>
+              {/* Tag pill */}
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 dark:bg-indigo-400/10 text-xs font-semibold text-indigo-600 dark:text-indigo-400 homepage-tag-glow shadow-xs">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Autonomous BI Platform — Retail Data Intelligence</span>
               </div>
 
-              {/* Exact H1 from Brief */}
+              {/* Main heading */}
               <h1
-                className="text-4xl sm:text-6xl font-black tracking-tight text-slate-900 dark:text-white leading-[1.1]"
+                className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-900 dark:text-white leading-[1.08]"
                 style={{ textWrap: 'balance' } as any}
               >
-                Turn a sales CSV into decisions.
+                Turn a sales CSV into{' '}
+                <span className="homepage-gradient-text">
+                  strategic decisions
+                </span>.
               </h1>
 
-              <p className="text-base text-slate-600 dark:text-slate-400 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                Upload your retail sales transactions and immediately receive autonomous KPIs, walk-forward forecasting models, rolling-median anomaly detection, plain-English Q&A, and publication-ready PDF reports.
+              <p className="text-base sm:text-lg text-slate-600 dark:text-slate-400 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                Upload retail sales transactions and instantly receive autonomous KPIs, walk-forward forecasting, anomaly detection, plain-English Q&A, and publication-ready PDF reports.
               </p>
 
               {/* Primary CTA */}
-              <div className="pt-2 flex flex-wrap items-center justify-center lg:justify-start gap-3">
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-1">
                 <button
                   onClick={handlePrimaryLaunch}
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-md shadow-indigo-600/30 transition-all cursor-pointer"
+                  className="homepage-cta-primary inline-flex items-center gap-2.5 px-8 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-xl shadow-indigo-600/25 hover:shadow-indigo-500/40 transition-all duration-300 cursor-pointer hover:scale-[1.03]"
                 >
                   <span>{isAuthenticated ? 'Open Analytics Workspace' : 'Get Started Free'}</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
-
-              {/* Interactive Mini Sample-Chart Card in Hero */}
-              <div className="pt-4 max-w-lg mx-auto lg:mx-0">
-                <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1e293b] shadow-xs text-left">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-bold text-slate-900 dark:text-white">
-                      Live Sample Preview:
-                    </span>
-                    {/* Revenue / Orders toggle */}
-                    <div className="flex items-center gap-1 p-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-[11px] font-semibold">
-                      <button
-                        onClick={() => setHeroMetric('revenue')}
-                        className={`px-2 py-0.5 rounded-md transition-colors cursor-pointer ${
-                          heroMetric === 'revenue'
-                            ? 'bg-indigo-600 text-white'
-                            : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                        }`}
-                      >
-                        Revenue
-                      </button>
-                      <button
-                        onClick={() => setHeroMetric('orders')}
-                        className={`px-2 py-0.5 rounded-md transition-colors cursor-pointer ${
-                          heroMetric === 'orders'
-                            ? 'bg-indigo-600 text-white'
-                            : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                        }`}
-                      >
-                        Orders
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="flex items-baseline gap-2 font-mono tabular-nums">
-                    <span className="text-2xl font-bold text-slate-900 dark:text-white">
-                      {heroMetric === 'revenue' ? '₹18,42,950' : '23,507'}
-                    </span>
-                    <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                      +14.2% MoM
-                    </span>
-                  </div>
-
-                  {/* Micro sparkline */}
-                  <div className="mt-2 h-7 flex items-end gap-1">
-                    {[38, 45, 52, 48, 62, 68, 64, 58, 74, 82, 92, 100].map((val, idx) => (
-                      <div
-                        key={idx}
-                        className="flex-1 rounded-xs bg-indigo-600/30 dark:bg-indigo-400/30 hover:bg-indigo-600 transition-colors"
-                        style={{ height: `${val}%` }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
             </div>
 
-            {/* Right Hero Art Column (320x240 Illustration with gentle float) */}
+            {/* Right: Live Autonomous Telemetry Card */}
             <div className="lg:col-span-5 flex items-center justify-center">
-              <div className="animate-gentle-float w-full max-w-[420px]">
-                <BrowserChartsIllustration className="w-full h-auto drop-shadow-xl" theme={theme} />
+              <div className="w-full max-w-[440px] homepage-hero-card p-6 rounded-3xl bg-white/85 dark:bg-slate-800/60 backdrop-blur-xl shadow-2xl shadow-indigo-950/10 dark:shadow-indigo-500/5">
+                {/* Card Header */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="relative flex h-2.5 w-2.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+                    </span>
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                      Live Telemetry Stream
+                    </span>
+                  </div>
+                  {/* Metric Toggle */}
+                  <div className="flex items-center gap-1 p-0.5 rounded-lg bg-slate-100 dark:bg-slate-700/60 text-[11px] font-semibold">
+                    <button
+                      onClick={() => setHeroMetric('revenue')}
+                      className={`px-2.5 py-1 rounded-md transition-all duration-300 cursor-pointer ${
+                        heroMetric === 'revenue'
+                          ? 'bg-indigo-600 text-white shadow-sm'
+                          : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                      }`}
+                    >
+                      Revenue
+                    </button>
+                    <button
+                      onClick={() => setHeroMetric('orders')}
+                      className={`px-2.5 py-1 rounded-md transition-all duration-300 cursor-pointer ${
+                        heroMetric === 'orders'
+                          ? 'bg-indigo-600 text-white shadow-sm'
+                          : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                      }`}
+                    >
+                      Orders
+                    </button>
+                  </div>
+                </div>
+
+                {/* Metric Display */}
+                <div className="flex items-baseline gap-3 mb-1">
+                  <span className="text-3xl font-black text-slate-900 dark:text-white tabular-nums tracking-tight transition-all duration-300">
+                    {heroMetric === 'revenue'
+                      ? `₹${revenueValue.toLocaleString('en-IN')}`
+                      : ordersValue.toLocaleString()}
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full">
+                    <TrendingUp className="w-3 h-3" />
+                    +{growthRate}%
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 mb-4 font-mono">
+                  <span>Continuous live stream</span>
+                  <span className="text-emerald-500 font-semibold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    Real-time
+                  </span>
+                </div>
+
+                {/* Dynamic live sparkline */}
+                <div className="h-16 flex items-end gap-[3px] px-1">
+                  {sparklineData.map((val, idx) => (
+                    <div
+                      key={`${heroMetric}-${idx}`}
+                      className="flex-1 rounded-sm bg-gradient-to-t from-indigo-600/40 to-indigo-500/80 dark:from-indigo-400/30 dark:to-indigo-400/70 hover:from-indigo-600 hover:to-indigo-500 transition-all duration-500 homepage-sparkline-bar"
+                      style={{
+                        height: `${val}%`,
+                        transition: 'height 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
+                      }}
+                    />
+                  ))}
+                </div>
+
+                {/* Mini labels */}
+                <div className="flex justify-between mt-2 text-[9px] text-slate-400 dark:text-slate-500 font-mono px-1">
+                  <span>Jan</span><span>Mar</span><span>Jun</span><span>Sep</span><span>Live</span>
+                </div>
               </div>
             </div>
           </div>
@@ -388,12 +615,50 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
       </section>
 
       {/* ============================================================ */}
-      {/* 3. SIX FEATURE CARDS */}
-      {/* dashboard, scored forecasts, anomaly detection, ask in plain English, PDF reports, private accounts */}
+      {/* 2b. LIVE STREAMING METRICS ROW                               */}
       {/* ============================================================ */}
-      <section id="features" className="py-16">
+      <section className="py-6">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+          <StatBadge
+            icon={<Database className="w-4 h-4" />}
+            value={processedRows}
+            suffix="+"
+            label="Live Streamed Records"
+            sublabel="Updating real-time"
+            live={true}
+          />
+          <StatBadge
+            icon={<Zap className="w-4 h-4" />}
+            value={avgLatency}
+            suffix="ms"
+            label="Model Latency"
+            sublabel="Instant evaluation"
+            live={true}
+          />
+          <StatBadge
+            icon={<LineChart className="w-4 h-4" />}
+            value={forecastConf}
+            suffix="%"
+            label="Forecast Confidence"
+            sublabel="Walk-Forward MAPE"
+            live={true}
+          />
+          <StatBadge
+            icon={<ShieldCheck className="w-4 h-4" />}
+            value={100}
+            suffix="%"
+            label="Data Isolation"
+            sublabel="Zero External Sharing"
+          />
+        </div>
+      </section>
+
+      {/* ============================================================ */}
+      {/* 3. SIX BUILT-IN AUTONOMOUS CAPABILITIES                      */}
+      {/* ============================================================ */}
+      <section id="features" className="py-12 sm:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center max-w-2xl mx-auto mb-12">
+          <div className="text-center max-w-2xl mx-auto mb-10">
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
               Six Built-In Autonomous Capabilities
             </h2>
@@ -403,151 +668,74 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Feature 1: Executive Dashboard */}
-            <div
+            <FeatureCard
+              icon={<BarChart3 className="w-5 h-5" />}
+              title="Executive Dashboard"
+              description="Automated MoM KPIs, weekly revenue area trends (3M/6M/All), product category breakdown, and dual-dimension customer segmentation donut."
+              accentColor="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"
+              glowColor="rgba(99, 102, 241, 0.08)"
+              cta="Explore"
               onClick={() => onLaunchPlatform('dashboard')}
-              className="p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1e293b] shadow-xs hover:border-indigo-400 dark:hover:border-indigo-500 hover:shadow-md transition-all cursor-pointer group space-y-3"
-            >
-              <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
-                  <BarChart3 className="w-5 h-5" />
-                </div>
-                <span className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
-                  <span>Explore</span>
-                  <ArrowRight className="w-3 h-3" />
-                </span>
-              </div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                Executive Dashboard
-              </h3>
-              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                Automated MoM KPIs, weekly revenue area trends (3M/6M/All), product category breakdown, and dual-dimension customer segmentation donut.
-              </p>
-            </div>
-
-            {/* Feature 2: Scored Forecasts */}
-            <div
+            />
+            <FeatureCard
+              icon={<LineChart className="w-5 h-5" />}
+              title="Scored Forecasts"
+              description="Walk-forward backtesting evaluates candidate algorithms, assigns Out-of-Sample MAPE scores, and projects future trajectories with shaded 80% confidence bands."
+              accentColor="bg-teal-500/10 text-teal-600 dark:text-teal-400"
+              glowColor="rgba(20, 184, 166, 0.08)"
+              cta="View Forecast"
               onClick={() => onLaunchPlatform('forecast-anomalies')}
-              className="p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1e293b] shadow-xs hover:border-teal-400 dark:hover:border-teal-500 hover:shadow-md transition-all cursor-pointer group space-y-3 ring-1 ring-teal-500/10"
-            >
-              <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center font-bold">
-                  <LineChart className="w-5 h-5" />
-                </div>
-                <span className="text-[11px] font-semibold text-teal-600 dark:text-teal-400 group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
-                  <span>View Forecast</span>
-                  <ArrowRight className="w-3 h-3" />
-                </span>
-              </div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
-                Scored Forecasts
-              </h3>
-              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                Walk-forward backtesting evaluates candidate algorithms, assigns Out-of-Sample MAPE scores, and projects future trajectories with shaded 80% confidence bands.
-              </p>
-            </div>
-
-            {/* Feature 3: Anomaly Detection */}
-            <div
+            />
+            <FeatureCard
+              icon={<Sliders className="w-5 h-5" />}
+              title="Anomaly Detection"
+              description="Flags unusual revenue days against a rolling 31-day median baseline using a modified z-score (threshold 3.5), and unusual transactions per product category using IQR fences."
+              accentColor="bg-rose-500/10 text-rose-600 dark:text-rose-400"
+              glowColor="rgba(244, 63, 94, 0.08)"
+              cta="View Anomalies"
               onClick={() => onLaunchPlatform('forecast-anomalies')}
-              className="p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1e293b] shadow-xs hover:border-rose-400 dark:hover:border-rose-500 hover:shadow-md transition-all cursor-pointer group space-y-3 ring-1 ring-rose-500/10"
-            >
-              <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center font-bold">
-                  <Sliders className="w-5 h-5" />
-                </div>
-                <span className="text-[11px] font-semibold text-rose-600 dark:text-rose-400 group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
-                  <span>View Anomalies</span>
-                  <ArrowRight className="w-3 h-3" />
-                </span>
-              </div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">
-                Anomaly Detection
-              </h3>
-              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                Flags unusual revenue days against a rolling 31-day median baseline using a modified z-score (threshold 3.5), and unusual transactions per product category using IQR fences.
-              </p>
-            </div>
-
-            {/* Feature 4: Ask in Plain English */}
-            <div
+            />
+            <FeatureCard
+              icon={<Bot className="w-5 h-5" />}
+              title="Ask in Plain English"
+              description="Connects to a local Ollama model. Maps questions into mathematical metrics and responds with zero hallucination."
+              accentColor="bg-purple-500/10 text-purple-600 dark:text-purple-400"
+              glowColor="rgba(168, 85, 247, 0.08)"
+              cta="Ask AI"
               onClick={() => onLaunchPlatform('ask-data')}
-              className="p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1e293b] shadow-xs hover:border-purple-400 dark:hover:border-purple-500 hover:shadow-md transition-all cursor-pointer group space-y-3"
-            >
-              <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold">
-                  <Bot className="w-5 h-5" />
-                </div>
-                <span className="text-[11px] font-semibold text-purple-600 dark:text-purple-400 group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
-                  <span>Ask AI</span>
-                  <ArrowRight className="w-3 h-3" />
-                </span>
-              </div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-                Ask in Plain English
-              </h3>
-              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                Connects to a local Ollama model. Maps questions into mathematical metrics and responds with zero hallucination.
-              </p>
-            </div>
-
-            {/* Feature 5: PDF Reports */}
-            <div
+            />
+            <FeatureCard
+              icon={<FileText className="w-5 h-5" />}
+              title="PDF Reports"
+              description="Generates vector PDF stakeholder briefs with executive scorecards, sales breakdown tables, forecast curves, and strategic insights ready to print or email."
+              accentColor="bg-amber-500/10 text-amber-600 dark:text-amber-400"
+              glowColor="rgba(245, 158, 11, 0.08)"
+              cta="Generate"
               onClick={() => onLaunchPlatform('reports')}
-              className="p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1e293b] shadow-xs hover:border-amber-400 dark:hover:border-amber-500 hover:shadow-md transition-all cursor-pointer group space-y-3"
-            >
-              <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
-                  <FileText className="w-5 h-5" />
-                </div>
-                <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
-                  <span>Generate</span>
-                  <ArrowRight className="w-3 h-3" />
-                </span>
-              </div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
-                PDF Reports
-              </h3>
-              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                Generates vector PDF stakeholder briefs with executive scorecards, sales breakdown tables, forecast curves, and strategic insights ready to print or email.
-              </p>
-            </div>
-
-            {/* Feature 6: Private Accounts */}
-            <div
-              onClick={() => onLaunchPlatform('signin')}
-              className="p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1e293b] shadow-xs hover:border-emerald-400 dark:hover:border-emerald-500 hover:shadow-md transition-all cursor-pointer group space-y-3"
-            >
-              <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
-                  <ShieldCheck className="w-5 h-5" />
-                </div>
-                <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
-                  <span>Sign In</span>
-                  <ArrowRight className="w-3 h-3" />
-                </span>
-              </div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                Private Accounts
-              </h3>
-              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                Dedicated multi-tenant isolation, cryptographic token verification, client-side CAPTCHA verification, and isolated session dataset workspaces.
-              </p>
-            </div>
+            />
+            <FeatureCard
+              icon={<ShieldCheck className="w-5 h-5" />}
+              title="Private Accounts"
+              description="Dedicated multi-tenant isolation, cryptographic token verification, client-side CAPTCHA verification, and isolated session dataset workspaces."
+              accentColor="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+              glowColor="rgba(16, 185, 129, 0.08)"
+              cta="Sign In"
+              onClick={() => openAuthModal('signin')}
+            />
           </div>
         </div>
       </section>
 
       {/* ============================================================ */}
-      {/* 4. INTERACTIVE DEMO (Tabs: Dashboard | Forecast | Anomalies | Ask) */}
+      {/* 4. INTERACTIVE DEMO (Tabs: Dashboard, Forecast, Anomalies, Q&A) */}
       {/* ============================================================ */}
-      <section id="interactive-demo" className="py-16">
+      <section id="interactive-demo" className="py-12 sm:py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center max-w-2xl mx-auto mb-10">
+          <div className="text-center max-w-2xl mx-auto mb-8">
             <span className="text-xs font-mono font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
               Interactive Live Demo
             </span>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white mt-1">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-slate-900 dark:text-white mt-1">
               Explore the Autonomous Intelligence Engine
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">
@@ -555,96 +743,72 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
             </p>
           </div>
 
-          <InteractiveLiveConsole
-            theme={theme}
-            onLaunchFullStudio={handlePrimaryLaunch}
-          />
+          <div>
+            <InteractiveLiveConsole
+              theme="dark"
+              onLaunchFullStudio={handlePrimaryLaunch}
+            />
+          </div>
         </div>
       </section>
 
       {/* ============================================================ */}
-      {/* 5. "HOW IT WORKS" 3-STEP STEPPER WITH ART PER STEP */}
+      {/* 5. HOW IT WORKS                                              */}
       {/* ============================================================ */}
-      <section id="how-it-works" className="py-16">
+      <section id="how-it-works" className="py-12 sm:py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-              How It Works: Three Steps to Foresight
+          <div className="text-center max-w-2xl mx-auto mb-10">
+            <span className="inline-block text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 mb-2">
+              Simple Workflow
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white leading-tight">
+              Three Steps to Foresight
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">
               A transparent, deterministic workflow designed for high-velocity retail operations.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Step 1 */}
-            <div className="p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1e293b] flex flex-col justify-between space-y-6">
-              <div className="flex justify-center">
-                <CsvUploadIllustration className="w-full max-w-[220px]" theme={theme} />
-              </div>
-              <div className="space-y-2">
-                <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">
-                  Step 01
-                </span>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                  Upload & Sanitize CSV
-                </h3>
-                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                  Drop your sales CSV. The engine validates 9 columns, normalizes multi-format dates to ISO 8601, and rejects duplicate transactions and negative records.
-                </p>
-              </div>
-            </div>
-
-            {/* Step 2 */}
-            <div className="p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1e293b] flex flex-col justify-between space-y-6">
-              <div className="flex justify-center">
-                <MagnifierChartIllustration className="w-full max-w-[220px]" theme={theme} />
-              </div>
-              <div className="space-y-2">
-                <span className="text-xs font-mono font-bold text-teal-600 dark:text-teal-400">
-                  Step 02
-                </span>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                  Model & Detect Anomalies
-                </h3>
-                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                  Walk-forward backtesting selects the minimum MAPE forecasting model, while a rolling 31-day median baseline with a modified z-score surfaces unusual revenue days and transactions.
-                </p>
-              </div>
-            </div>
-
-            {/* Step 3 */}
-            <div className="p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1e293b] flex flex-col justify-between space-y-6">
-              <div className="flex justify-center">
-                <PdfReportIllustration className="w-full max-w-[220px]" theme={theme} />
-              </div>
-              <div className="space-y-2">
-                <span className="text-xs font-mono font-bold text-amber-600 dark:text-amber-400">
-                  Step 03
-                </span>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                  Decide & Share Reports
-                </h3>
-                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                  Review executive scorecards, query store telemetry in plain English, and generate vector PDF reports formatted for board presentations.
-                </p>
-              </div>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <StepCard
+              stepNumber="01"
+              stepColor="bg-indigo-600"
+              title="Upload & Sanitize CSV"
+              description="Drop your sales CSV. The engine validates 9 columns, normalizes multi-format dates to ISO 8601, and rejects duplicate transactions and negative records."
+              icon={<UploadCloud className="w-6 h-6 text-indigo-500" />}
+            />
+            <StepCard
+              stepNumber="02"
+              stepColor="bg-teal-600"
+              title="Model & Detect Anomalies"
+              description="Walk-forward backtesting selects the minimum MAPE model, while a rolling 31-day median baseline with modified z-score surfaces unusual revenue days."
+              icon={<Eye className="w-6 h-6 text-teal-500" />}
+            />
+            <StepCard
+              stepNumber="03"
+              stepColor="bg-amber-600"
+              title="Decide & Share Reports"
+              description="Review executive scorecards, query store telemetry in plain English, and generate vector PDF reports formatted for board presentations."
+              icon={<FileText className="w-6 h-6 text-amber-500" />}
+            />
           </div>
         </div>
       </section>
 
       {/* ============================================================ */}
-      {/* 6. FAQ ACCORDION */}
+      {/* 6. FAQ ACCORDION                                             */}
       {/* ============================================================ */}
-      <section id="faq" className="py-16">
+      <section id="faq" className="py-12 sm:py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-xl mx-auto mb-10">
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+            <span className="inline-block text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 mb-2">
+              Got Questions?
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white leading-tight">
               Frequently Asked Questions
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">
-              Everything you need to know about the platform algorithms and data pipeline.
+              Everything you need to know about the algorithms and data pipeline.
             </p>
           </div>
 
@@ -654,25 +818,37 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
               return (
                 <div
                   key={idx}
-                  className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1e293b] overflow-hidden transition-colors"
+                  className={`rounded-2xl transition-all duration-300 overflow-hidden shadow-xs hover:shadow-md ${
+                    isOpen
+                      ? 'bg-white dark:bg-slate-800/80 shadow-md shadow-indigo-500/5'
+                      : 'bg-white/75 dark:bg-slate-800/40 hover:bg-white dark:hover:bg-slate-800/60'
+                  }`}
                 >
                   <button
                     onClick={() => setOpenFaq(isOpen ? null : idx)}
-                    className="w-full p-4 sm:p-5 flex items-center justify-between gap-4 text-left font-bold text-sm text-slate-900 dark:text-white cursor-pointer"
+                    className="w-full p-5 sm:p-6 flex items-center justify-between gap-4 text-left font-bold text-sm text-slate-900 dark:text-white cursor-pointer group"
                     aria-expanded={isOpen}
                   >
-                    <span>{faq.q}</span>
-                    {isOpen ? (
-                      <ChevronUp className="w-4 h-4 text-slate-400 shrink-0" />
-                    ) : (
-                      <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
-                    )}
+                    <span className="group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-300">
+                      {faq.q}
+                    </span>
+                    <div
+                      className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all duration-300 ${
+                        isOpen ? 'bg-indigo-600 text-white rotate-180' : 'bg-slate-100 dark:bg-slate-700 text-slate-400'
+                      }`}
+                    >
+                      <ChevronDown className="w-4 h-4" />
+                    </div>
                   </button>
-                  {isOpen && (
-                    <div className="px-4 sm:px-5 pb-5 pt-1 text-xs text-slate-600 dark:text-slate-400 leading-relaxed border-t border-slate-100 dark:border-slate-800/60">
+                  <div
+                    className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                      isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                    }`}
+                  >
+                    <div className="px-5 sm:px-6 pb-6 pt-1 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                       {faq.a}
                     </div>
-                  )}
+                  </div>
                 </div>
               );
             })}
@@ -681,137 +857,101 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
       </section>
 
       {/* ============================================================ */}
-      {/* 7. PROJECT TEAM SECTION */}
-      {/* Clean Teammate Name & Full Role without truncation or matter */}
+      {/* 7. PROJECT TEAM                                              */}
       {/* ============================================================ */}
-      <section id="team" className="py-16">
+      <section id="team" className="py-12 sm:py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-xl mx-auto mb-10">
-            <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+            <span className="inline-block text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 mb-2">
+              The Team
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
               Project Team
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">
               Core contributors & engineering leads
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
-            {/* Shreyas Mogalapalli */}
-            <div className="p-6 sm:p-7 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1e293b] flex items-center gap-4 sm:gap-5 shadow-xs hover:border-indigo-400 dark:hover:border-indigo-600 transition-all">
-              <div className="w-14 h-14 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center font-bold text-base shrink-0 shadow-xs">
-                SM
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {[
+              { name: 'Shreyas Mogalapalli', initials: 'SM', role: 'Project Lead & System Architect', color: 'bg-slate-900 dark:bg-white text-white dark:text-slate-900', roleColor: 'text-indigo-600 dark:text-indigo-400' },
+              { name: 'Saniya', initials: 'S', role: 'Machine Learning & Modeling Lead', color: 'bg-indigo-600 text-white', roleColor: 'text-indigo-600 dark:text-indigo-400' },
+              { name: 'Shlok', initials: 'S', role: 'Backend Infrastructure & Ingestion', color: 'bg-teal-600 text-white', roleColor: 'text-teal-600 dark:text-teal-400' },
+              { name: 'Navya', initials: 'N', role: 'BI Analytics & UX Intelligence', color: 'bg-violet-600 text-white', roleColor: 'text-violet-600 dark:text-violet-400' },
+            ].map((member) => (
+              <div
+                key={member.name}
+                className="p-6 rounded-3xl bg-white/75 dark:bg-slate-800/40 backdrop-blur-sm flex items-center gap-4 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
+              >
+                <div className={`w-14 h-14 rounded-2xl ${member.color} flex items-center justify-center font-bold text-base shrink-0 shadow-sm group-hover:scale-105 transition-transform duration-300`}>
+                  {member.initials}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white leading-tight">
+                    {member.name}
+                  </h3>
+                  <p className={`text-sm font-semibold ${member.roleColor} mt-1 whitespace-normal break-words leading-relaxed`}>
+                    {member.role}
+                  </p>
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-tight">
-                  Shreyas Mogalapalli
-                </h3>
-                <p className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 mt-1 whitespace-normal break-words leading-relaxed">
-                  Project Lead & System Architect
-                </p>
-              </div>
-            </div>
-
-            {/* Saniya */}
-            <div className="p-6 sm:p-7 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1e293b] flex items-center gap-4 sm:gap-5 shadow-xs hover:border-indigo-400 dark:hover:border-indigo-600 transition-all">
-              <div className="w-14 h-14 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-xs">
-                S
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-tight">
-                  Saniya
-                </h3>
-                <p className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 mt-1 whitespace-normal break-words leading-relaxed">
-                  Machine Learning & Modeling Lead
-                </p>
-              </div>
-            </div>
-
-            {/* Shlok */}
-            <div className="p-6 sm:p-7 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1e293b] flex items-center gap-4 sm:gap-5 shadow-xs hover:border-indigo-400 dark:hover:border-indigo-600 transition-all">
-              <div className="w-14 h-14 rounded-2xl bg-teal-600 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-xs">
-                S
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-tight">
-                  Shlok
-                </h3>
-                <p className="text-sm font-semibold text-teal-600 dark:text-teal-400 mt-1 whitespace-normal break-words leading-relaxed">
-                  Backend Infrastructure & Ingestion
-                </p>
-              </div>
-            </div>
-
-            {/* Navya */}
-            <div className="p-6 sm:p-7 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1e293b] flex items-center gap-4 sm:gap-5 shadow-xs hover:border-indigo-400 dark:hover:border-indigo-600 transition-all">
-              <div className="w-14 h-14 rounded-2xl bg-violet-600 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-xs">
-                N
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-tight">
-                  Navya
-                </h3>
-                <p className="text-sm font-semibold text-violet-600 dark:text-violet-400 mt-1 whitespace-normal break-words leading-relaxed">
-                  BI Analytics & UX Intelligence
-                </p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* ============================================================ */}
-      {/* 8. CTA BANNER */}
+      {/* 8. CTA BANNER                                                */}
       {/* ============================================================ */}
-      <section className="py-8">
+      <section className="py-6">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <div className="px-6 py-5 sm:px-8 sm:py-6 rounded-2xl bg-indigo-600 text-white shadow-md flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="space-y-1 text-center md:text-left">
-              <h2 className="text-lg sm:text-xl font-black">
-                Ready to turn your sales CSV into foresight?
-              </h2>
-              <p className="text-xs text-indigo-100 max-w-md leading-relaxed">
-                Upload your retail sales CSV or try the sample dataset.
-              </p>
+          <div className="homepage-cta-banner relative px-6 py-5 sm:px-8 sm:py-6 rounded-2xl overflow-hidden shadow-lg">
+            {/* Animated gradient background */}
+            <div className="absolute inset-0 homepage-cta-gradient" />
+            <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/90 via-indigo-700/80 to-violet-700/90" />
+
+            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="space-y-1 text-center md:text-left">
+                <h2 className="text-base sm:text-lg font-bold text-white leading-tight">
+                  Ready to turn your sales CSV into foresight?
+                </h2>
+                <p className="text-xs text-indigo-100/80 max-w-sm leading-relaxed">
+                  Upload your retail sales data and receive executive decision intelligence.
+                </p>
+              </div>
+              <button
+                onClick={handlePrimaryLaunch}
+                className="px-5 py-2.5 rounded-xl bg-white text-indigo-700 hover:bg-indigo-50 font-bold text-xs transition-all duration-300 shrink-0 shadow-md hover:shadow-lg cursor-pointer hover:scale-[1.02]"
+              >
+                Get Started Free
+              </button>
             </div>
-            <button
-              onClick={handlePrimaryLaunch}
-              className="px-5 py-2.5 rounded-lg bg-white text-indigo-700 hover:bg-indigo-50 font-bold text-xs transition-colors shrink-0 shadow-sm cursor-pointer"
-            >
-              Get Started Free
-            </button>
           </div>
         </div>
       </section>
 
       {/* ============================================================ */}
-      {/* 9. FOOTER */}
+      {/* 9. FOOTER                                                    */}
       {/* ============================================================ */}
-      <footer className="py-8 bg-white dark:bg-[#0f172a] text-xs text-slate-500 dark:text-slate-400">
+      <footer className="py-8 text-xs text-slate-500 dark:text-slate-400">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2.5">
             <BrandLogo size="sm" variant="compact" />
-            <span>·</span>
-            <span>ABIP: Autonomous Business Intelligence Platform</span>
-            <span>·</span>
-            <span className="font-mono text-[11px] text-slate-400">Sample data preview</span>
+            <span className="text-slate-300 dark:text-slate-600">·</span>
+            <span className="font-medium">ABIP: Autonomous Business Intelligence Platform</span>
           </div>
 
           <div className="flex items-center gap-6">
-            <a href="#features" className="hover:text-slate-900 dark:hover:text-white transition-colors">
-              Features
-            </a>
-            <a href="#interactive-demo" className="hover:text-slate-900 dark:hover:text-white transition-colors">
-              Demo
-            </a>
-            <a href="#how-it-works" className="hover:text-slate-900 dark:hover:text-white transition-colors">
-              How It Works
-            </a>
-            <a href="#faq" className="hover:text-slate-900 dark:hover:text-white transition-colors">
-              FAQ
-            </a>
-            <a href="#team" className="hover:text-slate-900 dark:hover:text-white transition-colors">
-              Team
-            </a>
+            {navLinks.map((item) => (
+              <a
+                key={item.label}
+                href={item.href}
+                className="hover:text-slate-900 dark:hover:text-white transition-colors duration-300"
+              >
+                {item.label}
+              </a>
+            ))}
             <button
               onClick={handlePrimaryLaunch}
               className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
