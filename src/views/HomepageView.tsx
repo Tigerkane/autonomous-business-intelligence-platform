@@ -17,7 +17,9 @@ import {
   X,
   Zap,
   Eye,
+  ArrowUp,
 } from 'lucide-react';
+import { motion, useScroll, useSpring } from 'motion/react';
 import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
 import { NavTab } from '../components/layout/Sidebar';
@@ -237,6 +239,58 @@ const StepCard: React.FC<{
 );
 
 /* ------------------------------------------------------------------ */
+/* Smooth Scroll Reveal Component (Framer Motion)                     */
+/* ------------------------------------------------------------------ */
+const ScrollReveal: React.FC<{
+  children: React.ReactNode;
+  delay?: number;
+  direction?: 'up' | 'down' | 'left' | 'right' | 'none';
+  className?: string;
+}> = ({ children, delay = 0, direction = 'up', className = '' }) => {
+  const getInitial = () => {
+    switch (direction) {
+      case 'up':
+        return { opacity: 0, y: 35 };
+      case 'down':
+        return { opacity: 0, y: -35 };
+      case 'left':
+        return { opacity: 0, x: -35 };
+      case 'right':
+        return { opacity: 0, x: 35 };
+      default:
+        return { opacity: 0 };
+    }
+  };
+
+  return (
+    <motion.div
+      initial={getInitial()}
+      whileInView={{ opacity: 1, x: 0, y: 0 }}
+      viewport={{ once: true, margin: '-40px' }}
+      transition={{ duration: 0.65, delay, ease: [0.22, 1, 0.36, 1] }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+};
+
+/* ------------------------------------------------------------------ */
+/* Marquee Capabilities Badges                                        */
+/* ------------------------------------------------------------------ */
+const MARQUEE_ITEMS = [
+  { icon: '⚡', text: 'Walk-Forward MAPE Model Scoring' },
+  { icon: '🎯', text: '31-Day Median Anomaly Radar (3.5 Threshold)' },
+  { icon: '🛡️', text: 'Supabase Multi-Tenant Row Level Security' },
+  { icon: '📊', text: 'Executive Vector PDF Brief Generator' },
+  { icon: '🤖', text: 'Deterministic Mathematical Solver & Ollama LLM' },
+  { icon: '🧹', text: '9-Column Retail CSV Auto-Sanitization' },
+  { icon: '🇮🇳', text: 'Indian Rupee Currency Formatting (₹)' },
+  { icon: '👥', text: 'Dual-Dimension Customer Demographics' },
+  { icon: '📈', text: 'Out-of-Sample 80% Confidence Trajectories' },
+];
+
+/* ------------------------------------------------------------------ */
 /* Main HomepageView Component                                         */
 /* ------------------------------------------------------------------ */
 interface HomepageViewProps {
@@ -249,6 +303,42 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [navScrolled, setNavScrolled] = useState(false);
+
+  // Scroll Progress and Scroll-to-Top State
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 120,
+    damping: 30,
+    restDelta: 0.001,
+  });
+  const [scrollProgressPercent, setScrollProgressPercent] = useState(0);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [activeSection, setActiveSection] = useState<string>('');
+
+  useEffect(() => {
+    return scrollYProgress.on('change', (latest) => {
+      setScrollProgressPercent(Math.round(latest * 100));
+      setShowScrollTop(latest > 0.08);
+    });
+  }, [scrollYProgress]);
+
+  // Scrollspy to detect active section
+  useEffect(() => {
+    const sectionIds = ['features', 'interactive-demo', 'how-it-works', 'faq', 'team'];
+    const handleScrollSpy = () => {
+      const scrollPos = window.scrollY + 220;
+      for (let i = sectionIds.length - 1; i >= 0; i--) {
+        const el = document.getElementById(sectionIds[i]);
+        if (el && el.offsetTop <= scrollPos) {
+          setActiveSection(sectionIds[i]);
+          return;
+        }
+      }
+      setActiveSection('');
+    };
+    window.addEventListener('scroll', handleScrollSpy, { passive: true });
+    return () => window.removeEventListener('scroll', handleScrollSpy);
+  }, []);
 
   // Enforce pure dark mode on homepage
   useEffect(() => {
@@ -352,6 +442,12 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
       {/* Floating dots spread across entire page till end — No lines */}
       <FloatingParticles />
 
+      {/* Top Scroll-Driven Progress Bar */}
+      <motion.div
+        className="fixed top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400 z-50 origin-left shadow-[0_0_12px_rgba(99,102,241,0.85)]"
+        style={{ scaleX }}
+      />
+
       {/* ============================================================ */}
       {/* 1. STICKY TOP NAV                                            */}
       {/* ============================================================ */}
@@ -372,17 +468,24 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
             <BrandLogo size="md" variant="full" />
           </button>
 
-          {/* Navigation Links */}
-          <nav className="hidden md:flex items-center gap-7 text-[13px] font-semibold text-slate-600 dark:text-slate-400">
-            {navLinks.map((item) => (
-              <a
-                key={item.label}
-                href={item.href}
-                className="relative py-1 hover:text-slate-900 dark:hover:text-white transition-colors duration-300 after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-indigo-500 after:transition-all after:duration-300 hover:after:w-full"
-              >
-                {item.label}
-              </a>
-            ))}
+          {/* Navigation Links with Scrollspy Highlight */}
+          <nav className="hidden md:flex items-center gap-7 text-[13px] font-semibold text-slate-400">
+            {navLinks.map((item) => {
+              const isActive = activeSection === item.href.replace('#', '');
+              return (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  className={`relative py-1 transition-colors duration-300 ${
+                    isActive
+                      ? 'text-indigo-400 font-bold after:w-full'
+                      : 'hover:text-white text-slate-400 after:w-0'
+                  } after:absolute after:bottom-0 after:left-0 after:h-[2px] after:bg-indigo-500 after:transition-all after:duration-300 hover:after:w-full`}
+                >
+                  {item.label}
+                </a>
+              );
+            })}
           </nav>
 
           {/* Right Actions */}
@@ -496,8 +599,8 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
       <section className="relative pt-10 pb-12 sm:pt-14 sm:pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-            {/* Left Content */}
-            <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
+            {/* Left Content with Scroll Reveal */}
+            <ScrollReveal direction="left" className="lg:col-span-7 space-y-6 text-center lg:text-left">
               {/* Tag pill */}
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 dark:bg-indigo-400/10 text-xs font-semibold text-indigo-600 dark:text-indigo-400 homepage-tag-glow shadow-xs">
                 <Sparkles className="w-3.5 h-3.5" />
@@ -529,10 +632,10 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
-            </div>
+            </ScrollReveal>
 
-            {/* Right: Live Autonomous Telemetry Card */}
-            <div className="lg:col-span-5 flex items-center justify-center">
+            {/* Right: Live Autonomous Telemetry Card with Scroll Reveal */}
+            <ScrollReveal direction="right" delay={0.15} className="lg:col-span-5 flex items-center justify-center">
               <div className="w-full max-w-[440px] homepage-hero-card p-6 rounded-3xl bg-white/85 dark:bg-slate-800/60 backdrop-blur-xl shadow-2xl shadow-indigo-950/10 dark:shadow-indigo-500/5">
                 {/* Card Header */}
                 <div className="flex items-center justify-between mb-4">
@@ -609,7 +712,7 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
                   <span>Jan</span><span>Mar</span><span>Jun</span><span>Sep</span><span>Live</span>
                 </div>
               </div>
-            </div>
+            </ScrollReveal>
           </div>
         </div>
       </section>
@@ -618,7 +721,7 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
       {/* 2b. LIVE STREAMING METRICS ROW                               */}
       {/* ============================================================ */}
       <section className="py-6">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+        <ScrollReveal direction="up" className="max-w-5xl mx-auto px-4 sm:px-6 grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
           <StatBadge
             icon={<Database className="w-4 h-4" />}
             value={processedRows}
@@ -650,6 +753,26 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
             label="Data Isolation"
             sublabel="Zero External Sharing"
           />
+        </ScrollReveal>
+      </section>
+
+      {/* ============================================================ */}
+      {/* 2c. CONTINUOUS SCROLLING CAPABILITIES MARQUEE                */}
+      {/* ============================================================ */}
+      <section className="py-6 overflow-hidden relative select-none">
+        <div className="absolute left-0 inset-y-0 w-28 bg-gradient-to-r from-[#0a0f1e] to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 inset-y-0 w-28 bg-gradient-to-l from-[#0a0f1e] to-transparent z-10 pointer-events-none" />
+
+        <div className="homepage-marquee-track flex items-center gap-4 py-2">
+          {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((item, idx) => (
+            <div
+              key={idx}
+              className="flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 backdrop-blur-md text-xs font-semibold text-slate-300 transition-colors shrink-0 shadow-2xs hover:border-indigo-500/40"
+            >
+              <span className="text-sm">{item.icon}</span>
+              <span>{item.text}</span>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -658,70 +781,82 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
       {/* ============================================================ */}
       <section id="features" className="py-12 sm:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center max-w-2xl mx-auto mb-10">
+          <ScrollReveal direction="up" className="text-center max-w-2xl mx-auto mb-10">
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
               Six Built-In Autonomous Capabilities
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">
               Everything required to go from raw multi-column transactions to executive strategic clarity.
             </p>
-          </div>
+          </ScrollReveal>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <FeatureCard
-              icon={<BarChart3 className="w-5 h-5" />}
-              title="Executive Dashboard"
-              description="Automated MoM KPIs, weekly revenue area trends (3M/6M/All), product category breakdown, and dual-dimension customer segmentation donut."
-              accentColor="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"
-              glowColor="rgba(99, 102, 241, 0.08)"
-              cta="Explore"
-              onClick={() => onLaunchPlatform('dashboard')}
-            />
-            <FeatureCard
-              icon={<LineChart className="w-5 h-5" />}
-              title="Scored Forecasts"
-              description="Walk-forward backtesting evaluates candidate algorithms, assigns Out-of-Sample MAPE scores, and projects future trajectories with shaded 80% confidence bands."
-              accentColor="bg-teal-500/10 text-teal-600 dark:text-teal-400"
-              glowColor="rgba(20, 184, 166, 0.08)"
-              cta="View Forecast"
-              onClick={() => onLaunchPlatform('forecast-anomalies')}
-            />
-            <FeatureCard
-              icon={<Sliders className="w-5 h-5" />}
-              title="Anomaly Detection"
-              description="Flags unusual revenue days against a rolling 31-day median baseline using a modified z-score (threshold 3.5), and unusual transactions per product category using IQR fences."
-              accentColor="bg-rose-500/10 text-rose-600 dark:text-rose-400"
-              glowColor="rgba(244, 63, 94, 0.08)"
-              cta="View Anomalies"
-              onClick={() => onLaunchPlatform('forecast-anomalies')}
-            />
-            <FeatureCard
-              icon={<Bot className="w-5 h-5" />}
-              title="Ask in Plain English"
-              description="Connects to a local Ollama model. Maps questions into mathematical metrics and responds with zero hallucination."
-              accentColor="bg-purple-500/10 text-purple-600 dark:text-purple-400"
-              glowColor="rgba(168, 85, 247, 0.08)"
-              cta="Ask AI"
-              onClick={() => onLaunchPlatform('ask-data')}
-            />
-            <FeatureCard
-              icon={<FileText className="w-5 h-5" />}
-              title="PDF Reports"
-              description="Generates vector PDF stakeholder briefs with executive scorecards, sales breakdown tables, forecast curves, and strategic insights ready to print or email."
-              accentColor="bg-amber-500/10 text-amber-600 dark:text-amber-400"
-              glowColor="rgba(245, 158, 11, 0.08)"
-              cta="Generate"
-              onClick={() => onLaunchPlatform('reports')}
-            />
-            <FeatureCard
-              icon={<ShieldCheck className="w-5 h-5" />}
-              title="Private Accounts"
-              description="Dedicated multi-tenant isolation, cryptographic token verification, client-side CAPTCHA verification, and isolated session dataset workspaces."
-              accentColor="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-              glowColor="rgba(16, 185, 129, 0.08)"
-              cta="Sign In"
-              onClick={() => openAuthModal('signin')}
-            />
+            <ScrollReveal delay={0.05} direction="up">
+              <FeatureCard
+                icon={<BarChart3 className="w-5 h-5" />}
+                title="Executive Dashboard"
+                description="Automated MoM KPIs, weekly revenue area trends (3M/6M/All), product category breakdown, and dual-dimension customer segmentation donut."
+                accentColor="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"
+                glowColor="rgba(99, 102, 241, 0.08)"
+                cta="Explore"
+                onClick={() => onLaunchPlatform('dashboard')}
+              />
+            </ScrollReveal>
+            <ScrollReveal delay={0.12} direction="up">
+              <FeatureCard
+                icon={<LineChart className="w-5 h-5" />}
+                title="Scored Forecasts"
+                description="Walk-forward backtesting evaluates candidate algorithms, assigns Out-of-Sample MAPE scores, and projects future trajectories with shaded 80% confidence bands."
+                accentColor="bg-teal-500/10 text-teal-600 dark:text-teal-400"
+                glowColor="rgba(20, 184, 166, 0.08)"
+                cta="View Forecast"
+                onClick={() => onLaunchPlatform('forecast-anomalies')}
+              />
+            </ScrollReveal>
+            <ScrollReveal delay={0.18} direction="up">
+              <FeatureCard
+                icon={<Sliders className="w-5 h-5" />}
+                title="Anomaly Detection"
+                description="Flags unusual revenue days against a rolling 31-day median baseline using a modified z-score (threshold 3.5), and unusual transactions per product category using IQR fences."
+                accentColor="bg-rose-500/10 text-rose-600 dark:text-rose-400"
+                glowColor="rgba(244, 63, 94, 0.08)"
+                cta="View Anomalies"
+                onClick={() => onLaunchPlatform('forecast-anomalies')}
+              />
+            </ScrollReveal>
+            <ScrollReveal delay={0.24} direction="up">
+              <FeatureCard
+                icon={<Bot className="w-5 h-5" />}
+                title="Ask in Plain English"
+                description="Connects to a local Ollama model. Maps questions into mathematical metrics and responds with zero hallucination."
+                accentColor="bg-purple-500/10 text-purple-600 dark:text-purple-400"
+                glowColor="rgba(168, 85, 247, 0.08)"
+                cta="Ask AI"
+                onClick={() => onLaunchPlatform('ask-data')}
+              />
+            </ScrollReveal>
+            <ScrollReveal delay={0.30} direction="up">
+              <FeatureCard
+                icon={<FileText className="w-5 h-5" />}
+                title="PDF Reports"
+                description="Generates vector PDF stakeholder briefs with executive scorecards, sales breakdown tables, forecast curves, and strategic insights ready to print or email."
+                accentColor="bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                glowColor="rgba(245, 158, 11, 0.08)"
+                cta="Generate"
+                onClick={() => onLaunchPlatform('reports')}
+              />
+            </ScrollReveal>
+            <ScrollReveal delay={0.36} direction="up">
+              <FeatureCard
+                icon={<ShieldCheck className="w-5 h-5" />}
+                title="Private Accounts"
+                description="Dedicated multi-tenant isolation, cryptographic token verification, client-side CAPTCHA verification, and isolated session dataset workspaces."
+                accentColor="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                glowColor="rgba(16, 185, 129, 0.08)"
+                cta="Sign In"
+                onClick={() => openAuthModal('signin')}
+              />
+            </ScrollReveal>
           </div>
         </div>
       </section>
@@ -731,7 +866,7 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
       {/* ============================================================ */}
       <section id="interactive-demo" className="py-12 sm:py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center max-w-2xl mx-auto mb-8">
+          <ScrollReveal direction="up" className="text-center max-w-2xl mx-auto mb-8">
             <span className="text-xs font-mono font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
               Interactive Live Demo
             </span>
@@ -741,14 +876,14 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">
               Switch between tabs below to preview the Dashboard, toggle 80% forecast ranges, adjust the anomaly threshold, and query plain-English questions.
             </p>
-          </div>
+          </ScrollReveal>
 
-          <div>
+          <ScrollReveal direction="up" delay={0.15}>
             <InteractiveLiveConsole
               theme="dark"
               onLaunchFullStudio={handlePrimaryLaunch}
             />
-          </div>
+          </ScrollReveal>
         </div>
       </section>
 
@@ -757,7 +892,7 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
       {/* ============================================================ */}
       <section id="how-it-works" className="py-12 sm:py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center max-w-2xl mx-auto mb-10">
+          <ScrollReveal direction="up" className="text-center max-w-2xl mx-auto mb-10">
             <span className="inline-block text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 mb-2">
               Simple Workflow
             </span>
@@ -767,30 +902,36 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">
               A transparent, deterministic workflow designed for high-velocity retail operations.
             </p>
-          </div>
+          </ScrollReveal>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <StepCard
-              stepNumber="01"
-              stepColor="bg-indigo-600"
-              title="Upload & Sanitize CSV"
-              description="Drop your sales CSV. The engine validates 9 columns, normalizes multi-format dates to ISO 8601, and rejects duplicate transactions and negative records."
-              icon={<UploadCloud className="w-6 h-6 text-indigo-500" />}
-            />
-            <StepCard
-              stepNumber="02"
-              stepColor="bg-teal-600"
-              title="Model & Detect Anomalies"
-              description="Walk-forward backtesting selects the minimum MAPE model, while a rolling 31-day median baseline with modified z-score surfaces unusual revenue days."
-              icon={<Eye className="w-6 h-6 text-teal-500" />}
-            />
-            <StepCard
-              stepNumber="03"
-              stepColor="bg-amber-600"
-              title="Decide & Share Reports"
-              description="Review executive scorecards, query store telemetry in plain English, and generate vector PDF reports formatted for board presentations."
-              icon={<FileText className="w-6 h-6 text-amber-500" />}
-            />
+            <ScrollReveal delay={0.08} direction="up">
+              <StepCard
+                stepNumber="01"
+                stepColor="bg-indigo-600"
+                title="Upload & Sanitize CSV"
+                description="Drop your sales CSV. The engine validates 9 columns, normalizes multi-format dates to ISO 8601, and rejects duplicate transactions and negative records."
+                icon={<UploadCloud className="w-6 h-6 text-indigo-500" />}
+              />
+            </ScrollReveal>
+            <ScrollReveal delay={0.18} direction="up">
+              <StepCard
+                stepNumber="02"
+                stepColor="bg-teal-600"
+                title="Model & Detect Anomalies"
+                description="Walk-forward backtesting selects the minimum MAPE model, while a rolling 31-day median baseline with modified z-score surfaces unusual revenue days."
+                icon={<Eye className="w-6 h-6 text-teal-500" />}
+              />
+            </ScrollReveal>
+            <ScrollReveal delay={0.28} direction="up">
+              <StepCard
+                stepNumber="03"
+                stepColor="bg-amber-600"
+                title="Decide & Share Reports"
+                description="Review executive scorecards, query store telemetry in plain English, and generate vector PDF reports formatted for board presentations."
+                icon={<FileText className="w-6 h-6 text-amber-500" />}
+              />
+            </ScrollReveal>
           </div>
         </div>
       </section>
@@ -800,7 +941,7 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
       {/* ============================================================ */}
       <section id="faq" className="py-12 sm:py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
-          <div className="text-center max-w-xl mx-auto mb-10">
+          <ScrollReveal direction="up" className="text-center max-w-xl mx-auto mb-10">
             <span className="inline-block text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 mb-2">
               Got Questions?
             </span>
@@ -810,9 +951,9 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">
               Everything you need to know about the algorithms and data pipeline.
             </p>
-          </div>
+          </ScrollReveal>
 
-          <div className="space-y-3">
+          <ScrollReveal direction="up" delay={0.1} className="space-y-3">
             {faqs.map((faq, idx) => {
               const isOpen = openFaq === idx;
               return (
@@ -852,7 +993,7 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
                 </div>
               );
             })}
-          </div>
+          </ScrollReveal>
         </div>
       </section>
 
@@ -861,7 +1002,7 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
       {/* ============================================================ */}
       <section id="team" className="py-12 sm:py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
-          <div className="text-center max-w-xl mx-auto mb-10">
+          <ScrollReveal direction="up" className="text-center max-w-xl mx-auto mb-10">
             <span className="inline-block text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 mb-2">
               The Team
             </span>
@@ -871,7 +1012,7 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">
               Core contributors & engineering leads
             </p>
-          </div>
+          </ScrollReveal>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {[
@@ -879,23 +1020,22 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
               { name: 'Saniya', initials: 'S', role: 'Machine Learning & Modeling Lead', color: 'bg-indigo-600 text-white', roleColor: 'text-indigo-600 dark:text-indigo-400' },
               { name: 'Shlok', initials: 'S', role: 'Backend Infrastructure & Ingestion', color: 'bg-teal-600 text-white', roleColor: 'text-teal-600 dark:text-teal-400' },
               { name: 'Navya', initials: 'N', role: 'BI Analytics & UX Intelligence', color: 'bg-violet-600 text-white', roleColor: 'text-violet-600 dark:text-violet-400' },
-            ].map((member) => (
-              <div
-                key={member.name}
-                className="p-6 rounded-3xl bg-white/75 dark:bg-slate-800/40 backdrop-blur-sm flex items-center gap-4 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
-              >
-                <div className={`w-14 h-14 rounded-2xl ${member.color} flex items-center justify-center font-bold text-base shrink-0 shadow-sm group-hover:scale-105 transition-transform duration-300`}>
-                  {member.initials}
+            ].map((member, idx) => (
+              <ScrollReveal key={member.name} delay={idx * 0.08} direction="up">
+                <div className="p-6 rounded-3xl bg-white/75 dark:bg-slate-800/40 backdrop-blur-sm flex items-center gap-4 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
+                  <div className={`w-14 h-14 rounded-2xl ${member.color} flex items-center justify-center font-bold text-base shrink-0 shadow-sm group-hover:scale-105 transition-transform duration-300`}>
+                    {member.initials}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-base font-bold text-slate-900 dark:text-white leading-tight">
+                      {member.name}
+                    </h3>
+                    <p className={`text-sm font-semibold ${member.roleColor} mt-1 whitespace-normal break-words leading-relaxed`}>
+                      {member.role}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white leading-tight">
-                    {member.name}
-                  </h3>
-                  <p className={`text-sm font-semibold ${member.roleColor} mt-1 whitespace-normal break-words leading-relaxed`}>
-                    {member.role}
-                  </p>
-                </div>
-              </div>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -906,28 +1046,30 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
       {/* ============================================================ */}
       <section className="py-6">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <div className="homepage-cta-banner relative px-6 py-5 sm:px-8 sm:py-6 rounded-2xl overflow-hidden shadow-lg">
-            {/* Animated gradient background */}
-            <div className="absolute inset-0 homepage-cta-gradient" />
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/90 via-indigo-700/80 to-violet-700/90" />
+          <ScrollReveal direction="up" delay={0.1}>
+            <div className="homepage-cta-banner relative px-6 py-5 sm:px-8 sm:py-6 rounded-2xl overflow-hidden shadow-lg">
+              {/* Animated gradient background */}
+              <div className="absolute inset-0 homepage-cta-gradient" />
+              <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/90 via-indigo-700/80 to-violet-700/90" />
 
-            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="space-y-1 text-center md:text-left">
-                <h2 className="text-base sm:text-lg font-bold text-white leading-tight">
-                  Ready to turn your sales CSV into foresight?
-                </h2>
-                <p className="text-xs text-indigo-100/80 max-w-sm leading-relaxed">
-                  Upload your retail sales data and receive executive decision intelligence.
-                </p>
+              <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="space-y-1 text-center md:text-left">
+                  <h2 className="text-base sm:text-lg font-bold text-white leading-tight">
+                    Ready to turn your sales CSV into foresight?
+                  </h2>
+                  <p className="text-xs text-indigo-100/80 max-w-sm leading-relaxed">
+                    Upload your retail sales data and receive executive decision intelligence.
+                  </p>
+                </div>
+                <button
+                  onClick={handlePrimaryLaunch}
+                  className="px-5 py-2.5 rounded-xl bg-white text-indigo-700 hover:bg-indigo-50 font-bold text-xs transition-all duration-300 shrink-0 shadow-md hover:shadow-lg cursor-pointer hover:scale-[1.02]"
+                >
+                  Get Started Free
+                </button>
               </div>
-              <button
-                onClick={handlePrimaryLaunch}
-                className="px-5 py-2.5 rounded-xl bg-white text-indigo-700 hover:bg-indigo-50 font-bold text-xs transition-all duration-300 shrink-0 shadow-md hover:shadow-lg cursor-pointer hover:scale-[1.02]"
-              >
-                Get Started Free
-              </button>
             </div>
-          </div>
+          </ScrollReveal>
         </div>
       </section>
 
@@ -961,6 +1103,46 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
           </div>
         </div>
       </footer>
+
+      {/* Floating Circular Back-to-Top Button with Progress Indicator */}
+      {showScrollTop && (
+        <motion.button
+          initial={{ opacity: 0, scale: 0.8, y: 16 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.8, y: 16 }}
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="fixed bottom-6 right-6 z-40 p-2.5 rounded-full bg-[#0d162e]/90 hover:bg-indigo-600 text-white shadow-2xl backdrop-blur-xl border border-indigo-500/30 transition-all duration-300 hover:scale-110 group cursor-pointer"
+          title="Scroll back to top"
+          aria-label="Scroll back to top"
+        >
+          <div className="relative w-8 h-8 flex items-center justify-center">
+            <svg className="w-8 h-8 -rotate-90">
+              <circle
+                cx="16"
+                cy="16"
+                r="13"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                fill="transparent"
+                className="text-white/10"
+              />
+              <circle
+                cx="16"
+                cy="16"
+                r="13"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                fill="transparent"
+                strokeDasharray={81.68}
+                strokeDashoffset={81.68 - (81.68 * scrollProgressPercent) / 100}
+                className="text-indigo-400 group-hover:text-white transition-all duration-150"
+                strokeLinecap="round"
+              />
+            </svg>
+            <ArrowUp className="w-4 h-4 absolute text-indigo-300 group-hover:text-white transition-colors" />
+          </div>
+        </motion.button>
+      )}
     </div>
   );
 };

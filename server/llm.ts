@@ -9,10 +9,15 @@ function getEnvVar(name: string, fallback = ''): string {
     return process.env[name]!.trim();
   }
 
-  // Hot-read .env or .env.local to ensure newly added keys work immediately without dev-server restart
+  // In production, environment variables are already injected by host
+  if (process.env.NODE_ENV === 'production') {
+    return fallback;
+  }
+
+  // Hot-read .env or .env.local in development so changes work without dev-server restart
   try {
     for (const file of ['.env.local', '.env']) {
-      const filePath = path.resolve(process.cwd(), file);
+      const filePath = path.resolve(/*turbopackIgnore: true*/ process.cwd(), file);
       if (fs.existsSync(filePath)) {
         const content = fs.readFileSync(filePath, 'utf8');
         for (const line of content.split('\n')) {

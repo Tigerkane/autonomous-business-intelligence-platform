@@ -369,6 +369,23 @@ html.theme-transition *::after {
   50% { background-position: 100% 50%; }
 }
 
+/* Continuous horizontal scrolling marquee */
+@keyframes homepage-marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.homepage-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: homepage-marquee 36s linear infinite;
+  will-change: transform;
+}
+
+.homepage-marquee-track:hover {
+  animation-play-state: paused;
+}
+
 /* Feature card hover glow animation */
 .homepage-feature-card::before {
   content: '';
