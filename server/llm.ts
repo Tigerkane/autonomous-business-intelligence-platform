@@ -1,14 +1,48 @@
+import fs from 'fs';
+import path from 'path';
 import { getAnomalies, getForecast, getOverview, getSalesAnalysis } from './analytics';
 import { databaseExists, getDatasetMeta, getSalesRows } from './db';
 import type { SaleRow } from './types';
 
-export const DEFAULT_PROVIDER = process.env.LLM_PROVIDER || 'deterministic';
+function getEnvVar(name: string, fallback = ''): string {
+  if (process.env[name] && process.env[name]!.trim()) {
+    return process.env[name]!.trim();
+  }
+
+  // Hot-read .env or .env.local to ensure newly added keys work immediately without dev-server restart
+  try {
+    for (const file of ['.env.local', '.env']) {
+      const filePath = path.resolve(process.cwd(), file);
+      if (fs.existsSync(filePath)) {
+        const content = fs.readFileSync(filePath, 'utf8');
+        for (const line of content.split('\n')) {
+          const trimmed = line.trim();
+          if (trimmed.startsWith('#') || !trimmed.includes('=')) continue;
+          const [k, ...rest] = trimmed.split('=');
+          const keyName = k.trim();
+          const rawVal = rest.join('=').trim().replace(/^["']|["']$/g, '');
+          if (rawVal && !process.env[keyName]) {
+            process.env[keyName] = rawVal;
+          }
+        }
+      }
+    }
+  } catch {}
+
+  return process.env[name]?.trim() || fallback;
+}
+
+export function getOllamaApiKey(): string {
+  return getEnvVar('OLLAMA_API_KEY') || getEnvVar('LLM_API_KEY');
+}
+
+export const DEFAULT_PROVIDER = getEnvVar('LLM_PROVIDER', 'deterministic');
 
 export function getLLMConfig() {
-  const provider = process.env.LLM_PROVIDER || 'ollama';
-  const baseUrl = (process.env.LLM_BASE_URL || 'http://localhost:11434').replace(/\/+$/, '');
-  const model = process.env.LLM_MODEL || 'llama3.2';
-  const apiKey = process.env.LLM_API_KEY || process.env.OLLAMA_API_KEY || '';
+  const provider = getEnvVar('LLM_PROVIDER', 'ollama');
+  const baseUrl = getEnvVar('LLM_BASE_URL', 'http://localhost:11434').replace(/\/+$/, '');
+  const model = getEnvVar('LLM_MODEL', 'llama3.2');
+  const apiKey = getOllamaApiKey();
   return { provider, baseUrl, model, apiKey };
 }
 
@@ -28,7 +62,8 @@ export interface ProviderInfo {
 
 export function availableProviders(): ProviderInfo[] {
   const cfg = getLLMConfig();
-  const ollamaCloudConfigured = Boolean(process.env.OLLAMA_API_KEY || (cfg.provider === 'ollama_cloud' && cfg.apiKey));
+  const apiKey = getOllamaApiKey();
+  const ollamaCloudConfigured = Boolean(apiKey || (cfg.provider === 'ollama_cloud' && cfg.apiKey));
 
   return [
     {
@@ -189,7 +224,7 @@ export async function askLLM(
 
   // 2. Ollama Cloud (hosted API, GPT-OSS 120B)
   if (provider === 'ollama_cloud') {
-    const key = process.env.OLLAMA_API_KEY || process.env.LLM_API_KEY;
+    const key = getOllamaApiKey();
     if (!key) {
       throw new Error('Ollama Cloud is not configured. Please set OLLAMA_API_KEY or LLM_API_KEY in your environment.');
     }
