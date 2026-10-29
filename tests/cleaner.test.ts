@@ -54,6 +54,20 @@ export function runCleanerTests(): { passed: number; failed: number } {
   const unknownCats = dirtyResult.rows.filter(r => r.product_category === 'Unknown');
   assert(unknownCats.length === 3, 'Blank Product Category converted to Unknown (3 rows)');
 
+  // 4. Unit Cost & Profit calculation
+  assert(cleanResult.rows.every(r => r.unit_cost !== undefined && r.profit !== undefined), 'Fallback unit_cost and profit populated for all rows when omitted');
+  
+  const csvWithCost = [
+    'Transaction ID,Date,Customer ID,Gender,Age,Product Category,Quantity,Price per Unit,Unit Cost,Total Amount',
+    'T1,2023-05-01,C1,Female,30,Beauty,2,500,200,1000',
+    'T2,2023-05-02,C2,Male,25,Electronics,1,1000,1200,1000',
+  ].join('\n');
+  const costResult = cleanSalesData(csvWithCost);
+  assert(costResult.rows.length === 2, 'Parsed CSV with explicit Unit Cost column');
+  assert(costResult.rows[0].unit_cost === 200 && costResult.rows[0].profit === 600, 'Calculates profit accurately: 1000 - (2 * 200) = 600');
+  const costExceeds = costResult.quality.issues.find(i => i.code === 'cost_exceeds_price');
+  assert(costExceeds !== undefined && costExceeds.count === 1, 'Triggers warning when Unit Cost exceeds Price per Unit');
+
   return { passed, failed };
 }
 

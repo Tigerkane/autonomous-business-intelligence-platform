@@ -30,6 +30,7 @@ import { useData } from '../contexts/DataContext';
 import { AnomaliesData, ForecastData } from '../types';
 import { EmptyState } from '../components/common/EmptyState';
 import { NavTab } from '../components/layout/Sidebar';
+import { InsightsPanel } from '../components/dashboard/InsightsPanel';
 
 ChartJS.register(
   CategoryScale,
@@ -457,6 +458,8 @@ export const ForecastAnomaliesView: React.FC<ForecastAnomaliesViewProps> = ({ on
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto animate-fade-in">
+      <InsightsPanel />
+
       {/* Top ML Diagnostic Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Forecast Model */}

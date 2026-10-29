@@ -8,6 +8,9 @@ export interface SaleRow {
   quantity: number;
   price_per_unit: number;
   total_amount: number;
+  unit_cost?: number;
+  total_cost?: number;
+  profit?: number;
 }
 
 export interface DatasetMeta {
@@ -30,4 +33,7 @@ export interface KPIs {
   total_quantity: number;
   total_transactions: number;
   average_transaction: number;
+  total_cost?: number;
+  total_profit?: number;
+  profit_margin?: number;
 }

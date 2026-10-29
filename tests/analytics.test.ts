@@ -42,6 +42,8 @@ export function runAnalyticsTests(): { passed: number; failed: number } {
   assert(ov.kpis.total_sales === 303025, 'Total revenue is exactly ₹3,03,025', `got ${ov.kpis.total_sales}`);
   assert(ov.kpis.total_quantity === 2507, 'Total units is exactly 2,507', `got ${ov.kpis.total_quantity}`);
   assert(Math.round(ov.kpis.average_transaction) === 303, 'Avg basket is ₹303', `got ${ov.kpis.average_transaction}`);
+  assert((ov.kpis.total_profit || 0) > 0, 'Total profit is computed and positive', `got ${ov.kpis.total_profit}`);
+  assert((ov.kpis.profit_margin || 0) > 0, 'Profit margin is computed and positive', `got ${ov.kpis.profit_margin}%`);
 
   const uniqueCustomers = new Set(cleanRows.map((r) => r.customer_id)).size;
   assert(uniqueCustomers === 369, 'Unique customers is exactly 369', `got ${uniqueCustomers}`);

@@ -99,6 +99,8 @@ export function getOverview(uid: string, rows?: SaleRow[]) {
 
   let totalSales = 0;
   let totalQuantity = 0;
+  let totalCost = 0;
+  let totalProfit = 0;
   let minDate = data[0].date;
   let maxDate = data[0].date;
 
@@ -108,17 +110,24 @@ export function getOverview(uid: string, rows?: SaleRow[]) {
       revenue: number;
       units: number;
       orders: number;
+      cost: number;
+      profit: number;
       dates: Set<string>;
       year: number;
       month: number;
     }
   >();
 
-  const categoryMap = new Map<string, number>();
+  const categoryMap = new Map<string, { sales: number; profit: number }>();
 
   for (const row of data) {
     totalSales += row.total_amount;
     totalQuantity += row.quantity;
+    const rowCost = row.total_cost ?? (row.unit_cost !== undefined ? row.quantity * row.unit_cost : row.total_amount * 0.65);
+    const rowProfit = row.profit ?? (row.total_amount - rowCost);
+    totalCost += rowCost;
+    totalProfit += rowProfit;
+
     if (row.date < minDate) minDate = row.date;
     if (row.date > maxDate) maxDate = row.date;
 
@@ -129,6 +138,8 @@ export function getOverview(uid: string, rows?: SaleRow[]) {
         revenue: 0,
         units: 0,
         orders: 0,
+        cost: 0,
+        profit: 0,
         dates: new Set(),
         year: y,
         month: m,
@@ -138,9 +149,14 @@ export function getOverview(uid: string, rows?: SaleRow[]) {
     mEntry.revenue += row.total_amount;
     mEntry.units += row.quantity;
     mEntry.orders += 1;
+    mEntry.cost += rowCost;
+    mEntry.profit += rowProfit;
     mEntry.dates.add(row.date);
 
-    categoryMap.set(row.product_category, (categoryMap.get(row.product_category) || 0) + row.total_amount);
+    const catEntry = categoryMap.get(row.product_category) || { sales: 0, profit: 0 };
+    catEntry.sales += row.total_amount;
+    catEntry.profit += rowProfit;
+    categoryMap.set(row.product_category, catEntry);
   }
 
   const sortedMonths = Array.from(monthMap.keys()).sort();
@@ -148,10 +164,13 @@ export function getOverview(uid: string, rows?: SaleRow[]) {
     const entry = monthMap.get(ym)!;
     const daysInMonth = getDaysInMonth(entry.year, entry.month - 1);
     const partial = entry.dates.size / daysInMonth < 0.8;
+    const profitMargin = entry.revenue > 0 ? Math.round(((entry.profit / entry.revenue) * 100) * 10) / 10 : 0;
     return {
       month: ym,
       total_revenue: Math.round(entry.revenue * 100) / 100,
       avg_revenue: Math.round((entry.revenue / entry.orders) * 100) / 100,
+      total_profit: Math.round(entry.profit * 100) / 100,
+      profit_margin: profitMargin,
       units: entry.units,
       orders: entry.orders,
       partial,
@@ -165,6 +184,7 @@ export function getOverview(uid: string, rows?: SaleRow[]) {
     units?: number;
     transactions?: number;
     avg?: number;
+    profit?: number;
     label?: string;
   } = {};
 
@@ -178,18 +198,25 @@ export function getOverview(uid: string, rows?: SaleRow[]) {
       units: pct(last.units, prev.units),
       transactions: pct(last.orders, prev.orders),
       avg: pct(last.avg_revenue, prev.avg_revenue),
+      profit: pct(last.total_profit, prev.total_profit),
       label: `${last.month} vs ${prev.month}`,
     };
   }
 
   // Weekly series: bucket by 7-day windows or ISO week ending dates
-  const dailyRev = new Map<string, number>();
+  const dailyRev = new Map<string, { revenue: number; profit: number }>();
   for (const row of data) {
-    dailyRev.set(row.date, (dailyRev.get(row.date) || 0) + row.total_amount);
+    const rowCost = row.total_cost ?? (row.unit_cost !== undefined ? row.quantity * row.unit_cost : row.total_amount * 0.65);
+    const rowProfit = row.profit ?? (row.total_amount - rowCost);
+    const prev = dailyRev.get(row.date) || { revenue: 0, profit: 0 };
+    dailyRev.set(row.date, {
+      revenue: prev.revenue + row.total_amount,
+      profit: prev.profit + rowProfit,
+    });
   }
 
   const sortedDates = Array.from(dailyRev.keys()).sort();
-  const weekly: { date: string; revenue: number }[] = [];
+  const weekly: { date: string; revenue: number; profit: number }[] = [];
   if (sortedDates.length > 0) {
     let weekEnd = new Date(sortedDates[0]);
     // set to end of current week (e.g. Sunday)
@@ -198,31 +225,42 @@ export function getOverview(uid: string, rows?: SaleRow[]) {
     weekEnd.setUTCDate(weekEnd.getUTCDate() + diff);
 
     let currentWeekRev = 0;
+    let currentWeekProfit = 0;
     const maxD = new Date(maxDate);
 
     for (const dStr of sortedDates) {
       const d = new Date(dStr);
+      const metrics = dailyRev.get(dStr)!;
       while (d > weekEnd && weekEnd <= maxD) {
         weekly.push({
           date: weekEnd.toISOString().slice(0, 10),
           revenue: Math.round(currentWeekRev * 100) / 100,
+          profit: Math.round(currentWeekProfit * 100) / 100,
         });
         currentWeekRev = 0;
+        currentWeekProfit = 0;
         weekEnd.setUTCDate(weekEnd.getUTCDate() + 7);
       }
-      currentWeekRev += dailyRev.get(dStr)!;
+      currentWeekRev += metrics.revenue;
+      currentWeekProfit += metrics.profit;
     }
     if (currentWeekRev > 0) {
       weekly.push({
         date: weekEnd.toISOString().slice(0, 10),
         revenue: Math.round(currentWeekRev * 100) / 100,
+        profit: Math.round(currentWeekProfit * 100) / 100,
       });
     }
   }
 
-  // Categories sorted
+  // Categories sorted with profit & margin
   const categories = Array.from(categoryMap.entries())
-    .map(([cat, rev]) => ({ category: cat, sales: Math.round(rev * 100) / 100 }))
+    .map(([cat, v]) => ({
+      category: cat,
+      sales: Math.round(v.sales * 100) / 100,
+      profit: Math.round(v.profit * 100) / 100,
+      margin: v.sales > 0 ? Math.round(((v.profit / v.sales) * 100) * 10) / 10 : 0,
+    }))
     .sort((a, b) => b.sales - a.sales);
 
   // Age segments: 18-24, 25-34, 35-44, 45-54, 55+
@@ -283,6 +321,9 @@ export function getOverview(uid: string, rows?: SaleRow[]) {
       total_quantity: totalQuantity,
       total_transactions: data.length,
       average_transaction: Math.round((totalSales / data.length) * 100) / 100,
+      total_cost: Math.round(totalCost * 100) / 100,
+      total_profit: Math.round(totalProfit * 100) / 100,
+      profit_margin: totalSales > 0 ? Math.round(((totalProfit / totalSales) * 100) * 10) / 10 : 0,
     },
     trends,
     weekly,
@@ -290,6 +331,8 @@ export function getOverview(uid: string, rows?: SaleRow[]) {
       month: m.month,
       total_revenue: m.total_revenue,
       avg_revenue: m.avg_revenue,
+      total_profit: m.total_profit,
+      profit_margin: m.profit_margin,
       partial: m.partial,
     })),
     categories,

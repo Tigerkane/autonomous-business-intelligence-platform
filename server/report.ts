@@ -2,18 +2,25 @@ import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import { getAnomalies, getForecast, getOverview, getSalesAnalysis } from './analytics';
 import { getDatasetMeta, getSalesRows } from './db';
 import { askLLM, buildContext } from './llm';
+import { getStockRecommendations } from './insights';
 
 const ANOMALY_THRESHOLD = 3.5;
 
 export async function generatePDFReport(uid: string, type: 'executive' | 'sales' | 'forecast' | 'ai', provider?: string): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.create();
-  const page = pdfDoc.addPage([595.28, 841.89]); // A4 in points
+  let page = pdfDoc.addPage([595.28, 841.89]); // A4 in points
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
   const { width, height } = page.getSize();
   const margin = 40;
   let cursorY = height - 50;
+  const ensureSpace = (needed: number) => {
+    if (cursorY - needed < 60) {
+      page = pdfDoc.addPage([595.28, 841.89]);
+      cursorY = height - 50;
+    }
+  };
 
   const primaryColor = rgb(0.258, 0.165, 0.984); // #422AFB brand
   const darkTextColor = rgb(0.106, 0.145, 0.294); // #1B254B
@@ -253,6 +260,53 @@ export async function generatePDFReport(uid: string, type: 'executive' | 'sales'
     cursorY -= 10;
   }
 
+  // Period forecast & stock recommendation (only in the reports where it is relevant)
+  if (type === 'forecast' || type === 'executive') {
+    try {
+      const st = getStockRecommendations(uid, 'quarter', rows);
+      ensureSpace(150);
+      drawSection('Stock Recommendation (Next Quarter)');
+
+      // Wrap the headline into lines of ~95 characters
+      const words = sanitizeForPDF(st.headline).split(' ');
+      const lines: string[] = [];
+      let cur = '';
+      for (const w of words) {
+        if ((cur + ' ' + w).trim().length > 95) { lines.push(cur.trim()); cur = w; } else { cur += ' ' + w; }
+      }
+      if (cur.trim()) lines.push(cur.trim());
+      lines.forEach((ln) => {
+        page.drawText(ln, { x: margin, y: cursorY, size: 9.5, font: fontBold, color: darkTextColor });
+        cursorY -= 13;
+      });
+      cursorY -= 6;
+
+      page.drawText('Category', { x: margin + 10, y: cursorY, size: 9, font: fontBold, color: darkTextColor });
+      page.drawText('Forecast Revenue', { x: margin + 130, y: cursorY, size: 9, font: fontBold, color: darkTextColor });
+      page.drawText(`vs ${st.compared_with}`, { x: margin + 260, y: cursorY, size: 9, font: fontBold, color: darkTextColor });
+      page.drawText('Action', { x: margin + 410, y: cursorY, size: 9, font: fontBold, color: darkTextColor });
+      cursorY -= 14;
+
+      st.recommendations.forEach((r, idx) => {
+        if (idx % 2 === 1) {
+          page.drawRectangle({ x: margin, y: cursorY - 4, width: width - margin * 2, height: 18, color: rgb(0.97, 0.98, 1.0) });
+        }
+        const trend = `${r.trend_pct >= 0 ? '+' : ''}${r.trend_pct}%`;
+        page.drawText(r.category, { x: margin + 10, y: cursorY, size: 9, font, color: darkTextColor });
+        page.drawText(`Rs ${r.forecast_revenue.toLocaleString('en-IN')}`, { x: margin + 130, y: cursorY, size: 9, font, color: darkTextColor });
+        page.drawText(trend, { x: margin + 260, y: cursorY, size: 9, font, color: darkTextColor });
+        page.drawText(r.action, { x: margin + 410, y: cursorY, size: 9, font: r.action === 'Increase stock' ? fontBold : font, color: darkTextColor });
+        cursorY -= 20;
+      });
+      page.drawText('Based on complete quarters of past sales. Profit uses assumed category margins.', {
+        x: margin, y: cursorY, size: 7.5, font, color: grayColor,
+      });
+      cursorY -= 20;
+    } catch {
+      // Not enough complete history: skip this section rather than fail the report.
+    }
+  }
+
   // Key Findings & AI Section
   drawSection(type === 'ai' ? 'Autonomous AI Analysis' : 'Automated Business Insights');
 
@@ -261,28 +315,61 @@ export async function generatePDFReport(uid: string, type: 'executive' | 'sales'
     const context = buildContext(uid);
     const prompt = 'Summarize key findings, risks, and recommendations for this retail dataset.';
     const aiResult = await askLLM(uid, prompt, context, provider);
-    const cleanLines = aiResult.answer
-      .split('\n')
-      .map((l) => l.replace(/[*#]/g, '').trim())
-      .filter((l) => l.length > 5)
-      .slice(0, 7);
-    if (cleanLines.length > 0) {
-      findings = cleanLines;
+
+    // The built-in solver answers only specific questions, so when no AI model is
+    // active it replies with a help message. Never print that in a report.
+    const isSolverHelp =
+      /couldn't match that question/i.test(aiResult.answer) ||
+      /No estimation or generated text/i.test(aiResult.answer);
+
+    if (!isSolverHelp) {
+      const cleanLines = aiResult.answer
+        .split('\n')
+        .map((l) => l.replace(/[*#_]/g, '').trim())
+        .filter((l) => l.length > 5)
+        .slice(0, 10);
+      if (cleanLines.length > 0) findings = cleanLines;
+    } else {
+      // Data-driven strategic summary (no AI model needed)
+      const summary: string[] = [...sa.insights.slice(0, 3)];
+      try {
+        const an = getAnomalies(uid, rows, 3, ANOMALY_THRESHOLD);
+        summary.push(`Risk: ${an.total} unusual sales days were flagged, so check those dates for stock-outs, promotions or data errors.`);
+      } catch {
+        // skip when there is not enough history
+      }
+      try {
+        const st = getStockRecommendations(uid, 'quarter', rows);
+        summary.push(`Recommendation: ${st.headline}`);
+        const reduce = st.recommendations.find((r) => r.action === 'Review / reduce stock');
+        if (reduce) summary.push(`Review ${reduce.category}: its forecast is falling versus last year.`);
+      } catch {
+        // skip when there is not enough history
+      }
+      findings = summary;
     }
   }
 
+  // Wrap long lines instead of cutting them off
+  const wrap = (text: string, maxChars: number) => {
+    const out: string[] = [];
+    let cur = '';
+    for (const w of text.split(' ')) {
+      if ((cur + ' ' + w).trim().length > maxChars) { out.push(cur.trim()); cur = w; } else { cur += ' ' + w; }
+    }
+    if (cur.trim()) out.push(cur.trim());
+    return out;
+  };
+
   findings.forEach((line) => {
-    if (cursorY < 70) return;
     const prefix = line.startsWith('•') || line.startsWith('-') ? '' : '- ';
-    const textToDraw = sanitizeForPDF((prefix + line).slice(0, 110));
-    page.drawText(textToDraw, {
-      x: margin,
-      y: cursorY,
-      size: 9,
-      font,
-      color: darkTextColor,
+    const wrapped = wrap(sanitizeForPDF(prefix + line), 105);
+    ensureSpace(wrapped.length * 13 + 5);
+    wrapped.forEach((ln, i) => {
+      page.drawText(i === 0 ? ln : '  ' + ln, { x: margin, y: cursorY, size: 9, font, color: darkTextColor });
+      cursorY -= 13;
     });
-    cursorY -= 16;
+    cursorY -= 4;
   });
 
   // Footer

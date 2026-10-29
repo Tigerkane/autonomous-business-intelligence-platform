@@ -41,6 +41,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [backendUp, setBackendUp] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [version, setVersion] = useState(0);
+  const lastUser = useRef<string | null>(null);
 
   // Initialize theme with safe localStorage and fallback to system preference
   const [theme, setThemeState] = useState<'dark' | 'light'>(() => {
@@ -132,7 +133,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     if (!sessionReady) return;
-    setDataset(null);
+    // Only clear the dataset when the signed-in user actually changes, so a
+    // background session re-check doesn't flash the "No Data" state.
+    const who = user?.email ?? '';
+    if (lastUser.current !== null && lastUser.current !== who) setDataset(null);
+    lastUser.current = who;
     load(true);
   }, [load, sessionReady, user?.email]);
   const refresh = useCallback(async () => {

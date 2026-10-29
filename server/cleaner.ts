@@ -227,6 +227,17 @@ export function cleanSalesData(csvContent: string): {
     }
   }
 
+  // Detect optional Unit Cost / Cost per Unit / COGS column
+  const OPTIONAL_COST_COLUMNS = ['Unit Cost', 'Cost per Unit', 'UnitCost', 'Cost', 'COGS'];
+  let costColIdx: number | undefined = undefined;
+  for (const col of OPTIONAL_COST_COLUMNS) {
+    const idx = headerMap.get(normalizeName(col));
+    if (idx !== undefined) {
+      costColIdx = idx;
+      break;
+    }
+  }
+
   if (missingColumns.length > 0) {
     const usedIdx = new Set(Object.values(colIndexes));
     const hints: string[] = [];
@@ -313,6 +324,7 @@ export function cleanSalesData(csvContent: string): {
     const rawQuantity = row[colIndexes['Quantity']];
     const rawPrice = row[colIndexes['Price per Unit']];
     const rawTotal = row[colIndexes['Total Amount']];
+    const rawCost = costColIdx !== undefined ? row[costColIdx] : undefined;
 
     // 1. Date
     const parsedDate = parseDate(rawDate);
@@ -474,6 +486,47 @@ export function cleanSalesData(csvContent: string): {
       );
     }
 
+    // 4. Unit Cost & Profit calculation
+    let unitCost: number;
+    const parsedCost = rawCost !== undefined ? parseNumber(rawCost) : null;
+    if (parsedCost !== null) {
+      if (parsedCost < 0) {
+        tracker.add(
+          'negative_cost',
+          'with negative Unit Cost (clamped to 0)',
+          'warning',
+          line,
+          `Unit Cost ${parsedCost}`
+        );
+        unitCost = 0;
+      } else {
+        unitCost = parsedCost;
+      }
+      if (unitCost > p) {
+        tracker.add(
+          'cost_exceeds_price',
+          'where Unit Cost exceeds Price per Unit (loss-making transaction)',
+          'warning',
+          line,
+          `Unit Cost ${unitCost} > Price ${p}`
+        );
+      }
+    } else {
+      // Benchmark gross margin fallback if Unit Cost is omitted
+      const defaultGrossMargin =
+        category.toLowerCase() === 'electronics'
+          ? 0.30
+          : category.toLowerCase() === 'clothing'
+          ? 0.45
+          : category.toLowerCase() === 'beauty'
+          ? 0.55
+          : 0.40;
+      unitCost = Math.round(p * (1 - defaultGrossMargin) * 100) / 100;
+    }
+
+    const totalCost = Math.round(q * unitCost * 100) / 100;
+    const profit = Math.round((t - totalCost) * 100) / 100;
+
     cleanedRows.push({
       transaction_id: transactionId,
       date: parsedDate.iso,
@@ -484,6 +537,9 @@ export function cleanSalesData(csvContent: string): {
       quantity: Math.round(q),
       price_per_unit: p,
       total_amount: t,
+      unit_cost: unitCost,
+      total_cost: totalCost,
+      profit: profit,
     });
   }
 
@@ -529,12 +585,12 @@ export function cleanSalesData(csvContent: string): {
 
 export function getCSVTemplate(): string {
   return [
-    'Transaction ID,Date,Customer ID,Gender,Age,Product Category,Quantity,Price per Unit,Total Amount',
-    'TXN001,2023-01-15,CUST101,Female,28,Beauty,2,500,1000',
-    'TXN002,2023-01-16,CUST102,Male,34,Electronics,1,1200,1200',
-    'TXN003,2023-01-17,CUST103,Female,45,Clothing,3,350,1050',
-    'TXN004,2023-02-05,CUST104,Male,22,Electronics,2,600,1200',
-    'TXN005,2023-02-14,CUST105,Female,31,Beauty,4,250,1000',
+    'Transaction ID,Date,Customer ID,Gender,Age,Product Category,Quantity,Price per Unit,Unit Cost,Total Amount',
+    'TXN001,2023-01-15,CUST101,Female,28,Beauty,2,500,225,1000',
+    'TXN002,2023-01-16,CUST102,Male,34,Electronics,1,1200,840,1200',
+    'TXN003,2023-01-17,CUST103,Female,45,Clothing,3,350,190,1050',
+    'TXN004,2023-02-05,CUST104,Male,22,Electronics,2,600,420,1200',
+    'TXN005,2023-02-14,CUST105,Female,31,Beauty,4,250,110,1000',
   ].join('\n');
 }
 

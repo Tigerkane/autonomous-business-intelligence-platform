@@ -57,6 +57,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [trendGrain, setTrendGrain] = useState<'weekly' | 'monthly'>('monthly');
+  const [trendMetric, setTrendMetric] = useState<'revenue' | 'profit'>('revenue');
 
   const isDark = theme === 'dark';
 
@@ -119,6 +120,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
   }
 
   // Trend Chart
+  const isProfit = trendMetric === 'profit';
   const trendLabels =
     trendGrain === 'weekly'
       ? data.weekly.map((w) => {
@@ -133,23 +135,28 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
 
   const trendValues =
     trendGrain === 'weekly'
-      ? data.weekly.map((w) => w.revenue)
-      : data.monthly.filter((m) => !m.partial).map((m) => m.total_revenue);
+      ? data.weekly.map((w) => (isProfit ? (w.profit ?? 0) : w.revenue))
+      : data.monthly.filter((m) => !m.partial).map((m) => (isProfit ? (m.total_profit ?? 0) : m.total_revenue));
 
   const lineChartData = {
     labels: trendLabels,
     datasets: [
       {
-        label: 'Revenue (₹)',
+        label: isProfit ? 'Gross Profit (₹)' : 'Revenue (₹)',
         data: trendValues,
-        borderColor: '#4f46e5',
+        borderColor: isProfit ? '#10b981' : '#4f46e5',
         backgroundColor: (context: any) => {
           const chart = context.chart;
           const { ctx, chartArea } = chart;
-          if (!chartArea) return 'rgba(79, 70, 229, 0.1)';
+          if (!chartArea) return isProfit ? 'rgba(16, 185, 129, 0.1)' : 'rgba(79, 70, 229, 0.1)';
           const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-          gradient.addColorStop(0, isDark ? 'rgba(99, 102, 241, 0.35)' : 'rgba(79, 70, 229, 0.25)');
-          gradient.addColorStop(1, 'rgba(79, 70, 229, 0.0)');
+          if (isProfit) {
+            gradient.addColorStop(0, isDark ? 'rgba(16, 185, 129, 0.35)' : 'rgba(16, 185, 129, 0.25)');
+            gradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+          } else {
+            gradient.addColorStop(0, isDark ? 'rgba(99, 102, 241, 0.35)' : 'rgba(79, 70, 229, 0.25)');
+            gradient.addColorStop(1, 'rgba(79, 70, 229, 0.0)');
+          }
           return gradient;
         },
         fill: true,
@@ -175,7 +182,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
         padding: 10,
         cornerRadius: 8,
         callbacks: {
-          label: (ctx: any) => ` Revenue: ₹${Math.round(ctx.parsed.y).toLocaleString('en-IN')}`,
+          label: (ctx: any) => ` ${isProfit ? 'Profit' : 'Revenue'}: ₹${Math.round(ctx.parsed.y).toLocaleString('en-IN')}`,
         },
       },
     },
@@ -297,6 +304,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
               <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
                 {inr(data.kpis.total_sales)}
               </h3>
+              {data.kpis.total_profit !== undefined && (
+                <div className="flex items-center gap-1.5 mt-1.5 text-xs">
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400 font-mono">
+                    {inr(data.kpis.total_profit)}
+                  </span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-500/20">
+                    {data.kpis.profit_margin}% margin
+                  </span>
+                </div>
+              )}
               {data.trends.revenue !== undefined && (
                 <div
                   className={`flex items-center gap-1 mt-2 text-xs font-semibold ${
@@ -451,34 +468,61 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
           <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
             <div>
               <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                Revenue Trajectory
+                {isProfit ? 'Gross Profit Trajectory' : 'Revenue Trajectory'}
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Aggregate retail sales performance across time intervals
+                {isProfit
+                  ? 'Gross margin & profitability trajectory over time intervals'
+                  : 'Aggregate retail sales performance across time intervals'}
               </p>
             </div>
-            {/* Grain Toggle */}
-            <div className="flex items-center p-1 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5">
-              <button
-                onClick={() => setTrendGrain('weekly')}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                  trendGrain === 'weekly'
-                    ? 'bg-white dark:bg-indigo-600 text-slate-900 dark:text-white shadow-xs'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                Weekly
-              </button>
-              <button
-                onClick={() => setTrendGrain('monthly')}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                  trendGrain === 'monthly'
-                    ? 'bg-white dark:bg-indigo-600 text-slate-900 dark:text-white shadow-xs'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                Monthly
-              </button>
+            {/* Metric & Grain Toggles */}
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center p-1 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5">
+                <button
+                  onClick={() => setTrendMetric('revenue')}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                    trendMetric === 'revenue'
+                      ? 'bg-white dark:bg-indigo-600 text-slate-900 dark:text-white shadow-xs'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  Revenue
+                </button>
+                <button
+                  onClick={() => setTrendMetric('profit')}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                    trendMetric === 'profit'
+                      ? 'bg-white dark:bg-emerald-600 text-slate-900 dark:text-white shadow-xs'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  Profit
+                </button>
+              </div>
+
+              <div className="flex items-center p-1 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5">
+                <button
+                  onClick={() => setTrendGrain('weekly')}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                    trendGrain === 'weekly'
+                      ? 'bg-white dark:bg-indigo-600 text-slate-900 dark:text-white shadow-xs'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  Weekly
+                </button>
+                <button
+                  onClick={() => setTrendGrain('monthly')}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                    trendGrain === 'monthly'
+                      ? 'bg-white dark:bg-indigo-600 text-slate-900 dark:text-white shadow-xs'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  Monthly
+                </button>
+              </div>
             </div>
           </div>
 
@@ -532,6 +576,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                     <span className="font-bold text-slate-900 dark:text-white">
                       {inr(c.sales)}
                     </span>
+                    {c.margin !== undefined && (
+                      <span
+                        className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-mono"
+                        title={`Profit: ${inr(c.profit || 0)}`}
+                      >
+                        {c.margin}% margin
+                      </span>
+                    )}
                     <span className="text-slate-400 w-10 text-right">{share}%</span>
                   </div>
                 </div>

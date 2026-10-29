@@ -589,7 +589,7 @@ export const UploadDatasetView: React.FC<UploadDatasetViewProps> = ({ onNavigate
             {uploading ? 'Processing and standardizing dataset...' : 'Click to browse or drag & drop CSV'}
           </p>
           <p className="text-xs text-slate-400 max-w-sm mx-auto mb-4">
-            Required columns: Transaction ID, Date, Customer ID, Gender, Age, Product Category, Quantity, Price per Unit, Total Amount
+            Required: Transaction ID, Date, Customer ID, Gender, Age, Product Category, Quantity, Price per Unit, Total Amount &bull; <span className="text-indigo-500 dark:text-indigo-400 font-medium">Optional: Unit Cost</span>
           </p>
 
           <span className="inline-block px-3 py-1 rounded-full bg-slate-100 dark:bg-white/5 text-[11px] font-semibold text-slate-600 dark:text-slate-400">

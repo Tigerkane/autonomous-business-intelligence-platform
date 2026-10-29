@@ -48,6 +48,9 @@ export interface KPIStats {
   total_quantity: number;
   total_transactions: number;
   average_transaction: number;
+  total_cost?: number;
+  total_profit?: number;
+  profit_margin?: number;
 }
 
 export interface OverviewData {
@@ -62,16 +65,19 @@ export interface OverviewData {
     units?: number;
     transactions?: number;
     avg?: number;
+    profit?: number;
     label?: string;
   };
-  weekly: { date: string; revenue: number }[];
+  weekly: { date: string; revenue: number; profit?: number }[];
   monthly: {
     month: string;
     total_revenue: number;
     avg_revenue: number;
+    total_profit?: number;
+    profit_margin?: number;
     partial: boolean;
   }[];
-  categories: { category: string; sales: number }[];
+  categories: { category: string; sales: number; profit?: number; margin?: number }[];
   segments: {
     age: { segment: string; count: number; revenue: number }[];
     gender: { segment: string; count: number; revenue: number; unique_customers?: number }[];

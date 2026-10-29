@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { createClient } from '../../lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 
@@ -141,6 +141,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'signin' | 'signup'>('signin');
   const [sessionReady, setSessionReady] = useState(false);
+  // Tracks the signed-in user id so a tab refocus (which makes Supabase re-emit
+  // SIGNED_IN for the same user) does not reset the session or the loaded data.
+  const currentUserId = useRef<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -151,7 +154,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       .then(async ({ data: { user: sbUser } }) => {
         if (sbUser) {
           const profile = await mapUserToProfile(sbUser);
-          if (!cancelled) setUser(profile);
+          if (!cancelled) { currentUserId.current = sbUser.id; setUser(profile); }
         }
       })
       .catch(() => {
@@ -168,14 +171,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // INITIAL_SESSION is handled by getUser() above.
         // TOKEN_REFRESHED does not change who the user is.
         if (event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') return;
+        // Same user re-announced (e.g. switching back to this browser tab): ignore.
+        if (event === 'SIGNED_IN' && session?.user?.id && session.user.id === currentUserId.current) return;
 
         setTimeout(async () => {
           if (cancelled) return;
           setSessionReady(false);
           if (session?.user) {
             const profile = await mapUserToProfile(session.user);
-            if (!cancelled) setUser(profile);
+            if (!cancelled) { currentUserId.current = session.user.id; setUser(profile); }
           } else {
+            currentUserId.current = null;
             setUser(null);
           }
           if (!cancelled) setSessionReady(true);

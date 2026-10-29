@@ -46,7 +46,7 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
   const { user, isAuthenticated, logout, openAuthModal } = useAuth();
   const [loadingSample, setLoadingSample] = useState(false);
 
-  // Hero interactive mini-sample card state
+  // Hero interactive live preview toggle
   const [heroMetric, setHeroMetric] = useState<'revenue' | 'orders'>('revenue');
 
   // FAQ Accordion open states
@@ -333,15 +333,21 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
                     <div className="flex items-center gap-1 p-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-[11px] font-semibold">
                       <button
                         onClick={() => setHeroMetric('revenue')}
-                        className={`px-2 py-0.5 rounded-md transition-colors cursor-pointer ${heroMetric === 'revenue' ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                          }`}
+                        className={`px-2 py-0.5 rounded-md transition-colors cursor-pointer ${
+                          heroMetric === 'revenue'
+                            ? 'bg-indigo-600 text-white'
+                            : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                        }`}
                       >
                         Revenue
                       </button>
                       <button
                         onClick={() => setHeroMetric('orders')}
-                        className={`px-2 py-0.5 rounded-md transition-colors cursor-pointer ${heroMetric === 'orders' ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                          }`}
+                        className={`px-2 py-0.5 rounded-md transition-colors cursor-pointer ${
+                          heroMetric === 'orders'
+                            ? 'bg-indigo-600 text-white'
+                            : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                        }`}
                       >
                         Orders
                       </button>
@@ -350,7 +356,7 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
 
                   <div className="flex items-baseline gap-2 font-mono tabular-nums">
                     <span className="text-2xl font-bold text-slate-900 dark:text-white">
-                      {heroMetric === 'revenue' ? '₹18,42,950' : '23,507 orders'}
+                      {heroMetric === 'revenue' ? '₹18,42,950' : '23,507'}
                     </span>
                     <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                       +14.2% MoM

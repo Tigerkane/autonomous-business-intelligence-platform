@@ -1,6 +1,7 @@
 import { runCleanerTests } from './cleaner.test';
 import { runAnalyticsTests } from './analytics.test';
 import { runE2EPipelineTests } from './e2e_pipeline.test';
+import { runInsightsTests } from './insights.test';
 
 async function main() {
   console.log('====================================================');
@@ -20,6 +21,11 @@ async function main() {
   const analyticsRes = runAnalyticsTests();
   totalPassed += analyticsRes.passed;
   totalFailed += analyticsRes.failed;
+
+  // 2b. Period analysis & stock recommendation tests
+  const insightsRes = runInsightsTests();
+  totalPassed += insightsRes.passed;
+  totalFailed += insightsRes.failed;
 
   // 3. E2E Pipeline & Storage Isolation Tests
   const e2eRes = await runE2EPipelineTests();
