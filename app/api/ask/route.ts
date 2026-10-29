@@ -22,14 +22,14 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { question, provider } = (await request.json().catch(() => ({}))) || {};
+  const { question, provider, apiKey } = (await request.json().catch(() => ({}))) || {};
   if (!question || typeof question !== 'string' || question.trim().length < 2) {
     return NextResponse.json({ detail: 'Please provide a valid question.' }, { status: 400 });
   }
 
   try {
     const context = buildContext(uid);
-    const result = await askLLM(uid, question.trim(), context, provider);
+    const result = await askLLM(uid, question.trim(), context, provider, apiKey);
     return NextResponse.json({
       question,
       answer: result.answer,

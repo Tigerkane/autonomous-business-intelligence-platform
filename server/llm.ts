@@ -177,7 +177,8 @@ export async function askLLM(
   uid: string,
   question: string,
   context: string,
-  requestedProvider?: string
+  requestedProvider?: string,
+  customApiKey?: string
 ): Promise<{ answer: string; model: string; provider: string }> {
   const provider = requestedProvider || DEFAULT_PROVIDER;
 
@@ -224,9 +225,11 @@ export async function askLLM(
 
   // 2. Ollama Cloud (hosted API, GPT-OSS 120B)
   if (provider === 'ollama_cloud') {
-    const key = getOllamaApiKey();
+    const key = customApiKey?.trim() || getOllamaApiKey();
     if (!key) {
-      throw new Error('Ollama Cloud is not configured. Please set OLLAMA_API_KEY or LLM_API_KEY in your environment.');
+      throw new Error(
+        'Ollama Cloud is not configured on your live deployment. Please add OLLAMA_API_KEY to your hosting provider (e.g. Vercel Environment Variables) or enter your key in the analyst settings.'
+      );
     }
     try {
       const res = await fetch('https://ollama.com/api/chat', {

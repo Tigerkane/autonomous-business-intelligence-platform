@@ -10,6 +10,7 @@ import {
   HelpCircle,
   Database,
   ArrowRight,
+  Key,
 } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
 import { ChatMessage, LLMProvider } from '../types';
@@ -46,6 +47,12 @@ export const AskYourDataView: React.FC<AskYourDataViewProps> = ({ onNavigate }) 
   const [providers, setProviders] = useState<LLMProvider[]>([]);
   const [selectedProvider, setSelectedProvider] = useState<string>('deterministic');
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [apiKeyInput, setApiKeyInput] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('abip_ollama_api_key') || '';
+    }
+    return '';
+  });
 
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -90,7 +97,11 @@ export const AskYourDataView: React.FC<AskYourDataViewProps> = ({ onNavigate }) 
       const res = await fetch('/api/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: q, provider: selectedProvider }),
+        body: JSON.stringify({
+          question: q,
+          provider: selectedProvider,
+          apiKey: apiKeyInput.trim() || undefined,
+        }),
       });
 
       if (!res.ok) {
@@ -165,6 +176,44 @@ export const AskYourDataView: React.FC<AskYourDataViewProps> = ({ onNavigate }) 
           </select>
         </div>
       </div>
+
+      {/* Ollama Cloud Live Session API Key Input */}
+      {selectedProvider === 'ollama_cloud' && (
+        <div className="mb-3 px-3.5 py-2.5 rounded-xl bg-indigo-50/80 dark:bg-indigo-950/30 border border-indigo-200/80 dark:border-indigo-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
+          <div className="flex items-center gap-2 text-indigo-900 dark:text-indigo-200">
+            <Key className="w-4 h-4 shrink-0 text-indigo-500" />
+            <span>
+              {providers.find((p) => p.id === 'ollama_cloud')?.configured
+                ? 'Server environment key active. You can override it here if needed:'
+                : 'Live server key not set in hosting dashboard. Enter your Ollama API key below (saved locally in your browser):'}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="password"
+              value={apiKeyInput}
+              onChange={(e) => {
+                const val = e.target.value;
+                setApiKeyInput(val);
+                if (typeof window !== 'undefined') {
+                  if (val) {
+                    localStorage.setItem('abip_ollama_api_key', val);
+                  } else {
+                    localStorage.removeItem('abip_ollama_api_key');
+                  }
+                }
+              }}
+              placeholder="Paste Ollama API key..."
+              className="px-3 py-1 rounded-lg bg-white dark:bg-slate-900 border border-indigo-300/80 dark:border-indigo-700 text-xs text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 w-52 sm:w-64 shadow-2xs font-mono"
+            />
+            {apiKeyInput ? (
+              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1 shrink-0">
+                <Check className="w-3.5 h-3.5" /> Ready
+              </span>
+            ) : null}
+          </div>
+        </div>
+      )}
 
       {/* What the solver can answer */}
       <p className="px-1 mb-2 text-[11px] text-slate-500 dark:text-slate-400">
