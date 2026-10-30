@@ -1,8 +1,6 @@
 import React from 'react';
 import {
   Menu,
-  Moon,
-  Sun,
   RefreshCw,
   FileSpreadsheet,
   Home,
@@ -86,7 +84,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   sidebarHidden = false,
   onToggleSidebar,
 }) => {
-  const { dataset, loaded, refreshing, refresh, theme, toggleTheme } = useData();
+  const { dataset, loaded, refreshing, refresh } = useData();
   const { user, isAuthenticated, logout, openAuthModal } = useAuth();
   const [accountMenuOpen, setAccountMenuOpen] = React.useState(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
@@ -214,20 +212,6 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <GithubIcon className="w-4 h-4" />
           </a>
-
-          {/* Dark / Light Mode Toggle: Sun for Light mode, Moon for Dark mode */}
-          <button
-            onClick={toggleTheme}
-            className="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 transition-colors"
-            title={theme === 'light' ? 'Light Mode (click to switch to Dark Mode)' : 'Dark Mode (click to switch to Light Mode)'}
-            aria-label="Toggle theme"
-          >
-            {theme === 'light' ? (
-              <Sun className="w-4 h-4 text-amber-500" />
-            ) : (
-              <Moon className="w-4 h-4 text-indigo-300" />
-            )}
-          </button>
 
           {/* User Profile / Auth State in Navbar */}
           {isAuthenticated && user ? (

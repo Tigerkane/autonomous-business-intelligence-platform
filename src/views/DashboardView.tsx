@@ -467,7 +467,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
       {/* Trajectory & Category Share Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left: Revenue Trend (2 cols) */}
-        <div className="lg:col-span-2 p-6 rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200/80 dark:border-white/10 shadow-xs">
+        <div className="lg:col-span-2 p-6 rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col">
           <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
             <div>
               <h3 className="text-base font-bold text-slate-900 dark:text-white">
@@ -529,8 +529,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
             </div>
           </div>
 
-          <div className="h-72 w-full">
-            <Line data={lineChartData} options={lineChartOptions} />
+          <div className="relative flex-1 min-h-[340px] w-full">
+            <div className="absolute inset-0">
+              <Line data={lineChartData} options={lineChartOptions} />
+            </div>
           </div>
         </div>
 
