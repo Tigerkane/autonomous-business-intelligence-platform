@@ -147,13 +147,14 @@ export async function generatePDFReport(uid: string, type: 'executive' | 'sales'
 
     // Table Header
     page.drawText('Category', { x: margin + 10, y: cursorY, size: 9, font: fontBold, color: darkTextColor });
-    page.drawText('Revenue', { x: margin + 160, y: cursorY, size: 9, font: fontBold, color: darkTextColor });
-    page.drawText('Share', { x: margin + 270, y: cursorY, size: 9, font: fontBold, color: darkTextColor });
-    page.drawText('Units Sold', { x: margin + 350, y: cursorY, size: 9, font: fontBold, color: darkTextColor });
-    page.drawText('Avg Order', { x: margin + 430, y: cursorY, size: 9, font: fontBold, color: darkTextColor });
+    page.drawText('Revenue', { x: margin + 135, y: cursorY, size: 9, font: fontBold, color: darkTextColor });
+    page.drawText('Profit', { x: margin + 215, y: cursorY, size: 9, font: fontBold, color: darkTextColor });
+    page.drawText('Margin', { x: margin + 295, y: cursorY, size: 9, font: fontBold, color: darkTextColor });
+    page.drawText('Share', { x: margin + 360, y: cursorY, size: 9, font: fontBold, color: darkTextColor });
+    page.drawText('Units', { x: margin + 430, y: cursorY, size: 9, font: fontBold, color: darkTextColor });
     cursorY -= 14;
 
-    sa.categories.slice(0, 6).forEach((cat, idx) => {
+    sa.categories.slice(0, 6).forEach((cat: any, idx: number) => {
       const isAlt = idx % 2 === 1;
       if (isAlt) {
         page.drawRectangle({
@@ -165,10 +166,11 @@ export async function generatePDFReport(uid: string, type: 'executive' | 'sales'
         });
       }
       page.drawText(cat.category, { x: margin + 10, y: cursorY, size: 9, font, color: darkTextColor });
-      page.drawText(`Rs ${Math.round(cat.revenue).toLocaleString('en-IN')}`, { x: margin + 160, y: cursorY, size: 9, font, color: darkTextColor });
-      page.drawText(`${cat.share}%`, { x: margin + 270, y: cursorY, size: 9, font, color: darkTextColor });
-      page.drawText(`${cat.units.toLocaleString()}`, { x: margin + 350, y: cursorY, size: 9, font, color: darkTextColor });
-      page.drawText(`Rs ${cat.avg_order}`, { x: margin + 430, y: cursorY, size: 9, font, color: darkTextColor });
+      page.drawText(`Rs ${Math.round(cat.revenue).toLocaleString('en-IN')}`, { x: margin + 135, y: cursorY, size: 9, font, color: darkTextColor });
+      page.drawText(`Rs ${Math.round(cat.profit ?? 0).toLocaleString('en-IN')}`, { x: margin + 215, y: cursorY, size: 9, font, color: rgb(0.06, 0.6, 0.4) });
+      page.drawText(`${cat.margin ?? 0}%`, { x: margin + 295, y: cursorY, size: 9, font, color: darkTextColor });
+      page.drawText(`${cat.share}%`, { x: margin + 360, y: cursorY, size: 9, font, color: darkTextColor });
+      page.drawText(`${cat.units.toLocaleString()}`, { x: margin + 430, y: cursorY, size: 9, font, color: darkTextColor });
       cursorY -= 20;
     });
 

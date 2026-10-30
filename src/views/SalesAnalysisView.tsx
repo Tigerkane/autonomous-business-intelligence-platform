@@ -498,6 +498,8 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
                 <th className="px-4 py-3 font-bold uppercase text-[10px]">Product Category</th>
                 <th className="px-4 py-3 font-bold uppercase text-[10px]">Revenue</th>
                 <th className="px-4 py-3 font-bold uppercase text-[10px]">Market Share</th>
+                <th className="px-4 py-3 font-bold uppercase text-[10px]">Gross Profit</th>
+                <th className="px-4 py-3 font-bold uppercase text-[10px]">Margin</th>
                 <th className="px-4 py-3 font-bold uppercase text-[10px]">Units Sold</th>
                 <th className="px-4 py-3 font-bold uppercase text-[10px]">Orders</th>
                 <th className="px-4 py-3 font-bold uppercase text-[10px]">Avg Order Value</th>
@@ -518,12 +520,12 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
                       <span>{c.category}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white">
+                  <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white font-mono">
                     {inr(c.revenue)}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <div className="w-20 bg-slate-200 dark:bg-white/10 rounded-full h-1.5 overflow-hidden">
+                      <div className="w-16 bg-slate-200 dark:bg-white/10 rounded-full h-1.5 overflow-hidden">
                         <div
                           className="h-full rounded-full"
                           style={{
@@ -532,10 +534,18 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
                           }}
                         />
                       </div>
-                      <span className="font-semibold text-slate-700 dark:text-slate-300">
+                      <span className="font-semibold text-slate-700 dark:text-slate-300 font-mono">
                         {c.share}%
                       </span>
                     </div>
+                  </td>
+                  <td className="px-4 py-3 font-bold text-emerald-600 dark:text-emerald-400 font-mono">
+                    {inr(c.profit ?? 0)}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-mono">
+                      {c.margin ?? 0}%
+                    </span>
                   </td>
                   <td className="px-4 py-3 text-slate-600 dark:text-slate-300 font-mono">
                     {c.units.toLocaleString()}
@@ -543,7 +553,7 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
                   <td className="px-4 py-3 text-slate-600 dark:text-slate-300 font-mono">
                     {c.orders.toLocaleString()}
                   </td>
-                  <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white">
+                  <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white font-mono">
                     {inr(c.avg_order)}
                   </td>
                 </tr>

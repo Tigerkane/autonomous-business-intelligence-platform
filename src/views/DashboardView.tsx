@@ -58,6 +58,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
   const [error, setError] = useState<string | null>(null);
   const [trendGrain, setTrendGrain] = useState<'weekly' | 'monthly'>('monthly');
   const [trendMetric, setTrendMetric] = useState<'revenue' | 'profit'>('revenue');
+  const [categoryMetric, setCategoryMetric] = useState<'revenue' | 'profit'>('revenue');
 
   const isDark = theme === 'dark';
 
@@ -217,11 +218,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
   };
 
   // Category Donut with shared deterministic colors
+  const isCategoryProfit = categoryMetric === 'profit';
   const donutData = {
     labels: data.categories.map((c) => c.category),
     datasets: [
       {
-        data: data.categories.map((c) => c.sales),
+        data: data.categories.map((c) => (isCategoryProfit ? (c.profit ?? 0) : c.sales)),
         backgroundColor: data.categories.map((c, i) => getCategoryColor(c.category, i)),
         borderWidth: 2,
         borderColor: isDark ? '#0d1527' : '#ffffff',
@@ -241,7 +243,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
         padding: 10,
         cornerRadius: 8,
         callbacks: {
-          label: (ctx: any) => ` ₹${Math.round(ctx.parsed).toLocaleString('en-IN')}`,
+          label: (ctx: any) =>
+            ` ${isCategoryProfit ? 'Gross Profit' : 'Revenue'}: ₹${Math.round(ctx.parsed).toLocaleString('en-IN')}`,
         },
       },
     },
@@ -534,25 +537,55 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
         {/* Right: Category Mix Donut */}
         <div className="p-6 rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
               <div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                  Category Mix
+                  {isCategoryProfit ? 'Category Profit Mix' : 'Category Sales Mix'}
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Revenue split by product category
+                  {isCategoryProfit
+                    ? 'Gross profit contribution by category'
+                    : 'Revenue split by product category'}
                 </p>
               </div>
-              <PieIcon className="w-5 h-5 text-indigo-500" />
+              <div className="flex items-center p-0.5 rounded-lg bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5">
+                <button
+                  onClick={() => setCategoryMetric('revenue')}
+                  className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all ${
+                    !isCategoryProfit
+                      ? 'bg-white dark:bg-indigo-600 text-slate-900 dark:text-white shadow-xs'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  Revenue
+                </button>
+                <button
+                  onClick={() => setCategoryMetric('profit')}
+                  className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all ${
+                    isCategoryProfit
+                      ? 'bg-white dark:bg-emerald-600 text-slate-900 dark:text-white shadow-xs'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  Profit
+                </button>
+              </div>
             </div>
 
             <div className="relative h-44 w-full flex items-center justify-center my-2">
               <Doughnut data={donutData} options={donutOptions} />
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total</span>
-                <span className="text-base font-extrabold text-slate-900 dark:text-white">
-                  {inr(data.kpis.total_sales)}
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  {isCategoryProfit ? 'Total Profit' : 'Total Revenue'}
                 </span>
+                <span className="text-base font-extrabold text-slate-900 dark:text-white">
+                  {inr(isCategoryProfit ? (data.kpis.total_profit ?? 0) : data.kpis.total_sales)}
+                </span>
+                {isCategoryProfit && data.kpis.profit_margin !== undefined && (
+                  <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 font-mono">
+                    {data.kpis.profit_margin}% avg margin
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -560,36 +593,154 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
           {/* Category List */}
           <div className="space-y-2 mt-4 pt-3 border-t border-slate-100 dark:border-white/5">
             {data.categories.map((c, i) => {
-              const share = ((c.sales / data.kpis.total_sales) * 100).toFixed(1);
+              const currentVal = isCategoryProfit ? (c.profit ?? 0) : c.sales;
+              const totalVal = isCategoryProfit ? (data.kpis.total_profit || 1) : data.kpis.total_sales;
+              const share = ((currentVal / totalVal) * 100).toFixed(1);
+
               return (
-                <div key={c.category} className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="w-2.5 h-2.5 rounded-full"
-                      style={{ backgroundColor: getCategoryColor(c.category, i) }}
-                    />
-                    <span className="font-semibold text-slate-700 dark:text-slate-300">
-                      {c.category}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-slate-900 dark:text-white">
-                      {inr(c.sales)}
-                    </span>
-                    {c.margin !== undefined && (
+                <div
+                  key={c.category}
+                  className="p-2.5 rounded-xl bg-slate-50/70 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/10 transition-colors"
+                >
+                  <div className="flex items-center justify-between text-xs mb-1.5">
+                    <div className="flex items-center gap-2 min-w-0">
                       <span
-                        className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-mono"
-                        title={`Profit: ${inr(c.profit || 0)}`}
-                      >
-                        {c.margin}% margin
+                        className="w-2.5 h-2.5 rounded-full shrink-0"
+                        style={{ backgroundColor: getCategoryColor(c.category, i) }}
+                      />
+                      <span className="font-bold text-slate-800 dark:text-slate-200 truncate">
+                        {c.category}
                       </span>
-                    )}
-                    <span className="text-slate-400 w-10 text-right">{share}%</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {c.margin !== undefined && (
+                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-mono">
+                          {c.margin}% margin
+                        </span>
+                      )}
+                      <span className="text-slate-400 text-[11px] font-medium font-mono">
+                        {share}%
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between text-[11px] pl-4.5 pt-1 border-t border-slate-100/80 dark:border-white/[0.03]">
+                    <div className="text-slate-500 dark:text-slate-400">
+                      <span>Rev: </span>
+                      <span className="font-semibold text-slate-800 dark:text-slate-200 font-mono">
+                        {inr(c.sales)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 text-slate-500 dark:text-slate-400">
+                      <span>Profit: </span>
+                      <span className="font-bold text-emerald-600 dark:text-emerald-400 font-mono">
+                        {inr(c.profit ?? 0)}
+                      </span>
+                    </div>
                   </div>
                 </div>
               );
             })}
           </div>
+        </div>
+      </div>
+
+      {/* Executive Category Profitability & Contribution Breakdown Table */}
+      <div className="p-6 rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">
+              Category Profitability & Contribution Scorecard
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Executive margin analysis and net profit contribution across retail product categories (Electronics, Beauty, Clothing)
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-slate-400 font-mono">
+              Total Profit: <strong className="text-emerald-600 dark:text-emerald-400">{inr(data.kpis.total_profit ?? 0)}</strong>
+            </span>
+            {data.kpis.profit_margin !== undefined && (
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-mono">
+                {data.kpis.profit_margin}% Gross Margin
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="overflow-x-auto border border-slate-200/80 dark:border-white/10 rounded-xl">
+          <table className="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr className="bg-slate-50 dark:bg-white/[0.03] border-b border-slate-200/80 dark:border-white/10 text-slate-500 dark:text-slate-400">
+                <th className="px-4 py-3 font-bold uppercase text-[10px]">Product Category</th>
+                <th className="px-4 py-3 font-bold uppercase text-[10px]">Revenue</th>
+                <th className="px-4 py-3 font-bold uppercase text-[10px]">Revenue Share</th>
+                <th className="px-4 py-3 font-bold uppercase text-[10px]">Gross Profit</th>
+                <th className="px-4 py-3 font-bold uppercase text-[10px]">Profit Margin</th>
+                <th className="px-4 py-3 font-bold uppercase text-[10px]">Profit Share</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-white/5 font-mono">
+              {data.categories.map((c, i) => {
+                const revShare = ((c.sales / data.kpis.total_sales) * 100).toFixed(1);
+                const totalProfit = data.kpis.total_profit || 1;
+                const profitShare = (((c.profit ?? 0) / totalProfit) * 100).toFixed(1);
+
+                return (
+                  <tr
+                    key={c.category}
+                    className="hover:bg-slate-50/80 dark:hover:bg-white/[0.02] transition-colors"
+                  >
+                    <td className="px-4 py-3 font-sans font-bold text-slate-900 dark:text-white">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="w-2.5 h-2.5 rounded-full shrink-0"
+                          style={{ backgroundColor: getCategoryColor(c.category, i) }}
+                        />
+                        <span>{c.category}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white">
+                      {inr(c.sales)}
+                    </td>
+                    <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
+                      <div className="flex items-center gap-2">
+                        <div className="w-16 bg-slate-200 dark:bg-white/10 rounded-full h-1.5 overflow-hidden">
+                          <div
+                            className="h-full rounded-full"
+                            style={{
+                              width: `${revShare}%`,
+                              backgroundColor: getCategoryColor(c.category, i),
+                            }}
+                          />
+                        </div>
+                        <span>{revShare}%</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 font-bold text-emerald-600 dark:text-emerald-400">
+                      {inr(c.profit ?? 0)}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                        {c.margin ?? 0}% margin
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
+                      <div className="flex items-center gap-2">
+                        <div className="w-16 bg-emerald-100 dark:bg-emerald-950/40 rounded-full h-1.5 overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-emerald-500"
+                            style={{ width: `${Math.min(100, Math.max(0, Number(profitShare)))}%` }}
+                          />
+                        </div>
+                        <span className="text-emerald-600 dark:text-emerald-400 font-semibold">{profitShare}%</span>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
 

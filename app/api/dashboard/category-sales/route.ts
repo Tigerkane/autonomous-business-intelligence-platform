@@ -15,17 +15,25 @@ export async function GET() {
     return NextResponse.json({ detail: 'No dataset has been uploaded yet.' }, { status: 404 });
   }
   const rows = getSalesRows(uid);
-  const catMap = new Map<string, number>();
+  const catMap = new Map<string, { sales: number; profit: number }>();
   for (const r of rows) {
-    catMap.set(rowCategory(r), (catMap.get(rowCategory(r)) || 0) + r.total_amount);
+    const cat = rowCategory(r);
+    const cost = r.total_cost ?? (r.unit_cost !== undefined ? r.quantity * r.unit_cost : r.total_amount * 0.65);
+    const profit = r.profit ?? (r.total_amount - cost);
+    const curr = catMap.get(cat) || { sales: 0, profit: 0 };
+    curr.sales += r.total_amount;
+    curr.profit += profit;
+    catMap.set(cat, curr);
   }
   function rowCategory(r: any) {
     return r.product_category || 'Other';
   }
   const data = Array.from(catMap.entries())
-    .map(([category, sales]) => ({
+    .map(([category, val]) => ({
       category,
-      sales: Math.round(sales * 100) / 100,
+      sales: Math.round(val.sales * 100) / 100,
+      profit: Math.round(val.profit * 100) / 100,
+      margin: val.sales > 0 ? Math.round(((val.profit / val.sales) * 100) * 10) / 10 : 0,
     }))
     .sort((a, b) => b.sales - a.sales);
   return NextResponse.json({ data });

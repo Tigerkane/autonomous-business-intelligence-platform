@@ -126,6 +126,8 @@ export interface SalesAnalysisData {
     units: number;
     orders: number;
     avg_order: number;
+    profit?: number;
+    margin?: number;
   }[];
   weekday: { day: string; avg_daily_revenue: number }[];
   gender_analysis?: {

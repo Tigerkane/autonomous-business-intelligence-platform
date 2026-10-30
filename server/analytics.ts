@@ -363,9 +363,9 @@ export function getSalesAnalysis(uid: string, rows?: SaleRow[]) {
     }
   }
 
-  const catAgg = new Map<string, { revenue: number; units: number; orders: number }>();
+  const catAgg = new Map<string, { revenue: number; units: number; orders: number; profit: number }>();
   for (const cat of allCategories) {
-    catAgg.set(cat, { revenue: 0, units: 0, orders: 0 });
+    catAgg.set(cat, { revenue: 0, units: 0, orders: 0, profit: 0 });
   }
 
   // Weekday daily revenue: 0=Mon, 1=Tue, ..., 6=Sun
@@ -378,10 +378,14 @@ export function getSalesAnalysis(uid: string, rows?: SaleRow[]) {
       stackedMap.get(ym)![row.product_category] += row.total_amount;
     }
 
+    const rowCost = row.total_cost ?? (row.unit_cost !== undefined ? row.quantity * row.unit_cost : row.total_amount * 0.65);
+    const rowProfit = row.profit ?? (row.total_amount - rowCost);
+
     const c = catAgg.get(row.product_category)!;
     c.revenue += row.total_amount;
     c.units += row.quantity;
     c.orders += 1;
+    c.profit += rowProfit;
 
     // Date day of week: getUTCDay() gives 0=Sun, 1=Mon, ..., 6=Sat
     // Convert to 0=Mon ... 6=Sun
@@ -407,6 +411,8 @@ export function getSalesAnalysis(uid: string, rows?: SaleRow[]) {
         units: r.units,
         orders: r.orders,
         avg_order: r.orders ? Math.round((r.revenue / r.orders) * 100) / 100 : 0,
+        profit: Math.round(r.profit * 100) / 100,
+        margin: r.revenue > 0 ? Math.round(((r.profit / r.revenue) * 100) * 10) / 10 : 0,
       };
     })
     .sort((a, b) => b.revenue - a.revenue);

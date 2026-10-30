@@ -51,11 +51,20 @@ export function runAnalyticsTests(): { passed: number; failed: number } {
   const avgAge = Math.round((cleanRows.reduce((acc, r) => acc + r.age, 0) / cleanRows.length) * 10) / 10;
   assert(avgAge === 40.6, 'Average age is exactly 40.6', `got ${avgAge}`);
 
-  // 2. Category Revenue
+  // 2. Category Revenue & Profit
   const catRev = new Map(ov.categories.map((c) => [c.category, c.sales]));
   assert(catRev.get('Electronics') === 203700, 'Electronics revenue is ₹2,03,700', `got ${catRev.get('Electronics')}`);
   assert(catRev.get('Clothing') === 61715, 'Clothing revenue is ₹61,715', `got ${catRev.get('Clothing')}`);
   assert(catRev.get('Beauty') === 37610, 'Beauty revenue is ₹37,610', `got ${catRev.get('Beauty')}`);
+
+  const catProfit = new Map(ov.categories.map((c) => [c.category, c.profit]));
+  assert((catProfit.get('Electronics') || 0) > 0, 'Electronics profit is computed and positive in overview', `got ${catProfit.get('Electronics')}`);
+  assert((catProfit.get('Beauty') || 0) > 0, 'Beauty profit is computed and positive in overview', `got ${catProfit.get('Beauty')}`);
+  assert((catProfit.get('Clothing') || 0) > 0, 'Clothing profit is computed and positive in overview', `got ${catProfit.get('Clothing')}`);
+
+  const saCatProfit = new Map(sa.categories.map((c) => [c.category, c.profit]));
+  assert((saCatProfit.get('Electronics') || 0) > 0, 'Electronics profit is computed and positive in sales analysis');
+  assert((saCatProfit.get('Beauty') || 0) > 0, 'Beauty profit is computed and positive in sales analysis');
 
   // 3. Monthly Revenue
   const monthRev = new Map(ov.monthly.map((m) => [m.month, m.total_revenue]));
