@@ -105,7 +105,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const content = (
     <div className="flex flex-col h-full bg-white dark:bg-[#060b19] border-r border-slate-200 dark:border-slate-800 select-none">
       {/* Brand Header */}
-      <div className="p-5 flex items-center justify-between border-b border-slate-200 dark:border-slate-800">
+      <div className="h-16 px-4 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 shrink-0">
         <button
           onClick={() => {
             onSelectTab('home');
@@ -134,17 +134,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <X className="w-5 h-5" />
           </button>
         </div>
-      </div>
-
-      {/* Dataset / Server status strip - unboxed typography */}
-      <div className="px-5 py-2.5 bg-slate-50 dark:bg-slate-900/40 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-        <span className="flex items-center gap-1.5">
-          <span className={`w-1.5 h-1.5 rounded-full ${backendUp ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-          <span>Server {backendUp ? 'Connected' : 'Offline'}</span>
-        </span>
-        <span className="font-mono text-[11px] text-slate-400 dark:text-slate-500">
-          {loaded ? 'Session Active' : 'No Data'}
-        </span>
       </div>
 
       {/* Navigation List */}
@@ -186,7 +175,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </nav>
 
       {/* User Session Footer */}
-      <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20">
+      <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20 shrink-0">
+        {/* Dataset / Server status telemetry */}
+        <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mb-3 pb-2.5 border-b border-slate-200 dark:border-slate-800/80">
+          <span className="flex items-center gap-1.5">
+            <span className={`w-1.5 h-1.5 rounded-full ${backendUp ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+            <span className="text-[11px]">Server {backendUp ? 'Connected' : 'Offline'}</span>
+          </span>
+          <span className="font-mono text-[10px] text-slate-400 dark:text-slate-500">
+            {loaded ? 'Session Active' : 'No Data'}
+          </span>
+        </div>
+
         {isAuthenticated && user ? (
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5 min-w-0">

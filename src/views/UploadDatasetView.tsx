@@ -249,10 +249,10 @@ export const UploadDatasetView: React.FC<UploadDatasetViewProps> = ({ onNavigate
 
       {/* When Dataset is Loaded: Active Dataset Stats & Preview Table */}
       {loaded && dataset && (
-        <div className="p-6 rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-6">
+        <div className="p-6 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 shadow-lg shadow-black/20 space-y-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
                 <FileSpreadsheet className="w-6 h-6" />
               </div>
               <div>
@@ -537,7 +537,7 @@ export const UploadDatasetView: React.FC<UploadDatasetViewProps> = ({ onNavigate
       )}
 
       {/* Upload Dropzone */}
-      <div className="p-6 sm:p-8 rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-4">
+      <div className="p-6 sm:p-8 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 shadow-lg shadow-black/20 space-y-4">
         <div>
           <h3 className="text-base font-bold text-slate-900 dark:text-white">
             {loaded ? 'Replace Active Dataset' : 'Upload Retail Sales CSV'}
@@ -565,8 +565,8 @@ export const UploadDatasetView: React.FC<UploadDatasetViewProps> = ({ onNavigate
           onClick={() => fileInputRef.current?.click()}
           className={`cursor-pointer border-2 border-dashed rounded-2xl p-8 sm:p-12 text-center transition-all ${
             isDragging
-              ? 'border-indigo-500 bg-indigo-500/5 ring-4 ring-indigo-500/10'
-              : 'border-slate-300 dark:border-white/10 hover:border-indigo-500 hover:bg-slate-50/50 dark:hover:bg-white/[0.02]'
+              ? 'border-indigo-500 bg-indigo-500/10 ring-4 ring-indigo-500/20'
+              : 'border-slate-800 hover:border-indigo-500/60 hover:bg-white/[0.02]'
           }`}
         >
           <input

@@ -105,8 +105,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   }, [accountMenuOpen]);
 
   return (
-    <header className="sticky top-0 z-20 px-4 md:px-8 py-3.5 backdrop-blur-md bg-white/90 dark:bg-[#060b19]/90 border-b border-slate-200 dark:border-slate-800 transition-colors">
-      <div className="flex items-center justify-between gap-4">
+    <header className="sticky top-0 z-20 h-16 px-4 md:px-8 flex items-center backdrop-blur-md bg-white/90 dark:bg-[#060b19]/90 border-b border-slate-200 dark:border-slate-800 transition-colors">
+      <div className="flex items-center justify-between gap-4 w-full">
         {/* Left: Sidebar Toggle & Page Title */}
         <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
           {/* Mobile hamburger menu */}

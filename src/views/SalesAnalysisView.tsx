@@ -401,7 +401,7 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
       {/* Row 1: Trajectory + Weekday Pattern */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left: Revenue Trend (2 cols) */}
-        <div className="lg:col-span-2 p-6 rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200/80 dark:border-white/10 shadow-xs">
+        <div className="lg:col-span-2 p-6 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 shadow-lg shadow-black/20">
           <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
             <div>
               <h3 className="text-base font-bold text-slate-900 dark:text-white">
@@ -441,7 +441,7 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
         </div>
 
         {/* Right: Weekday Distribution */}
-        <div className="p-6 rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200/80 dark:border-white/10 shadow-xs">
+        <div className="p-6 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 shadow-lg shadow-black/20">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-base font-bold text-slate-900 dark:text-white">
@@ -460,7 +460,7 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
       </div>
 
       {/* Row 2: Stacked Category Breakdown Chart */}
-      <div className="p-6 rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200/80 dark:border-white/10 shadow-xs">
+      <div className="p-6 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 shadow-lg shadow-black/20">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-base font-bold text-slate-900 dark:text-white">
@@ -478,7 +478,7 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
       </div>
 
       {/* Row 3: Category Performance Breakdown Table */}
-      <div className="p-6 rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-4">
+      <div className="p-6 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 shadow-lg shadow-black/20 space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-base font-bold text-slate-900 dark:text-white">
@@ -567,7 +567,7 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
       {genderStats.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Card 1: Revenue by Gender Donut & Metrics Table */}
-          <div className="p-6 rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between">
+          <div className="p-6 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 shadow-lg shadow-black/20 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -637,7 +637,7 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
           </div>
 
           {/* Card 2: Gender x Category Grouped Bar Chart */}
-          <div className="p-6 rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between">
+          <div className="p-6 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 shadow-lg shadow-black/20 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-4">
                 <div>

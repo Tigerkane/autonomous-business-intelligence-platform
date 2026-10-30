@@ -43,19 +43,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [version, setVersion] = useState(0);
   const lastUser = useRef<string | null>(null);
 
-  // Initialize theme with safe localStorage and fallback to system preference
-  const [theme, setThemeState] = useState<'dark' | 'light'>(() => {
-    try {
-      const saved = localStorage.getItem('abip_theme');
-      if (saved === 'dark' || saved === 'light') return saved;
-      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        return 'dark';
-      }
-    } catch {
-      // fallback
-    }
-    return 'dark';
-  });
+  // Dark mode is always enforced — no light mode option
+  const [theme, setThemeState] = useState<'dark' | 'light'>('dark');
 
   // Tracks the last applied theme so we only animate on real changes (not on first mount)
   const prevTheme = useRef<'dark' | 'light' | null>(null);

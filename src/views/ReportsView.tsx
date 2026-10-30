@@ -162,7 +162,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ onNavigate }) => {
           return (
             <div
               key={report.id}
-              className="p-6 rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200/80 dark:border-white/10 shadow-xs hover:border-indigo-500/40 hover:-translate-y-0.5 transition-all flex flex-col justify-between"
+              className="p-6 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 shadow-lg shadow-black/20 hover:border-indigo-500/50 hover:shadow-indigo-500/5 hover:-translate-y-0.5 transition-all flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-start justify-between gap-4 mb-4">
@@ -240,8 +240,8 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ onNavigate }) => {
       {/* Preview Modal */}
       {previewBlobUrl && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in">
-          <div className="relative w-full max-w-4xl h-[85vh] bg-white dark:bg-[#0d1527] border border-slate-200 dark:border-white/10 rounded-2xl flex flex-col shadow-2xl overflow-hidden">
-            <div className="p-4 border-b border-slate-200 dark:border-white/10 flex items-center justify-between">
+          <div className="relative w-full max-w-4xl h-[85vh] bg-slate-900 border border-slate-800 rounded-2xl flex flex-col shadow-2xl overflow-hidden">
+            <div className="p-4 border-b border-slate-800 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <FileText className="w-5 h-5 text-indigo-500" />
                 <h3 className="font-bold text-sm text-slate-900 dark:text-white">

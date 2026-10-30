@@ -463,7 +463,7 @@ export const ForecastAnomaliesView: React.FC<ForecastAnomaliesViewProps> = ({ on
       {/* Top ML Diagnostic Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Forecast Model */}
-        <div className="p-5 rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200/80 dark:border-white/10 shadow-xs">
+        <div className="p-5 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 shadow-lg shadow-black/20">
           <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
             Selected Algorithm
           </p>
@@ -476,7 +476,7 @@ export const ForecastAnomaliesView: React.FC<ForecastAnomaliesViewProps> = ({ on
         </div>
 
         {/* Backtest MAPE & Accuracy */}
-        <div className="p-5 rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200/80 dark:border-white/10 shadow-xs">
+        <div className="p-5 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 shadow-lg shadow-black/20">
           <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
             Backtest MAPE
           </p>
@@ -489,7 +489,7 @@ export const ForecastAnomaliesView: React.FC<ForecastAnomaliesViewProps> = ({ on
         </div>
 
         {/* Next Month Predicted */}
-        <div className="p-5 rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200/80 dark:border-white/10 shadow-xs">
+        <div className="p-5 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 shadow-lg shadow-black/20">
           <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
             Next Month Target
           </p>
@@ -502,7 +502,7 @@ export const ForecastAnomaliesView: React.FC<ForecastAnomaliesViewProps> = ({ on
         </div>
 
         {/* Anomalies Detected */}
-        <div className="p-5 rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200/80 dark:border-white/10 shadow-xs">
+        <div className="p-5 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 shadow-lg shadow-black/20">
           <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
             Anomalous Days
           </p>
@@ -516,7 +516,7 @@ export const ForecastAnomaliesView: React.FC<ForecastAnomaliesViewProps> = ({ on
       </div>
 
       {/* Predictive Forecast Chart */}
-      <div className="p-6 rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200/80 dark:border-white/10 shadow-xs">
+      <div className="p-6 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 shadow-lg shadow-black/20">
         <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
           <div>
             <h3 className="text-base font-bold text-slate-900 dark:text-white">
@@ -566,7 +566,7 @@ export const ForecastAnomaliesView: React.FC<ForecastAnomaliesViewProps> = ({ on
 
       {/* Daily revenue with anomaly markers */}
       {dailyChartData && (
-        <div className="p-6 rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200/80 dark:border-white/10 shadow-xs">
+        <div className="p-6 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 shadow-lg shadow-black/20">
           <div className="mb-4">
             <h3 className="text-base font-bold text-slate-900 dark:text-white">
               Daily Revenue with Flagged Days
@@ -583,7 +583,7 @@ export const ForecastAnomaliesView: React.FC<ForecastAnomaliesViewProps> = ({ on
       )}
 
       {/* Anomalies Detection Table & Explanation */}
-      <div className="p-6 rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-4">
+      <div className="p-6 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 shadow-lg shadow-black/20 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -770,7 +770,7 @@ export const ForecastAnomaliesView: React.FC<ForecastAnomaliesViewProps> = ({ on
       </div>
 
       {/* Unusual Transactions (per-category IQR) */}
-      <div className="p-6 rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-4">
+      <div className="p-6 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 shadow-lg shadow-black/20 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">

@@ -142,7 +142,7 @@ export const AskYourDataView: React.FC<AskYourDataViewProps> = ({ onNavigate }) 
   return (
     <div className="flex flex-col h-[calc(100vh-140px)] max-w-5xl mx-auto animate-fade-in">
       {/* Top Controls Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 p-4 mb-3 rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200/80 dark:border-white/10 shadow-xs">
+      <div className="flex flex-wrap items-center justify-between gap-4 p-4 mb-3 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 shadow-lg shadow-black/20">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
             <Bot className="w-5 h-5" />
@@ -232,7 +232,7 @@ export const AskYourDataView: React.FC<AskYourDataViewProps> = ({ onNavigate }) 
             key={idx}
             onClick={() => handleSend(q)}
             disabled={loading}
-            className="shrink-0 px-3 py-1.5 rounded-full bg-white dark:bg-[#0d1527] border border-slate-200 dark:border-white/10 hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 text-xs text-slate-600 dark:text-slate-300 transition-colors shadow-2xs disabled:opacity-50"
+            className="shrink-0 px-3.5 py-1.5 rounded-full bg-slate-900/60 border border-slate-800/80 hover:border-indigo-500/60 hover:text-indigo-400 text-xs text-slate-300 transition-colors shadow-2xs disabled:opacity-50"
           >
             {q}
           </button>
@@ -240,7 +240,7 @@ export const AskYourDataView: React.FC<AskYourDataViewProps> = ({ onNavigate }) 
       </div>
 
       {/* Message Stream */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 rounded-2xl bg-white/70 dark:bg-[#0d1527]/70 border border-slate-200/80 dark:border-white/10 shadow-inner">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 rounded-2xl bg-slate-900/40 backdrop-blur-xl border border-slate-800/80 shadow-inner">
         {messages.map((msg) => {
           const isUser = msg.role === 'user';
           return (
@@ -262,7 +262,7 @@ export const AskYourDataView: React.FC<AskYourDataViewProps> = ({ onNavigate }) 
                 className={`max-w-[80%] rounded-2xl px-5 py-3.5 shadow-xs ${
                   isUser
                     ? 'bg-indigo-600 text-white rounded-tr-none'
-                    : 'bg-white dark:bg-[#131d38] border border-slate-200/80 dark:border-white/10 text-slate-800 dark:text-slate-100 rounded-tl-none'
+                    : 'bg-slate-800/60 border border-slate-700/60 text-slate-100 rounded-tl-none'
                 }`}
               >
                 <div className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap font-sans">
@@ -306,7 +306,7 @@ export const AskYourDataView: React.FC<AskYourDataViewProps> = ({ onNavigate }) 
             <div className="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center shrink-0">
               <Bot className="w-4 h-4" />
             </div>
-            <div className="bg-white dark:bg-[#131d38] border border-slate-200/80 dark:border-white/10 rounded-2xl rounded-tl-none px-5 py-3.5 shadow-xs">
+            <div className="bg-slate-800/60 border border-slate-700/60 rounded-2xl rounded-tl-none px-5 py-3.5 shadow-xs">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-purple-500 animate-bounce" />
                 <div className="w-2 h-2 rounded-full bg-purple-500 animate-bounce [animation-delay:0.2s]" />
@@ -337,7 +337,7 @@ export const AskYourDataView: React.FC<AskYourDataViewProps> = ({ onNavigate }) 
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask a question about sales revenue, trends, categories, or anomalies..."
             disabled={loading}
-            className="w-full pl-4 pr-12 py-3 rounded-xl bg-white dark:bg-[#0d1527] border border-slate-200/80 dark:border-white/10 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 shadow-xs focus:outline-none focus:border-indigo-500 disabled:opacity-50"
+            className="w-full pl-4 pr-12 py-3 rounded-xl bg-slate-900/80 backdrop-blur-xl border border-slate-800/80 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 shadow-xs focus:outline-none focus:border-indigo-500 disabled:opacity-50"
           />
         </div>
 
