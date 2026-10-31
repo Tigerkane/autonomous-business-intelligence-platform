@@ -3,11 +3,11 @@ import { DataProvider, useData } from './contexts/DataContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Sidebar, NavTab } from './components/layout/Sidebar';
 import { Navbar } from './components/layout/Navbar';
+import { HomepageView } from './views/HomepageView';
 
 /* ------------------------------------------------------------------ */
-/* Lazy-loaded views & modals for minimal initial JS bundle            */
+/* Lazy-loaded workspace views for minimal bundle size                */
 /* ------------------------------------------------------------------ */
-const HomepageView = lazy(() => import('./views/HomepageView').then(m => ({ default: m.HomepageView })));
 const DashboardView = lazy(() => import('./views/DashboardView').then(m => ({ default: m.DashboardView })));
 const SalesAnalysisView = lazy(() => import('./views/SalesAnalysisView').then(m => ({ default: m.SalesAnalysisView })));
 const ForecastAnomaliesView = lazy(() => import('./views/ForecastAnomaliesView').then(m => ({ default: m.ForecastAnomaliesView })));
@@ -139,10 +139,10 @@ function AppContent() {
   if (currentTab === 'home' || blocked) {
     return (
       <>
-        <Suspense fallback={<ViewFallback />}>
-          <HomepageView onLaunchPlatform={(tab = 'upload') => goToTab(tab)} />
+        <HomepageView onLaunchPlatform={(tab = 'upload') => goToTab(tab)} />
+        <Suspense fallback={null}>
+          <AuthModal onAuthSuccess={handleAuthSuccess} />
         </Suspense>
-        <AuthModal onAuthSuccess={handleAuthSuccess} />
       </>
     );
   }
