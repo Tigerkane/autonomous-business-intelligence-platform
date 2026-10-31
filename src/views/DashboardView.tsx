@@ -99,12 +99,47 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
 
   if (loading && !data) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-9 h-9 border-3 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-            Synthesizing autonomous KPI scorecards...
-          </p>
+      <div className="space-y-6 animate-pulse select-none" aria-busy="true">
+        {/* Header title skeleton */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <div className="w-64 h-7 bg-slate-800 rounded-lg mb-2" />
+            <div className="w-96 max-w-full h-4 bg-slate-850 rounded" />
+          </div>
+          <div className="w-36 h-9 rounded-xl bg-slate-800 border border-slate-700/50" />
+        </div>
+
+        {/* 4 KPI Scorecard Skeletons */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="p-5 rounded-2xl bg-[#0e172e] border border-slate-800/90 shadow-sm"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-24 h-3 bg-slate-700/60 rounded" />
+                <div className="w-8 h-8 rounded-xl bg-indigo-500/20" />
+              </div>
+              <div className="w-28 h-7 bg-slate-700/80 rounded-lg mb-2" />
+              <div className="w-32 h-3 bg-slate-800 rounded" />
+            </div>
+          ))}
+        </div>
+
+        {/* Charts Grid Skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 p-6 rounded-2xl bg-[#0e172e] border border-slate-800/90 h-80 flex flex-col justify-between">
+            <div className="flex justify-between items-center">
+              <div className="w-40 h-4 bg-slate-700 rounded" />
+              <div className="w-24 h-7 bg-slate-800 rounded-lg" />
+            </div>
+            <div className="w-full h-48 rounded-xl bg-slate-900/60 border border-slate-800/60" />
+          </div>
+          <div className="p-6 rounded-2xl bg-[#0e172e] border border-slate-800/90 h-80 flex flex-col justify-between">
+            <div className="w-32 h-4 bg-slate-700 rounded" />
+            <div className="w-36 h-36 rounded-full border-[16px] border-slate-800 self-center my-auto" />
+            <div className="w-full h-10 bg-slate-800/60 rounded-xl" />
+          </div>
         </div>
       </div>
     );

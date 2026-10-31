@@ -36,8 +36,17 @@ const THEME_TRANSITION_MS = 350;
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, sessionReady } = useAuth();
-  const [dataset, setDataset] = useState<DatasetStatus | null>(null);
-  const [ready, setReady] = useState(false);
+  // Optimistically hydrate cached dataset status from sessionStorage for instant zero-flash render
+  const [dataset, setDataset] = useState<DatasetStatus | null>(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const cached = sessionStorage.getItem('abip_cached_dataset');
+      return cached ? JSON.parse(cached) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [ready, setReady] = useState(true); // Never block the initial app shell paint
   const [backendUp, setBackendUp] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [version, setVersion] = useState(0);
@@ -69,7 +78,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     root.style.colorScheme = mode;
 
     try {
-      localStorage.setItem('abip_theme', mode);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('abip_theme', mode);
+      }
     } catch {
       // ignore
     }
@@ -104,8 +115,16 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const res = await fetch('/api/data/status');
       if (res.ok) {
         const data = await res.json();
-        setDataset(data.database_exists && (data.total_rows || 0) > 0 ? data : null);
+        const active = data.database_exists && (data.total_rows || 0) > 0 ? data : null;
+        setDataset(active);
         setBackendUp(true);
+        try {
+          if (active) {
+            sessionStorage.setItem('abip_cached_dataset', JSON.stringify(active));
+          } else {
+            sessionStorage.removeItem('abip_cached_dataset');
+          }
+        } catch {}
       } else {
         setDataset(null);
       }
@@ -120,12 +139,21 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
+  // Trigger non-blocking status check on initial mount
+  useEffect(() => {
+    load(false);
+  }, [load]);
+
+  // Resync when authentication state changes
   useEffect(() => {
     if (!sessionReady) return;
-    // Only clear the dataset when the signed-in user actually changes, so a
-    // background session re-check doesn't flash the "No Data" state.
     const who = user?.email ?? '';
-    if (lastUser.current !== null && lastUser.current !== who) setDataset(null);
+    if (lastUser.current !== null && lastUser.current !== who) {
+      setDataset(null);
+      try {
+        sessionStorage.removeItem('abip_cached_dataset');
+      } catch {}
+    }
     lastUser.current = who;
     load(true);
   }, [load, sessionReady, user?.email]);

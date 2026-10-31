@@ -360,13 +360,26 @@ export const ForecastAnomaliesView: React.FC<ForecastAnomaliesViewProps> = ({ on
 
   if (loading && !anomalies && !forecast) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-9 h-9 border-3 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-            Running forecast backtests & anomaly detection...
-          </p>
+      <div className="space-y-6 animate-pulse select-none" aria-busy="true">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <div className="w-56 h-7 bg-slate-800 rounded-lg mb-2" />
+            <div className="w-96 max-w-full h-4 bg-slate-850 rounded" />
+          </div>
+          <div className="w-32 h-9 bg-slate-800 border border-slate-700/50 rounded-xl" />
         </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="p-5 rounded-2xl bg-[#0e172e] border border-slate-800/90 h-32 flex flex-col justify-between">
+              <div className="w-28 h-3 bg-slate-700 rounded" />
+              <div className="w-36 h-7 bg-slate-700/80 rounded" />
+              <div className="w-48 h-3 bg-slate-800/70 rounded" />
+            </div>
+          ))}
+        </div>
+
+        <div className="p-6 rounded-2xl bg-[#0e172e] border border-slate-800/90 h-96" />
       </div>
     );
   }

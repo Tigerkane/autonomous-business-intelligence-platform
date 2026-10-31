@@ -3,28 +3,44 @@ import { DataProvider, useData } from './contexts/DataContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Sidebar, NavTab } from './components/layout/Sidebar';
 import { Navbar } from './components/layout/Navbar';
-import { AuthModal } from './components/auth/AuthModal';
-import { AuthView } from './views/AuthView';
-import { ErrorView } from './views/ErrorView';
-import { UploadDatasetView } from './views/UploadDatasetView';
-import { AskYourDataView } from './views/AskYourDataView';
-import { SettingsView } from './views/SettingsView';
 
 /* ------------------------------------------------------------------ */
-/* Lazy-loaded views (Chart.js, pdf-lib, canvas-confetti heavy)        */
-/* These get code-split into separate chunks to reduce initial bundle  */
+/* Lazy-loaded views & modals for minimal initial JS bundle            */
 /* ------------------------------------------------------------------ */
 const HomepageView = lazy(() => import('./views/HomepageView').then(m => ({ default: m.HomepageView })));
 const DashboardView = lazy(() => import('./views/DashboardView').then(m => ({ default: m.DashboardView })));
 const SalesAnalysisView = lazy(() => import('./views/SalesAnalysisView').then(m => ({ default: m.SalesAnalysisView })));
 const ForecastAnomaliesView = lazy(() => import('./views/ForecastAnomaliesView').then(m => ({ default: m.ForecastAnomaliesView })));
 const ReportsView = lazy(() => import('./views/ReportsView').then(m => ({ default: m.ReportsView })));
+const UploadDatasetView = lazy(() => import('./views/UploadDatasetView').then(m => ({ default: m.UploadDatasetView })));
+const AskYourDataView = lazy(() => import('./views/AskYourDataView').then(m => ({ default: m.AskYourDataView })));
+const SettingsView = lazy(() => import('./views/SettingsView').then(m => ({ default: m.SettingsView })));
+const AuthView = lazy(() => import('./views/AuthView').then(m => ({ default: m.AuthView })));
+const ErrorView = lazy(() => import('./views/ErrorView').then(m => ({ default: m.ErrorView })));
+const AuthModal = lazy(() => import('./components/auth/AuthModal').then(m => ({ default: m.AuthModal })));
 
-/** Minimal loading spinner shown while lazy chunks stream in */
+/** Shimmering skeleton fallback shown while lazy chunks stream in */
 const ViewFallback = () => (
-  <div className="flex items-center justify-center h-64 gap-3 animate-pulse">
-    <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-    <span className="text-sm text-slate-400 font-medium">Loading view…</span>
+  <div className="space-y-6 animate-pulse select-none">
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div>
+        <div className="w-56 h-7 bg-slate-800/80 rounded-lg mb-2" />
+        <div className="w-80 max-w-full h-4 bg-slate-850 rounded" />
+      </div>
+      <div className="w-32 h-9 bg-slate-800/60 rounded-xl" />
+    </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {[1, 2, 3, 4].map((i) => (
+        <div key={i} className="h-28 rounded-2xl bg-[#0e172e] border border-slate-800/80 p-5">
+          <div className="w-20 h-3 bg-slate-700/60 rounded mb-3" />
+          <div className="w-28 h-6 bg-slate-700/80 rounded" />
+        </div>
+      ))}
+    </div>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="lg:col-span-2 h-72 rounded-2xl bg-[#0e172e] border border-slate-800/80 p-6" />
+      <div className="h-72 rounded-2xl bg-[#0e172e] border border-slate-800/80 p-6" />
+    </div>
   </div>
 );
 
@@ -45,7 +61,10 @@ function AppContent() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sidebarHidden, setSidebarHidden] = useState<boolean>(() => {
     try {
-      return localStorage.getItem('abip_sidebar_hidden') === 'true';
+      if (typeof window !== 'undefined') {
+        return localStorage.getItem('abip_sidebar_hidden') === 'true';
+      }
+      return false;
     } catch {
       return false;
     }
@@ -57,7 +76,9 @@ function AppContent() {
     setSidebarHidden((prev) => {
       const next = !prev;
       try {
-        localStorage.setItem('abip_sidebar_hidden', String(next));
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('abip_sidebar_hidden', String(next));
+        }
       } catch {}
       return next;
     });
@@ -129,35 +150,41 @@ function AppContent() {
   // Public: Dedicated Split-Layout Sign In & Sign Up Screen
   if (currentTab === 'signin' || currentTab === 'signup') {
     return (
-      <AuthView
-        initialMode={currentTab}
-        onNavigateHome={() => setCurrentTab('home')}
-        onAuthSuccess={handleAuthSuccess}
-      />
+      <Suspense fallback={<ViewFallback />}>
+        <AuthView
+          initialMode={currentTab}
+          onNavigateHome={() => setCurrentTab('home')}
+          onAuthSuccess={handleAuthSuccess}
+        />
+      </Suspense>
     );
   }
 
   // Public: 404 Discontinuity Screen
   if (currentTab === '404') {
     return (
-      <ErrorView
-        type="404"
-        onNavigateHome={() => setCurrentTab('home')}
-      />
+      <Suspense fallback={<ViewFallback />}>
+        <ErrorView
+          type="404"
+          onNavigateHome={() => setCurrentTab('home')}
+        />
+      </Suspense>
     );
   }
 
   // Public: Server Unreachable / Offline Screen
   if (currentTab === 'offline') {
     return (
-      <ErrorView
-        type="offline"
-        onNavigateHome={() => setCurrentTab('home')}
-        onRetry={async () => {
-          await refresh();
-          if (backendUp) setCurrentTab('dashboard');
-        }}
-      />
+      <Suspense fallback={<ViewFallback />}>
+        <ErrorView
+          type="offline"
+          onNavigateHome={() => setCurrentTab('home')}
+          onRetry={async () => {
+            await refresh();
+            if (backendUp) setCurrentTab('dashboard');
+          }}
+        />
+      </Suspense>
     );
   }
 
@@ -202,18 +229,20 @@ function AppContent() {
             {currentTab === 'reports' && (
               <ReportsView onNavigate={(tab) => setCurrentTab(tab)} />
             )}
+            {currentTab === 'upload' && (
+              <UploadDatasetView onNavigate={(tab) => setCurrentTab(tab)} />
+            )}
+            {currentTab === 'ask-data' && (
+              <AskYourDataView onNavigate={(tab) => setCurrentTab(tab)} />
+            )}
+            {currentTab === 'settings' && <SettingsView />}
           </Suspense>
-          {currentTab === 'upload' && (
-            <UploadDatasetView onNavigate={(tab) => setCurrentTab(tab)} />
-          )}
-          {currentTab === 'ask-data' && (
-            <AskYourDataView onNavigate={(tab) => setCurrentTab(tab)} />
-          )}
-          {currentTab === 'settings' && <SettingsView />}
         </main>
       </div>
 
-      <AuthModal onAuthSuccess={handleAuthSuccess} />
+      <Suspense fallback={null}>
+        <AuthModal onAuthSuccess={handleAuthSuccess} />
+      </Suspense>
     </div>
   );
 }
