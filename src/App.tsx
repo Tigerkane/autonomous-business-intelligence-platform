@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Sidebar, NavTab } from './components/layout/Sidebar';
 import { Navbar } from './components/layout/Navbar';
 import { HomepageView } from './views/HomepageView';
+import { AuthModal } from './components/auth/AuthModal';
 
 /* ------------------------------------------------------------------ */
 /* Lazy-loaded workspace views for minimal bundle size                */
@@ -17,7 +18,6 @@ const AskYourDataView = lazy(() => import('./views/AskYourDataView').then(m => (
 const SettingsView = lazy(() => import('./views/SettingsView').then(m => ({ default: m.SettingsView })));
 const AuthView = lazy(() => import('./views/AuthView').then(m => ({ default: m.AuthView })));
 const ErrorView = lazy(() => import('./views/ErrorView').then(m => ({ default: m.ErrorView })));
-const AuthModal = lazy(() => import('./components/auth/AuthModal').then(m => ({ default: m.AuthModal })));
 
 /** Shimmering skeleton fallback shown while lazy chunks stream in */
 const ViewFallback = () => (
@@ -101,6 +101,20 @@ function AppContent() {
 
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('abip:sidebar-toggle', handleExternalToggle);
+
+    // Preload primary workspace views on idle so opening them is instantaneous
+    const preload = () => {
+      import('./views/DashboardView');
+      import('./views/UploadDatasetView');
+    };
+    if (typeof window !== 'undefined') {
+      if ('requestIdleCallback' in window) {
+        (window as any).requestIdleCallback(preload);
+      } else {
+        setTimeout(preload, 1200);
+      }
+    }
+
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('abip:sidebar-toggle', handleExternalToggle);
@@ -140,9 +154,7 @@ function AppContent() {
     return (
       <>
         <HomepageView onLaunchPlatform={(tab = 'upload') => goToTab(tab)} />
-        <Suspense fallback={null}>
-          <AuthModal onAuthSuccess={handleAuthSuccess} />
-        </Suspense>
+        <AuthModal onAuthSuccess={handleAuthSuccess} />
       </>
     );
   }
@@ -240,9 +252,7 @@ function AppContent() {
         </main>
       </div>
 
-      <Suspense fallback={null}>
-        <AuthModal onAuthSuccess={handleAuthSuccess} />
-      </Suspense>
+      <AuthModal onAuthSuccess={handleAuthSuccess} />
     </div>
   );
 }

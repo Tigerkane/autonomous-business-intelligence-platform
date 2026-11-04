@@ -55,10 +55,11 @@ const FloatingParticles: React.FC<{ className?: string }> = ({ className = '' })
     const particles: DotParticle[] = [];
 
     const resize = () => {
-      canvas.width = window.innerWidth * window.devicePixelRatio;
-      canvas.height = window.innerHeight * window.devicePixelRatio;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
       ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      ctx.scale(dpr, dpr);
     };
     resize();
     window.addEventListener('resize', resize);
@@ -73,9 +74,9 @@ const FloatingParticles: React.FC<{ className?: string }> = ({ className = '' })
     ];
 
     // Spread floating dots across the whole screen till end
-    const count = Math.min(110, Math.max(65, Math.floor((window.innerWidth * window.innerHeight) / 10000)));
+    const count = Math.min(100, Math.max(50, Math.floor((window.innerWidth * window.innerHeight) / 12000)));
     for (let i = 0; i < count; i++) {
-      const baseOp = Math.random() * 0.5 + 0.2;
+      const baseOp = Math.random() * 0.45 + 0.2;
       const color = palette[Math.floor(Math.random() * palette.length)];
       particles.push({
         x: Math.random() * window.innerWidth,
@@ -111,10 +112,7 @@ const FloatingParticles: React.FC<{ className?: string }> = ({ className = '' })
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
         ctx.fillStyle = `${p.color} ${clampedOpacity})`;
-        ctx.shadowBlur = p.r * 2.5;
-        ctx.shadowColor = `${p.color} ${clampedOpacity * 0.75})`;
         ctx.fill();
-        ctx.shadowBlur = 0;
       }
 
       animId = requestAnimationFrame(draw);
@@ -130,7 +128,7 @@ const FloatingParticles: React.FC<{ className?: string }> = ({ className = '' })
   return (
     <canvas
       ref={canvasRef}
-      className={`fixed inset-0 w-full h-full pointer-events-none z-30 ${className}`}
+      className={`fixed inset-0 w-full h-full pointer-events-none z-30 transition-opacity duration-700 ${className}`}
       style={{ opacity: 0.95 }}
     />
   );
@@ -250,13 +248,13 @@ const ScrollReveal: React.FC<{
   const getInitial = () => {
     switch (direction) {
       case 'up':
-        return { opacity: 0, y: 35 };
+        return { opacity: 0, y: 20 };
       case 'down':
-        return { opacity: 0, y: -35 };
+        return { opacity: 0, y: -20 };
       case 'left':
-        return { opacity: 0, x: -35 };
+        return { opacity: 0, x: -20 };
       case 'right':
-        return { opacity: 0, x: 35 };
+        return { opacity: 0, x: 20 };
       default:
         return { opacity: 0 };
     }
@@ -266,8 +264,8 @@ const ScrollReveal: React.FC<{
     <motion.div
       initial={getInitial()}
       whileInView={{ opacity: 1, x: 0, y: 0 }}
-      viewport={{ once: true, margin: '-40px' }}
-      transition={{ duration: 0.65, delay, ease: [0.22, 1, 0.36, 1] }}
+      viewport={{ once: true, margin: '0px 0px -40px 0px' }}
+      transition={{ duration: 0.5, delay, ease: [0.16, 1, 0.3, 1] }}
       className={className}
     >
       {children}
@@ -442,9 +440,11 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
       {/* Floating dots spread across entire page till end — No lines */}
       <FloatingParticles />
 
-      {/* Top Scroll-Driven Progress Bar */}
+      {/* Top Scroll-Driven Progress Bar — smoothly fades in only once scrolled */}
       <motion.div
-        className="fixed top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400 z-50 origin-left shadow-[0_0_12px_rgba(99,102,241,0.85)]"
+        className={`fixed top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400 z-50 origin-left shadow-[0_0_12px_rgba(99,102,241,0.85)] transition-opacity duration-300 ${
+          showScrollTop ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
         style={{ scaleX }}
       />
 
@@ -452,7 +452,7 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
       {/* 1. STICKY TOP NAV                                            */}
       {/* ============================================================ */}
       <header
-        className={`sticky top-0 z-40 transition-all duration-500 ${
+        className={`sticky top-0 z-40 animate-opening-nav transition-all duration-500 ${
           navScrolled
             ? 'backdrop-blur-xl bg-[#0a0f1e]/85 shadow-md shadow-indigo-950/5'
             : 'bg-transparent'
@@ -551,10 +551,10 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-50 md:hidden flex">
           <div
-            className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity"
+            className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm animate-modal-backdrop"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <div className="relative flex flex-col w-72 max-w-[85vw] h-full bg-white dark:bg-[#0c1222] shadow-2xl z-10 p-5">
+          <div className="relative flex flex-col w-72 max-w-[85vw] h-full bg-white dark:bg-[#0c1222] shadow-2xl z-10 p-5 animate-slide-in">
             <div className="flex items-center justify-between pb-4">
               <BrandLogo size="md" variant="full" />
               <button
@@ -599,8 +599,8 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
       <section className="relative pt-10 pb-12 sm:pt-14 sm:pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-            {/* Left Content with Scroll Reveal */}
-            <ScrollReveal direction="left" className="lg:col-span-7 space-y-6 text-center lg:text-left">
+            {/* Left Content with fluid opening entrance */}
+            <div className="lg:col-span-7 space-y-6 text-center lg:text-left animate-opening-hero">
               {/* Tag pill */}
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 dark:bg-indigo-400/10 text-xs font-semibold text-indigo-600 dark:text-indigo-400 homepage-tag-glow shadow-xs">
                 <Sparkles className="w-3.5 h-3.5" />
@@ -632,10 +632,10 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
-            </ScrollReveal>
+            </div>
 
-            {/* Right: Live Autonomous Telemetry Card with Scroll Reveal */}
-            <ScrollReveal direction="right" delay={0.15} className="lg:col-span-5 flex items-center justify-center">
+            {/* Right: Live Autonomous Telemetry Card with fluid opening bloom */}
+            <div className="lg:col-span-5 flex items-center justify-center animate-opening-card">
               <div className="w-full max-w-[440px] homepage-hero-card p-6 rounded-3xl bg-white/85 dark:bg-slate-800/60 backdrop-blur-xl shadow-2xl shadow-indigo-950/10 dark:shadow-indigo-500/5">
                 {/* Card Header */}
                 <div className="flex items-center justify-between mb-4">
@@ -712,7 +712,7 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
                   <span>Jan</span><span>Mar</span><span>Jun</span><span>Sep</span><span>Live</span>
                 </div>
               </div>
-            </ScrollReveal>
+            </div>
           </div>
         </div>
       </section>
@@ -721,7 +721,7 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
       {/* 2b. LIVE STREAMING METRICS ROW                               */}
       {/* ============================================================ */}
       <section className="py-6">
-        <ScrollReveal direction="up" className="max-w-5xl mx-auto px-4 sm:px-6 grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 animate-opening-metrics">
           <StatBadge
             icon={<Database className="w-4 h-4" />}
             value={processedRows}
@@ -753,7 +753,7 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
             label="Data Isolation"
             sublabel="Zero External Sharing"
           />
-        </ScrollReveal>
+        </div>
       </section>
 
       {/* ============================================================ */}

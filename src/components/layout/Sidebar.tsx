@@ -256,7 +256,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {mobileOpen && (
         <div className="fixed inset-0 z-50 md:hidden flex">
           <div
-            className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs animate-modal-backdrop"
             onClick={onCloseMobile}
           />
           <div className="relative flex flex-col w-72 max-w-[85vw] h-full shadow-2xl z-10 animate-slide-in">

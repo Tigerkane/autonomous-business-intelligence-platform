@@ -7,17 +7,17 @@
     --font-sans: 'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-    --bg-main: #f8fafc;
-    --bg-surface: #ffffff;
-    --bg-raised: #f1f5f9;
-    --border-color: #e2e8f0;
-    --text-primary: #0f172a;
-    --text-muted: #64748b;
-    --primary: #4f46e5;
-    --primary-hover: #4338ca;
-    --primary-soft: #6366f1;
+    --bg-main: #0a0f1e;
+    --bg-surface: #0e172e;
+    --bg-raised: #1e293b;
+    --border-color: #334155;
+    --text-primary: #e2e8f0;
+    --text-muted: #94a3b8;
+    --primary: #6366f1;
+    --primary-hover: #4f46e5;
+    --primary-soft: #818cf8;
 
-    color-scheme: light;
+    color-scheme: dark;
   }
 
   .dark {
@@ -289,20 +289,113 @@ html.theme-transition *::after {
   50% { transform: translate(30px, -35px) scale(1.04); }
 }
 
-/* Sparkline bar entrance animation */
-.homepage-sparkline-bar {
-  animation: homepage-bar-rise 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-  animation-fill-mode: both;
+/* ============================================================ */
+/* Cinematic Fluid Opening Entrance Animations                   */
+/* Zero hydration break: Hardware-accelerated GPU compositor    */
+/* ============================================================ */
+@keyframes hero-fade-up {
+  0% {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-@keyframes homepage-bar-rise {
+
+@keyframes hero-card-bloom {
+  0% {
+    opacity: 0;
+    transform: translateY(22px) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes hero-fade-down {
+  0% {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes sparkline-rise {
   0% {
     transform: scaleY(0);
-    transform-origin: bottom;
   }
   100% {
     transform: scaleY(1);
-    transform-origin: bottom;
   }
+}
+
+.animate-opening-nav {
+  animation: hero-fade-down 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-opening-hero {
+  animation: hero-fade-up 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.05s;
+}
+
+.animate-opening-card {
+  animation: hero-card-bloom 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.16s;
+}
+
+.animate-opening-metrics {
+  animation: hero-fade-up 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.26s;
+}
+
+.homepage-sparkline-bar {
+  transform-origin: bottom;
+  animation: sparkline-rise 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.35s;
+}
+
+/* Smooth modal and drawer entrance animations */
+@keyframes modal-backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modal-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-modal-backdrop {
+  animation: modal-backdrop-in 0.2s ease-out forwards;
+}
+
+.animate-modal-dialog {
+  animation: modal-scale-in 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-in {
+  animation: slide-in-left 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Hero card subtle hover lift */
@@ -407,6 +500,14 @@ html.theme-transition *::after {
 
 /* Reduced motion: disable all homepage animations */
 @media (prefers-reduced-motion: reduce) {
+  .animate-opening-nav,
+  .animate-opening-hero,
+  .animate-opening-card,
+  .animate-opening-metrics {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
   .homepage-reveal {
     opacity: 1;
     transform: none;
