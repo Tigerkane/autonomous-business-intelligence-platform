@@ -103,10 +103,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
         {/* Header title skeleton */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <div className="w-64 h-7 bg-slate-800 rounded-lg mb-2" />
-            <div className="w-96 max-w-full h-4 bg-slate-850 rounded" />
+            <div className="w-64 h-7 bg-slate-200 dark:bg-slate-800 rounded-lg mb-2" />
+            <div className="w-96 max-w-full h-4 bg-slate-100 dark:bg-slate-850 rounded" />
           </div>
-          <div className="w-36 h-9 rounded-xl bg-slate-800 border border-slate-700/50" />
+          <div className="w-36 h-9 rounded-xl bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700/50" />
         </div>
 
         {/* 4 KPI Scorecard Skeletons */}
@@ -114,31 +114,31 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
           {[1, 2, 3, 4].map((i) => (
             <div
               key={i}
-              className="p-5 rounded-2xl bg-[#0e172e] border border-slate-800/90 shadow-sm"
+              className="p-5 rounded-2xl bg-white dark:bg-[#0e172e] border border-slate-200 dark:border-slate-800/90 shadow-sm"
             >
               <div className="flex items-center justify-between mb-3">
-                <div className="w-24 h-3 bg-slate-700/60 rounded" />
+                <div className="w-24 h-3 bg-slate-200 dark:bg-slate-700/60 rounded" />
                 <div className="w-8 h-8 rounded-xl bg-indigo-500/20" />
               </div>
-              <div className="w-28 h-7 bg-slate-700/80 rounded-lg mb-2" />
-              <div className="w-32 h-3 bg-slate-800 rounded" />
+              <div className="w-28 h-7 bg-slate-200 dark:bg-slate-700/80 rounded-lg mb-2" />
+              <div className="w-32 h-3 bg-slate-100 dark:bg-slate-800 rounded" />
             </div>
           ))}
         </div>
 
         {/* Charts Grid Skeleton */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 p-6 rounded-2xl bg-[#0e172e] border border-slate-800/90 h-80 flex flex-col justify-between">
+          <div className="lg:col-span-2 p-6 rounded-2xl bg-white dark:bg-[#0e172e] border border-slate-200 dark:border-slate-800/90 h-80 flex flex-col justify-between">
             <div className="flex justify-between items-center">
-              <div className="w-40 h-4 bg-slate-700 rounded" />
-              <div className="w-24 h-7 bg-slate-800 rounded-lg" />
+              <div className="w-40 h-4 bg-slate-200 dark:bg-slate-700 rounded" />
+              <div className="w-24 h-7 bg-slate-200 dark:bg-slate-800 rounded-lg" />
             </div>
-            <div className="w-full h-48 rounded-xl bg-slate-900/60 border border-slate-800/60" />
+            <div className="w-full h-48 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/60" />
           </div>
-          <div className="p-6 rounded-2xl bg-[#0e172e] border border-slate-800/90 h-80 flex flex-col justify-between">
-            <div className="w-32 h-4 bg-slate-700 rounded" />
-            <div className="w-36 h-36 rounded-full border-[16px] border-slate-800 self-center my-auto" />
-            <div className="w-full h-10 bg-slate-800/60 rounded-xl" />
+          <div className="p-6 rounded-2xl bg-white dark:bg-[#0e172e] border border-slate-200 dark:border-slate-800/90 h-80 flex flex-col justify-between">
+            <div className="w-32 h-4 bg-slate-200 dark:bg-slate-700 rounded" />
+            <div className="w-36 h-36 rounded-full border-[16px] border-slate-200 dark:border-slate-800 self-center my-auto" />
+            <div className="w-full h-10 bg-slate-100 dark:bg-slate-800/60 rounded-xl" />
           </div>
         </div>
       </div>
@@ -331,7 +331,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
       {/* Top 4 KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Revenue */}
-        <div className="p-5 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] shadow-lg shadow-black/10 hover:border-indigo-500/30 hover:shadow-indigo-500/5 transition-all duration-500">
+        <div className="p-5 rounded-2xl bg-white dark:bg-white/[0.03] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-sm dark:shadow-lg dark:shadow-black/10 hover:border-indigo-500/30 hover:shadow-indigo-500/5 transition-all duration-300">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
@@ -380,7 +380,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
         </div>
 
         {/* Transactions */}
-        <div className="p-5 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] shadow-lg shadow-black/10 hover:border-emerald-500/30 hover:shadow-emerald-500/5 transition-all duration-500">
+        <div className="p-5 rounded-2xl bg-white dark:bg-white/[0.03] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-sm dark:shadow-lg dark:shadow-black/10 hover:border-emerald-500/30 hover:shadow-emerald-500/5 transition-all duration-300">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
@@ -419,7 +419,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
         </div>
 
         {/* Units Sold */}
-        <div className="p-5 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] shadow-lg shadow-black/10 hover:border-amber-500/30 hover:shadow-amber-500/5 transition-all duration-500">
+        <div className="p-5 rounded-2xl bg-white dark:bg-white/[0.03] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-sm dark:shadow-lg dark:shadow-black/10 hover:border-amber-500/30 hover:shadow-amber-500/5 transition-all duration-300">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
@@ -458,7 +458,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
         </div>
 
         {/* Avg. Transaction Value */}
-        <div className="p-5 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] shadow-lg shadow-black/10 hover:border-purple-500/30 hover:shadow-purple-500/5 transition-all duration-500">
+        <div className="p-5 rounded-2xl bg-white dark:bg-white/[0.03] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-sm dark:shadow-lg dark:shadow-black/10 hover:border-purple-500/30 hover:shadow-purple-500/5 transition-all duration-300">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
@@ -502,10 +502,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
         {/* Left Column (8 cols): Primary Analytical Core */}
         <div className="lg:col-span-8 space-y-6">
           {/* Revenue & Profit Trajectory Hub */}
-          <div className="p-6 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] shadow-lg shadow-black/10 hover:border-white/[0.14] transition-all duration-500 flex flex-col">
+          <div className="p-6 rounded-2xl bg-white dark:bg-white/[0.03] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-sm dark:shadow-lg dark:shadow-black/10 hover:border-slate-300 dark:hover:border-white/[0.14] transition-all duration-300 flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
               <div>
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                   <LineChart className="w-4 h-4 text-indigo-400" />
                   <span>{isProfit ? 'Gross Profit Trajectory' : 'Revenue Trajectory'}</span>
                 </h3>
@@ -517,13 +517,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
               </div>
               {/* Metric & Grain Toggles */}
               <div className="flex flex-wrap items-center gap-2">
-                <div className="flex items-center p-0.5 rounded-xl bg-white/[0.04] border border-white/[0.08]">
+                <div className="flex items-center p-0.5 rounded-xl bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08]">
                   <button
                     onClick={() => setTrendMetric('revenue')}
                     className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
                       trendMetric === 'revenue'
                         ? 'bg-indigo-600 text-white shadow-xs'
-                        : 'text-slate-400 hover:text-white'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
                     Revenue
@@ -533,20 +533,20 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                     className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
                       trendMetric === 'profit'
                         ? 'bg-emerald-600 text-white shadow-xs'
-                        : 'text-slate-400 hover:text-white'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
                     Profit
                   </button>
                 </div>
 
-                <div className="flex items-center p-0.5 rounded-xl bg-white/[0.04] border border-white/[0.08]">
+                <div className="flex items-center p-0.5 rounded-xl bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08]">
                   <button
                     onClick={() => setTrendGrain('weekly')}
                     className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
                       trendGrain === 'weekly'
                         ? 'bg-indigo-600 text-white shadow-xs'
-                        : 'text-slate-400 hover:text-white'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
                     Weekly
@@ -556,7 +556,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                     className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
                       trendGrain === 'monthly'
                         ? 'bg-indigo-600 text-white shadow-xs'
-                        : 'text-slate-400 hover:text-white'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
                     Monthly
@@ -573,10 +573,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
           </div>
 
           {/* Executive Category Profitability & Contribution Breakdown Table */}
-          <div className="p-6 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] shadow-lg shadow-black/10 hover:border-white/[0.14] transition-all duration-500 space-y-4">
+          <div className="p-6 rounded-2xl bg-white dark:bg-white/[0.03] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-sm dark:shadow-lg dark:shadow-black/10 hover:border-slate-300 dark:hover:border-white/[0.14] transition-all duration-300 space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <h3 className="text-base font-bold text-white">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">
                   Category Profitability & Contribution Scorecard
                 </h3>
                 <p className="text-xs text-slate-400 mt-0.5">
@@ -595,10 +595,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
               </div>
             </div>
 
-            <div className="overflow-x-auto border border-white/[0.08] rounded-xl bg-white/[0.01]">
+            <div className="overflow-x-auto border border-slate-200 dark:border-white/[0.08] rounded-xl bg-slate-50/50 dark:bg-white/[0.01]">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="bg-white/[0.03] border-b border-white/[0.08] text-slate-400">
+                  <tr className="bg-slate-50 dark:bg-white/[0.03] border-b border-slate-200 dark:border-white/[0.08] text-slate-500 dark:text-slate-400">
                     <th className="px-4 py-3 font-bold uppercase text-[10px]">Product Category</th>
                     <th className="px-4 py-3 font-bold uppercase text-[10px]">Revenue</th>
                     <th className="px-4 py-3 font-bold uppercase text-[10px]">Revenue Share</th>
@@ -607,7 +607,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                     <th className="px-4 py-3 font-bold uppercase text-[10px]">Profit Share</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/[0.04] font-mono">
+                <tbody className="divide-y divide-slate-100 dark:divide-white/[0.04] font-mono">
                   {data.categories.map((c, i) => {
                     const revShare = ((c.sales / data.kpis.total_sales) * 100).toFixed(1);
                     const totalProfit = data.kpis.total_profit || 1;
@@ -616,9 +616,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                     return (
                       <tr
                         key={c.category}
-                        className="hover:bg-white/[0.03] transition-colors"
+                        className="hover:bg-slate-50 dark:hover:bg-white/[0.03] transition-colors"
                       >
-                        <td className="px-4 py-3 font-sans font-bold text-white">
+                        <td className="px-4 py-3 font-sans font-bold text-slate-900 dark:text-white">
                           <div className="flex items-center gap-2">
                             <span
                               className="w-2.5 h-2.5 rounded-full shrink-0"
@@ -627,12 +627,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                             <span>{c.category}</span>
                           </div>
                         </td>
-                        <td className="px-4 py-3 font-semibold text-white">
+                        <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white">
                           {inr(c.sales)}
                         </td>
-                        <td className="px-4 py-3 text-slate-300">
+                        <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
                           <div className="flex items-center gap-2">
-                            <div className="w-16 bg-white/10 rounded-full h-1.5 overflow-hidden">
+                            <div className="w-16 bg-slate-200 dark:bg-white/10 rounded-full h-1.5 overflow-hidden">
                               <div
                                 className="h-full rounded-full"
                                 style={{
@@ -644,23 +644,23 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                             <span>{revShare}%</span>
                           </div>
                         </td>
-                        <td className="px-4 py-3 font-bold text-emerald-400">
+                        <td className="px-4 py-3 font-bold text-emerald-600 dark:text-emerald-400">
                           {inr(c.profit ?? 0)}
                         </td>
                         <td className="px-4 py-3">
-                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
                             {c.margin ?? 0}% margin
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-slate-300">
+                        <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
                           <div className="flex items-center gap-2">
-                            <div className="w-16 bg-emerald-950/40 rounded-full h-1.5 overflow-hidden">
+                            <div className="w-16 bg-slate-200 dark:bg-emerald-950/40 rounded-full h-1.5 overflow-hidden">
                               <div
                                 className="h-full rounded-full bg-emerald-500"
                                 style={{ width: `${Math.min(100, Math.max(0, Number(profitShare)))}%` }}
                               />
                             </div>
-                            <span className="text-emerald-400 font-semibold">{profitShare}%</span>
+                            <span className="text-emerald-600 dark:text-emerald-400 font-semibold">{profitShare}%</span>
                           </div>
                         </td>
                       </tr>
@@ -672,10 +672,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
           </div>
 
           {/* Customer Demographics Bar Chart */}
-          <div className="p-6 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] shadow-lg shadow-black/10 hover:border-white/[0.14] transition-all duration-500">
+          <div className="p-6 rounded-2xl bg-white dark:bg-white/[0.03] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-sm dark:shadow-lg dark:shadow-black/10 hover:border-slate-300 dark:hover:border-white/[0.14] transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                   <Users className="w-4 h-4 text-indigo-400" />
                   <span>Customer Age Demographic Spread</span>
                 </h3>
@@ -699,13 +699,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
               const unknownPct = (unknownCust / totalCust) * 100;
 
               return (
-                <div className="mt-5 pt-4 border-t border-white/[0.06]">
+                <div className="mt-5 pt-4 border-t border-slate-200 dark:border-white/[0.06]">
                   <div className="flex items-center justify-between text-xs mb-2">
-                    <span className="font-bold text-slate-300">Customer Gender Distribution</span>
-                    <span className="text-slate-400 font-mono text-[11px]">{totalCust.toLocaleString()} Total Unique Customers</span>
+                    <span className="font-bold text-slate-700 dark:text-slate-300">Customer Gender Distribution</span>
+                    <span className="text-slate-500 dark:text-slate-400 font-mono text-[11px]">{totalCust.toLocaleString('en-IN')} Total Unique Customers</span>
                   </div>
 
-                  <div className="w-full h-2 rounded-full overflow-hidden flex bg-white/[0.06]">
+                  <div className="w-full h-2 rounded-full overflow-hidden flex bg-slate-100 dark:bg-white/[0.06]">
                     <div
                       style={{ width: `${malePct}%`, backgroundColor: getGenderColor('Male') }}
                       title={`Male: ${maleCust} (${malePct.toFixed(1)}%)`}
@@ -728,22 +728,22 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                   <div className="flex items-center justify-between mt-2.5 text-xs">
                     <div className="flex items-center gap-1.5">
                       <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: getGenderColor('Male') }} />
-                      <span className="text-slate-400 font-medium">Male:</span>
-                      <span className="font-bold text-white font-mono">{maleCust}</span>
-                      <span className="text-slate-500">({malePct.toFixed(1)}%)</span>
+                      <span className="text-slate-500 dark:text-slate-400 font-medium">Male:</span>
+                      <span className="font-bold text-slate-900 dark:text-white font-mono">{maleCust}</span>
+                      <span className="text-slate-400 dark:text-slate-500">({malePct.toFixed(1)}%)</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: getGenderColor('Female') }} />
-                      <span className="text-slate-400 font-medium">Female:</span>
-                      <span className="font-bold text-white font-mono">{femaleCust}</span>
-                      <span className="text-slate-500">({femalePct.toFixed(1)}%)</span>
+                      <span className="text-slate-500 dark:text-slate-400 font-medium">Female:</span>
+                      <span className="font-bold text-slate-900 dark:text-white font-mono">{femaleCust}</span>
+                      <span className="text-slate-400 dark:text-slate-500">({femalePct.toFixed(1)}%)</span>
                     </div>
                     {unknownCust > 0 && (
                       <div className="flex items-center gap-1.5">
                         <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: getGenderColor('Unknown') }} />
-                        <span className="text-slate-400 font-medium">Unknown:</span>
-                        <span className="font-bold text-white font-mono">{unknownCust}</span>
-                        <span className="text-slate-500">({unknownPct.toFixed(1)}%)</span>
+                        <span className="text-slate-500 dark:text-slate-400 font-medium">Unknown:</span>
+                        <span className="font-bold text-slate-900 dark:text-white font-mono">{unknownCust}</span>
+                        <span className="text-slate-400 dark:text-slate-500">({unknownPct.toFixed(1)}%)</span>
                       </div>
                     )}
                   </div>
@@ -756,11 +756,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
         {/* Right Column (4 cols): Intelligence Rail & Action Center */}
         <div className="lg:col-span-4 space-y-6">
           {/* Category Mix & Donut Hub */}
-          <div className="p-6 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] shadow-lg shadow-black/10 hover:border-white/[0.14] transition-all duration-500 flex flex-col justify-between">
+          <div className="p-6 rounded-2xl bg-white dark:bg-white/[0.03] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-sm dark:shadow-lg dark:shadow-black/10 hover:border-slate-300 dark:hover:border-white/[0.14] transition-all duration-300 flex flex-col justify-between">
             <div>
               <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
                 <div>
-                  <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                     <PieIcon className="w-4 h-4 text-purple-400" />
                     <span>{isCategoryProfit ? 'Category Profit Mix' : 'Category Sales Mix'}</span>
                   </h3>
@@ -770,13 +770,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                       : 'Revenue split by category'}
                   </p>
                 </div>
-                <div className="flex items-center p-0.5 rounded-lg bg-white/[0.04] border border-white/[0.08]">
+                <div className="flex items-center p-0.5 rounded-lg bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08]">
                   <button
                     onClick={() => setCategoryMetric('revenue')}
                     className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all ${
                       !isCategoryProfit
                         ? 'bg-indigo-600 text-white shadow-xs'
-                        : 'text-slate-400 hover:text-white'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
                     Revenue
@@ -786,7 +786,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                     className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all ${
                       isCategoryProfit
                         ? 'bg-emerald-600 text-white shadow-xs'
-                        : 'text-slate-400 hover:text-white'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
                     Profit
@@ -797,14 +797,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
               <div className="relative h-48 w-full flex items-center justify-center my-3">
                 <Doughnut data={donutData} options={donutOptions} />
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     {isCategoryProfit ? 'Total Profit' : 'Total Revenue'}
                   </span>
-                  <span className="text-base font-extrabold text-white">
+                  <span className="text-base font-extrabold text-slate-900 dark:text-white">
                     {inr(isCategoryProfit ? (data.kpis.total_profit ?? 0) : data.kpis.total_sales)}
                   </span>
                   {isCategoryProfit && data.kpis.profit_margin !== undefined && (
-                    <span className="text-[10px] font-semibold text-emerald-400 font-mono">
+                    <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 font-mono">
                       {data.kpis.profit_margin}% avg margin
                     </span>
                   )}
@@ -813,7 +813,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
             </div>
 
             {/* Category List */}
-            <div className="space-y-2 mt-4 pt-3 border-t border-white/[0.06]">
+            <div className="space-y-2 mt-4 pt-3 border-t border-slate-200 dark:border-white/[0.06]">
               {data.categories.map((c, i) => {
                 const currentVal = isCategoryProfit ? (c.profit ?? 0) : c.sales;
                 const totalVal = isCategoryProfit ? (data.kpis.total_profit || 1) : data.kpis.total_sales;
@@ -822,7 +822,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                 return (
                   <div
                     key={c.category}
-                    className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.12] transition-colors"
+                    className="p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] hover:border-slate-300 dark:hover:border-white/[0.12] transition-colors"
                   >
                     <div className="flex items-center justify-between text-xs mb-1.5">
                       <div className="flex items-center gap-2 min-w-0">
@@ -830,32 +830,32 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                           className="w-2.5 h-2.5 rounded-full shrink-0"
                           style={{ backgroundColor: getCategoryColor(c.category, i) }}
                         />
-                        <span className="font-bold text-slate-200 truncate">
+                        <span className="font-bold text-slate-800 dark:text-slate-200 truncate">
                           {c.category}
                         </span>
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0">
                         {c.margin !== undefined && (
-                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 font-mono">
+                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 font-mono">
                             {c.margin}% margin
                           </span>
                         )}
-                        <span className="text-slate-400 text-[11px] font-medium font-mono">
+                        <span className="text-slate-500 dark:text-slate-400 text-[11px] font-medium font-mono">
                           {share}%
                         </span>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between text-[11px] pl-4.5 pt-1 border-t border-white/[0.03]">
-                      <div className="text-slate-400">
+                    <div className="flex items-center justify-between text-[11px] pl-4.5 pt-1 border-t border-slate-200 dark:border-white/[0.03]">
+                      <div className="text-slate-500 dark:text-slate-400">
                         <span>Rev: </span>
-                        <span className="font-semibold text-slate-200 font-mono">
+                        <span className="font-semibold text-slate-800 dark:text-slate-200 font-mono">
                           {inr(c.sales)}
                         </span>
                       </div>
-                      <div className="flex items-center gap-1 text-slate-400">
+                      <div className="flex items-center gap-1 text-slate-500 dark:text-slate-400">
                         <span>Profit: </span>
-                        <span className="font-bold text-emerald-400 font-mono">
+                        <span className="font-bold text-emerald-600 dark:text-emerald-400 font-mono">
                           {inr(c.profit ?? 0)}
                         </span>
                       </div>
@@ -870,54 +870,54 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
           <div className="space-y-3.5 flex flex-col justify-between">
             <div
               onClick={() => onNavigate('forecast-anomalies')}
-              className="group cursor-pointer p-5 rounded-2xl bg-gradient-to-r from-indigo-950/40 via-slate-900/40 to-indigo-950/30 backdrop-blur-xl border border-indigo-500/20 hover:border-indigo-400 hover:shadow-lg hover:shadow-indigo-500/10 transition-all duration-300 text-white"
+              className="group cursor-pointer p-5 rounded-2xl bg-white dark:bg-[#0e172e] dark:bg-gradient-to-r dark:from-indigo-950/70 dark:via-slate-900/70 dark:to-indigo-950/50 backdrop-blur-xl border border-slate-200/90 dark:border-indigo-500/25 hover:border-indigo-400 dark:hover:border-indigo-400/60 hover:shadow-lg hover:shadow-indigo-500/10 transition-all duration-300 text-slate-900 dark:text-white shadow-xs"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
                   Predictive Horizon
                 </span>
-                <ArrowRight className="w-4 h-4 text-indigo-400 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-4 h-4 text-indigo-600 dark:text-indigo-400 group-hover:translate-x-1 transition-transform" />
               </div>
-              <h4 className="font-bold text-white text-sm mb-1">
+              <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-1">
                 Forecast & Anomaly Detection
               </h4>
-              <p className="text-xs text-slate-400 leading-relaxed">
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                 6-month predictive trajectory with 31-day rolling median anomaly flagging.
               </p>
             </div>
 
             <div
               onClick={() => onNavigate('ask-data')}
-              className="group cursor-pointer p-5 rounded-2xl bg-gradient-to-r from-purple-950/40 via-slate-900/40 to-purple-950/30 backdrop-blur-xl border border-purple-500/20 hover:border-purple-400 hover:shadow-lg hover:shadow-purple-500/10 transition-all duration-300 text-white"
+              className="group cursor-pointer p-5 rounded-2xl bg-white dark:bg-[#0e172e] dark:bg-gradient-to-r dark:from-purple-950/70 dark:via-slate-900/70 dark:to-purple-950/50 backdrop-blur-xl border border-slate-200/90 dark:border-purple-500/25 hover:border-purple-400 dark:hover:border-purple-400/60 hover:shadow-lg hover:shadow-purple-500/10 transition-all duration-300 text-slate-900 dark:text-white shadow-xs"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-purple-400">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">
                   AI Business Reasoning
                 </span>
-                <ArrowRight className="w-4 h-4 text-purple-400 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-4 h-4 text-purple-600 dark:text-purple-400 group-hover:translate-x-1 transition-transform" />
               </div>
-              <h4 className="font-bold text-white text-sm mb-1">
+              <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-1">
                 Autonomous AI Analyst
               </h4>
-              <p className="text-xs text-slate-400 leading-relaxed">
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                 Ask questions about trends, margins, and customer behavior with natural language.
               </p>
             </div>
 
             <div
               onClick={() => onNavigate('reports')}
-              className="group cursor-pointer p-5 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-slate-900/40 to-emerald-950/30 backdrop-blur-xl border border-emerald-500/20 hover:border-emerald-400 hover:shadow-lg hover:shadow-emerald-500/10 transition-all duration-300 text-white"
+              className="group cursor-pointer p-5 rounded-2xl bg-white dark:bg-[#0e172e] dark:bg-gradient-to-r dark:from-emerald-950/70 dark:via-slate-900/70 dark:to-emerald-950/50 backdrop-blur-xl border border-slate-200/90 dark:border-emerald-500/25 hover:border-emerald-400 dark:hover:border-emerald-400/60 hover:shadow-lg hover:shadow-emerald-500/10 transition-all duration-300 text-slate-900 dark:text-white shadow-xs"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
                   Executive PDF Studio
                 </span>
-                <ArrowRight className="w-4 h-4 text-emerald-400 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-4 h-4 text-emerald-600 dark:text-emerald-400 group-hover:translate-x-1 transition-transform" />
               </div>
-              <h4 className="font-bold text-white text-sm mb-1">
+              <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-1">
                 Download PDF Reports
               </h4>
-              <p className="text-xs text-slate-400 leading-relaxed">
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                 Generate vector-grade executive summaries and stakeholder reports.
               </p>
             </div>

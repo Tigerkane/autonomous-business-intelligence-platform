@@ -7,23 +7,23 @@
     --font-sans: 'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-    --bg-main: #0a0f1e;
-    --bg-surface: #0e172e;
-    --bg-raised: #1e293b;
-    --border-color: #334155;
-    --text-primary: #e2e8f0;
-    --text-muted: #94a3b8;
-    --primary: #6366f1;
-    --primary-hover: #4f46e5;
-    --primary-soft: #818cf8;
+    --bg-main: #f8fafc;
+    --bg-surface: #ffffff;
+    --bg-raised: #f1f5f9;
+    --border-color: #e2e8f0;
+    --text-primary: #0f172a;
+    --text-muted: #64748b;
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --primary-soft: #6366f1;
 
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   .dark {
-    --bg-main: #0f172a;
-    --bg-surface: #1e293b;
-    --bg-raised: #273449;
+    --bg-main: #0a0f1e;
+    --bg-surface: #0e172e;
+    --bg-raised: #1e293b;
     --border-color: #334155;
     --text-primary: #e2e8f0;
     --text-muted: #94a3b8;

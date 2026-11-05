@@ -25,6 +25,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { NavTab } from '../components/layout/Sidebar';
 import { GithubIcon } from '../components/common/GithubIcon';
 import { BrandLogo } from '../components/common/BrandLogo';
+import { ThemeToggle } from '../components/common/ThemeToggle';
 import { InteractiveLiveConsole } from '../components/dashboard/InteractiveLiveConsole';
 
 /* ------------------------------------------------------------------ */
@@ -152,7 +153,7 @@ const StatBadge: React.FC<{
       </div>
       <div>
         <div className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tabular-nums tracking-tight flex items-center gap-2">
-          <span>{typeof value === 'number' ? value.toLocaleString() : value}{suffix}</span>
+          <span suppressHydrationWarning>{typeof value === 'number' ? value.toLocaleString('en-IN') : value}{suffix}</span>
           {live && (
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
@@ -296,7 +297,7 @@ interface HomepageViewProps {
 }
 
 export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) => {
-  const { loaded } = useData();
+  const { loaded, theme } = useData();
   const { user, isAuthenticated, logout, openAuthModal } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
@@ -336,17 +337,6 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
     };
     window.addEventListener('scroll', handleScrollSpy, { passive: true });
     return () => window.removeEventListener('scroll', handleScrollSpy);
-  }, []);
-
-  // Enforce pure dark mode on homepage
-  useEffect(() => {
-    document.documentElement.classList.add('dark');
-    document.documentElement.style.colorScheme = 'dark';
-    try {
-      localStorage.setItem('abip_theme', 'dark');
-    } catch {
-      // ignore
-    }
   }, []);
 
   // Hero interactive metric toggle
@@ -428,7 +418,7 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
   ];
 
   return (
-    <div className="relative min-h-screen bg-[#0a0f1e] text-slate-100 selection:bg-indigo-600 selection:text-white overflow-x-hidden">
+    <div className="relative min-h-screen bg-slate-50 dark:bg-[#0a0f1e] text-slate-900 dark:text-slate-100 selection:bg-indigo-600 selection:text-white overflow-x-hidden transition-colors">
       {/* Global ambient background glow that extends smoothly till the end of the entire page */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="homepage-gradient-orb homepage-gradient-orb-1" />
@@ -454,7 +444,7 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
       <header
         className={`sticky top-0 z-40 animate-opening-nav transition-all duration-500 ${
           navScrolled
-            ? 'backdrop-blur-xl bg-[#0a0f1e]/85 shadow-md shadow-indigo-950/5'
+            ? 'backdrop-blur-xl bg-white/85 dark:bg-[#0a0f1e]/85 shadow-md shadow-indigo-950/5 border-b border-slate-200/80 dark:border-white/5'
             : 'bg-transparent'
         }`}
       >
@@ -469,7 +459,7 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
           </button>
 
           {/* Navigation Links with Scrollspy Highlight */}
-          <nav className="hidden md:flex items-center gap-7 text-[13px] font-semibold text-slate-400">
+          <nav className="hidden md:flex items-center gap-7 text-[13px] font-semibold text-slate-600 dark:text-slate-400">
             {navLinks.map((item) => {
               const isActive = activeSection === item.href.replace('#', '');
               return (
@@ -478,8 +468,8 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
                   href={item.href}
                   className={`relative py-1 transition-colors duration-300 ${
                     isActive
-                      ? 'text-indigo-400 font-bold after:w-full'
-                      : 'hover:text-white text-slate-400 after:w-0'
+                      ? 'text-indigo-600 dark:text-indigo-400 font-bold after:w-full'
+                      : 'hover:text-slate-900 dark:hover:text-white text-slate-600 dark:text-slate-400 after:w-0'
                   } after:absolute after:bottom-0 after:left-0 after:h-[2px] after:bg-indigo-500 after:transition-all after:duration-300 hover:after:w-full`}
                 >
                   {item.label}
@@ -495,12 +485,15 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
               href="https://github.com/Tigerkane/autonomous-business-intelligence-platform"
               target="_blank"
               rel="noreferrer"
-              className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-400 transition-all duration-300 hover:scale-105"
+              className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-transparent transition-all duration-300 hover:scale-105"
               title="View Repository on GitHub"
               aria-label="View Repository on GitHub"
             >
               <GithubIcon className="w-4 h-4" />
             </a>
+
+            {/* Light / Dark Mode Toggle */}
+            <ThemeToggle size="sm" />
 
             {/* User / Sign In */}
             {isAuthenticated && user ? (
@@ -577,7 +570,11 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
                 </a>
               ))}
             </nav>
-            <div className="pt-4">
+            <div className="pt-4 space-y-2">
+              <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/60">
+                <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">Appearance</span>
+                <ThemeToggle size="sm" />
+              </div>
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
@@ -675,10 +672,13 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
 
                 {/* Metric Display */}
                 <div className="flex items-baseline gap-3 mb-1">
-                  <span className="text-3xl font-black text-slate-900 dark:text-white tabular-nums tracking-tight transition-all duration-300">
+                  <span
+                    suppressHydrationWarning
+                    className="text-3xl font-black text-slate-900 dark:text-white tabular-nums tracking-tight transition-all duration-300"
+                  >
                     {heroMetric === 'revenue'
                       ? `₹${revenueValue.toLocaleString('en-IN')}`
-                      : ordersValue.toLocaleString()}
+                      : ordersValue.toLocaleString('en-IN')}
                   </span>
                   <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full">
                     <TrendingUp className="w-3 h-3" />
@@ -760,14 +760,14 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
       {/* 2c. CONTINUOUS SCROLLING CAPABILITIES MARQUEE                */}
       {/* ============================================================ */}
       <section className="py-6 overflow-hidden relative select-none">
-        <div className="absolute left-0 inset-y-0 w-28 bg-gradient-to-r from-[#0a0f1e] to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 inset-y-0 w-28 bg-gradient-to-l from-[#0a0f1e] to-transparent z-10 pointer-events-none" />
+        <div className="absolute left-0 inset-y-0 w-28 bg-gradient-to-r from-slate-50 dark:from-[#0a0f1e] to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 inset-y-0 w-28 bg-gradient-to-l from-slate-50 dark:from-[#0a0f1e] to-transparent z-10 pointer-events-none" />
 
         <div className="homepage-marquee-track flex items-center gap-4 py-2">
           {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((item, idx) => (
             <div
               key={idx}
-              className="flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 backdrop-blur-md text-xs font-semibold text-slate-300 transition-colors shrink-0 shadow-2xs hover:border-indigo-500/40"
+              className="flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-white dark:bg-white/[0.04] hover:bg-slate-100 dark:hover:bg-white/[0.08] border border-slate-200 dark:border-white/10 backdrop-blur-md text-xs font-semibold text-slate-800 dark:text-slate-300 transition-colors shrink-0 shadow-xs hover:border-indigo-500/40"
             >
               <span className="text-sm">{item.icon}</span>
               <span>{item.text}</span>
@@ -880,7 +880,7 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
 
           <ScrollReveal direction="up" delay={0.15}>
             <InteractiveLiveConsole
-              theme="dark"
+              theme={theme}
               onLaunchFullStudio={handlePrimaryLaunch}
             />
           </ScrollReveal>
@@ -1111,7 +1111,7 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.8, y: 16 }}
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="fixed bottom-6 right-6 z-40 p-2.5 rounded-full bg-[#0d162e]/90 hover:bg-indigo-600 text-white shadow-2xl backdrop-blur-xl border border-indigo-500/30 transition-all duration-300 hover:scale-110 group cursor-pointer"
+          className="fixed bottom-6 right-6 z-40 p-2.5 rounded-full bg-white/90 dark:bg-[#0d162e]/90 hover:bg-indigo-600 dark:hover:bg-indigo-600 text-slate-800 dark:text-white shadow-xl dark:shadow-2xl backdrop-blur-xl border border-slate-200 dark:border-indigo-500/30 transition-all duration-300 hover:scale-110 group cursor-pointer"
           title="Scroll back to top"
           aria-label="Scroll back to top"
         >
@@ -1124,7 +1124,7 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
                 stroke="currentColor"
                 strokeWidth="2.5"
                 fill="transparent"
-                className="text-white/10"
+                className="text-slate-200 dark:text-white/10"
               />
               <circle
                 cx="16"
@@ -1135,11 +1135,11 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
                 fill="transparent"
                 strokeDasharray={81.68}
                 strokeDashoffset={81.68 - (81.68 * scrollProgressPercent) / 100}
-                className="text-indigo-400 group-hover:text-white transition-all duration-150"
+                className="text-indigo-600 dark:text-indigo-400 group-hover:text-white transition-all duration-150"
                 strokeLinecap="round"
               />
             </svg>
-            <ArrowUp className="w-4 h-4 absolute text-indigo-300 group-hover:text-white transition-colors" />
+            <ArrowUp className="w-4 h-4 absolute text-indigo-600 dark:text-indigo-300 group-hover:text-white transition-colors" />
           </div>
         </motion.button>
       )}

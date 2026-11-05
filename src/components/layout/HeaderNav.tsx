@@ -22,6 +22,7 @@ import { useData } from '../../contexts/DataContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { NavTab } from './Sidebar';
 import { BrandLogo } from '../common/BrandLogo';
+import { ThemeToggle } from '../common/ThemeToggle';
 
 interface HeaderNavProps {
   currentTab: NavTab;
@@ -89,8 +90,8 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({ currentTab, onSelectTab })
               >
                 <FileSpreadsheet className="w-3.5 h-3.5" />
                 <span className="truncate max-w-[110px]">{dataset?.filename || 'Dataset'}</span>
-                <span className="text-[10px] opacity-80">
-                  ({dataset?.total_rows?.toLocaleString()})
+                <span className="text-[10px] opacity-80" suppressHydrationWarning>
+                  ({dataset?.total_rows?.toLocaleString('en-IN')})
                 </span>
               </button>
             ) : (
@@ -102,6 +103,9 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({ currentTab, onSelectTab })
                 <span>Upload CSV</span>
               </button>
             )}
+
+            {/* Light / Dark Mode Toggle */}
+            <ThemeToggle size="sm" />
 
             {/* User Auth Info / Button */}
             {isAuthenticated && user ? (

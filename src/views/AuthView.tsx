@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { BrandLogo } from '../components/common/BrandLogo';
+import { ThemeToggle } from '../components/common/ThemeToggle';
 
 interface AuthViewProps {
   initialMode?: 'signin' | 'signup';
@@ -154,32 +155,35 @@ export const AuthView: React.FC<AuthViewProps> = ({
   };
 
   return (
-    <div className="relative min-h-screen bg-[#0a0f1e] text-slate-100 flex flex-col justify-between selection:bg-indigo-600 selection:text-white p-4 sm:p-6 overflow-hidden">
+    <div className="relative min-h-screen bg-slate-50 dark:bg-[#0a0f1e] text-slate-900 dark:text-slate-100 flex flex-col justify-between selection:bg-indigo-600 selection:text-white p-4 sm:p-6 overflow-hidden transition-colors">
       {/* Top Header Bar */}
       <header className="max-w-md mx-auto w-full pt-2 flex items-center justify-between">
         <button
           onClick={onNavigateHome}
-          className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-white transition-colors cursor-pointer py-1.5 px-3 rounded-lg hover:bg-slate-800/60"
+          className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer py-1.5 px-3 rounded-lg hover:bg-slate-200/60 dark:hover:bg-slate-800/60"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Back to Home</span>
         </button>
-        <BrandLogo size="sm" variant="icon" />
+        <div className="flex items-center gap-2">
+          <ThemeToggle size="sm" />
+          <BrandLogo size="sm" variant="icon" />
+        </div>
       </header>
 
       {/* Main Centered Compact Card ("The small one") */}
       <main className="flex-1 flex items-center justify-center my-6">
-        <div className="w-full max-w-md rounded-3xl bg-slate-800/40 backdrop-blur-xl border border-white/10 shadow-2xl p-6 sm:p-8 space-y-5">
+        <div className="w-full max-w-md rounded-3xl bg-white dark:bg-slate-800/40 backdrop-blur-xl border border-slate-200 dark:border-white/10 shadow-xl dark:shadow-2xl p-6 sm:p-8 space-y-5">
           {/* Header */}
           <div className="text-center space-y-1">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-400 text-[10px] font-mono uppercase tracking-wider mb-2">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 text-[10px] font-mono uppercase tracking-wider mb-2">
               <ShieldCheck className="w-3 h-3" />
               <span>Secure Authentication</span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
               {mode === 'signin' ? 'Sign in to platform' : 'Create analyst account'}
             </h2>
-            <p className="text-xs text-slate-400 leading-relaxed">
+            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
               {mode === 'signin'
                 ? 'Access session datasets, ML predictions, and retail executive reports.'
                 : 'Register your account to manage retail datasets and generate insights.'}
@@ -187,7 +191,7 @@ export const AuthView: React.FC<AuthViewProps> = ({
           </div>
 
           {/* Mode Switcher Tabs */}
-          <div className="flex border-b border-slate-700/60">
+          <div className="flex border-b border-slate-200 dark:border-slate-700/60">
             <button
               type="button"
               onClick={() => {
@@ -199,8 +203,8 @@ export const AuthView: React.FC<AuthViewProps> = ({
               }}
               className={`pb-2.5 text-xs font-bold border-b-2 mr-6 transition-colors cursor-pointer ${
                 mode === 'signin'
-                  ? 'border-indigo-500 text-white'
-                  : 'border-transparent text-slate-400 hover:text-slate-200'
+                  ? 'border-indigo-500 text-slate-900 dark:text-white'
+                  : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
               }`}
             >
               Sign In
@@ -214,8 +218,8 @@ export const AuthView: React.FC<AuthViewProps> = ({
               }}
               className={`pb-2.5 text-xs font-bold border-b-2 transition-colors cursor-pointer ${
                 mode === 'signup'
-                  ? 'border-indigo-500 text-white'
-                  : 'border-transparent text-slate-400 hover:text-slate-200'
+                  ? 'border-indigo-500 text-slate-900 dark:text-white'
+                  : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
               }`}
             >
               Register
@@ -242,7 +246,7 @@ export const AuthView: React.FC<AuthViewProps> = ({
           <form onSubmit={handleSubmit} className="space-y-3.5" noValidate>
             {mode === 'signup' && (
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">
+                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Full Name <span className="text-rose-400">*</span>
                 </label>
                 <div className="relative">
@@ -253,7 +257,7 @@ export const AuthView: React.FC<AuthViewProps> = ({
                     placeholder="e.g. Alex Morgan"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-900/60 border border-slate-700/80 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 transition-colors"
+                    className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/80 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 transition-colors"
                   />
                 </div>
               </div>
@@ -261,7 +265,7 @@ export const AuthView: React.FC<AuthViewProps> = ({
 
             {/* Email Address */}
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">
+              <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
                 Email Address <span className="text-rose-400">*</span>
               </label>
               <div className="relative">
@@ -272,14 +276,14 @@ export const AuthView: React.FC<AuthViewProps> = ({
                   placeholder="analyst@retailbi.ai"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-900/60 border border-slate-700/80 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 transition-colors"
+                  className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/80 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 transition-colors"
                 />
               </div>
             </div>
 
             {/* Password */}
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">
+              <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
                 Password <span className="text-rose-400">*</span>
               </label>
               <div className="relative">
@@ -290,12 +294,12 @@ export const AuthView: React.FC<AuthViewProps> = ({
                   placeholder="At least 6 characters"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-9 pr-9 py-2 rounded-xl bg-slate-900/60 border border-slate-700/80 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 transition-colors"
+                  className="w-full pl-9 pr-9 py-2 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/80 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 transition-colors"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -308,7 +312,7 @@ export const AuthView: React.FC<AuthViewProps> = ({
                     <span>Password strength:</span>
                     <span className="font-semibold">{strength.label}</span>
                   </div>
-                  <div className="grid grid-cols-4 gap-1.5 h-1.5 rounded-full overflow-hidden bg-slate-800">
+                  <div className="grid grid-cols-4 gap-1.5 h-1.5 rounded-full overflow-hidden bg-slate-200 dark:bg-slate-800">
                     <div className={`h-full ${strength.score >= 1 ? strength.color : 'bg-transparent'}`} />
                     <div className={`h-full ${strength.score >= 2 ? strength.color : 'bg-transparent'}`} />
                     <div className={`h-full ${strength.score >= 3 ? strength.color : 'bg-transparent'}`} />
@@ -321,8 +325,8 @@ export const AuthView: React.FC<AuthViewProps> = ({
             {/* Confirm Password (Signup only) */}
             {mode === 'signup' && (
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">
-                  Confirm Password <span className="text-rose-400">*</span>
+                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  Confirm Password <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
                   <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -332,12 +336,12 @@ export const AuthView: React.FC<AuthViewProps> = ({
                     placeholder="Repeat password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full pl-9 pr-9 py-2 rounded-xl bg-slate-900/60 border border-slate-700/80 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 transition-colors"
+                    className="w-full pl-9 pr-9 py-2 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/80 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-hidden focus:border-indigo-500 transition-colors"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer"
                   >
                     {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -347,20 +351,20 @@ export const AuthView: React.FC<AuthViewProps> = ({
 
             {/* Security Verification (CAPTCHA) — Only for Sign In, removed while registering */}
             {mode === 'signin' && (
-              <div className="pt-2 border-t border-slate-700/60 space-y-2">
-                <div className="flex items-center justify-between text-xs font-medium text-slate-300">
+              <div className="pt-2 border-t border-slate-200 dark:border-slate-700/60 space-y-2">
+                <div className="flex items-center justify-between text-xs font-medium text-slate-700 dark:text-slate-300">
                   <span>Security Verification (CAPTCHA)</span>
                   <button
                     type="button"
                     onClick={refreshCaptcha}
-                    className="text-[11px] text-indigo-400 flex items-center gap-1 hover:underline cursor-pointer"
+                    className="text-[11px] text-indigo-600 dark:text-indigo-400 flex items-center gap-1 hover:underline cursor-pointer"
                   >
                     <RotateCw className="w-3 h-3" />
                     <span>Change code</span>
                   </button>
                 </div>
                 <div className="flex gap-2">
-                  <div className="h-10 px-4 rounded-xl bg-slate-900 border border-slate-700 flex items-center justify-center font-mono font-bold tracking-widest text-indigo-400 text-sm select-none">
+                  <div className="h-10 px-4 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-center font-mono font-bold tracking-widest text-indigo-600 dark:text-indigo-400 text-sm select-none">
                     {captchaCode}
                   </div>
                   <input
@@ -369,7 +373,7 @@ export const AuthView: React.FC<AuthViewProps> = ({
                     placeholder="Enter 5 characters"
                     value={captchaInput}
                     onChange={(e) => setCaptchaInput(e.target.value)}
-                    className="flex-1 px-3 py-2 rounded-xl bg-slate-900/60 border border-slate-700/80 text-xs font-mono uppercase tracking-wider text-white placeholder:font-sans placeholder:normal-case placeholder-slate-500 focus:outline-hidden focus:border-indigo-500"
+                    className="flex-1 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/80 text-xs font-mono uppercase tracking-wider text-slate-900 dark:text-white placeholder:font-sans placeholder:normal-case placeholder-slate-400 dark:placeholder-slate-500 focus:outline-hidden focus:border-indigo-500"
                   />
                 </div>
               </div>

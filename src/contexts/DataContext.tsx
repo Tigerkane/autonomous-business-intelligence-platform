@@ -52,8 +52,23 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [version, setVersion] = useState(0);
   const lastUser = useRef<string | null>(null);
 
-  // Dark mode is always enforced — no light mode option
+  // Active theme: 'dark' (default) or 'light'
   const [theme, setThemeState] = useState<'dark' | 'light'>('dark');
+
+  // Hydrate saved theme from localStorage on client mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('abip_theme') as 'dark' | 'light' | null;
+      if (saved === 'dark' || saved === 'light') {
+        setThemeState(saved);
+      } else {
+        const isDark = document.documentElement.classList.contains('dark');
+        setThemeState(isDark ? 'dark' : 'light');
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
 
   // Tracks the last applied theme so we only animate on real changes (not on first mount)
   const prevTheme = useRef<'dark' | 'light' | null>(null);

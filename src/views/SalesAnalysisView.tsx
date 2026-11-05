@@ -97,27 +97,27 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
       <div className="space-y-6 animate-pulse select-none" aria-busy="true">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <div className="w-56 h-7 bg-slate-800 rounded-lg mb-2" />
-            <div className="w-96 max-w-full h-4 bg-slate-850 rounded" />
+            <div className="w-56 h-7 bg-slate-200 dark:bg-slate-800 rounded-lg mb-2" />
+            <div className="w-96 max-w-full h-4 bg-slate-100 dark:bg-slate-850 rounded" />
           </div>
-          <div className="w-32 h-9 bg-slate-800 border border-slate-700/50 rounded-xl" />
+          <div className="w-32 h-9 bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700/50 rounded-xl" />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="p-6 rounded-2xl bg-[#0e172e] border border-slate-800/90 h-64 flex flex-col justify-between">
+            <div key={i} className="p-6 rounded-2xl bg-white dark:bg-[#0e172e] border border-slate-200 dark:border-slate-800/90 h-64 flex flex-col justify-between">
               <div className="flex justify-between items-center">
-                <div className="w-28 h-4 bg-slate-700 rounded" />
-                <div className="w-8 h-8 rounded-xl bg-slate-800" />
+                <div className="w-28 h-4 bg-slate-200 dark:bg-slate-700 rounded" />
+                <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800" />
               </div>
-              <div className="w-36 h-8 bg-slate-700/80 rounded" />
-              <div className="w-full h-2 bg-slate-800 rounded" />
-              <div className="w-48 h-3 bg-slate-800/70 rounded" />
+              <div className="w-36 h-8 bg-slate-200 dark:bg-slate-700/80 rounded" />
+              <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded" />
+              <div className="w-48 h-3 bg-slate-100 dark:bg-slate-800/70 rounded" />
             </div>
           ))}
         </div>
 
-        <div className="p-6 rounded-2xl bg-[#0e172e] border border-slate-800/90 h-80" />
+        <div className="p-6 rounded-2xl bg-white dark:bg-[#0e172e] border border-slate-200 dark:border-slate-800/90 h-80" />
       </div>
     );
   }
@@ -395,10 +395,10 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
     <div className="space-y-6 max-w-7xl mx-auto animate-fade-in">
       {/* Automated Key Insights Banner */}
       {data.insights.length > 0 && (
-        <div className="p-5 rounded-2xl bg-gradient-to-r from-indigo-950/50 via-slate-900/40 to-indigo-950/50 border border-indigo-500/20 shadow-xs text-white">
+        <div className="p-5 rounded-2xl bg-indigo-50/70 dark:bg-[#0e172e] dark:bg-gradient-to-r dark:from-indigo-950/60 dark:via-slate-900/60 dark:to-indigo-950/50 border border-indigo-200/80 dark:border-indigo-500/25 shadow-xs text-slate-900 dark:text-white">
           <div className="flex items-center gap-2 mb-3">
-            <Lightbulb className="w-4 h-4 text-amber-400" />
-            <h3 className="text-xs font-black uppercase tracking-wider text-indigo-300">
+            <Lightbulb className="w-4 h-4 text-amber-500 dark:text-amber-400" />
+            <h3 className="text-xs font-black uppercase tracking-wider text-indigo-600 dark:text-indigo-300">
               Autonomous Highlights & Trends
             </h3>
           </div>
@@ -406,7 +406,7 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
             {data.insights.map((insight, idx) => (
               <div
                 key={idx}
-                className="p-3 rounded-xl bg-white/5 border border-white/5 text-xs text-slate-200 leading-relaxed font-medium"
+                className="p-3 rounded-xl bg-white dark:bg-white/5 border border-indigo-100 dark:border-white/5 text-xs text-slate-700 dark:text-slate-200 leading-relaxed font-medium shadow-xs"
               >
                 {insight}
               </div>
@@ -418,7 +418,7 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
       {/* Row 1: Trajectory + Weekday Pattern */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left: Revenue Trend (2 cols) */}
-        <div className="lg:col-span-2 p-6 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 shadow-lg shadow-black/20">
+        <div className="lg:col-span-2 p-6 rounded-2xl bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-lg dark:shadow-black/20">
           <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
             <div>
               <h3 className="text-base font-bold text-slate-900 dark:text-white">
@@ -458,7 +458,7 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
         </div>
 
         {/* Right: Weekday Distribution */}
-        <div className="p-6 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 shadow-lg shadow-black/20">
+        <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-lg dark:shadow-black/20">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-base font-bold text-slate-900 dark:text-white">
@@ -477,7 +477,7 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
       </div>
 
       {/* Row 2: Stacked Category Breakdown Chart */}
-      <div className="p-6 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 shadow-lg shadow-black/20">
+      <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-lg dark:shadow-black/20">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-base font-bold text-slate-900 dark:text-white">
@@ -495,7 +495,7 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
       </div>
 
       {/* Row 3: Category Performance Breakdown Table */}
-      <div className="p-6 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 shadow-lg shadow-black/20 space-y-4">
+      <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-lg dark:shadow-black/20 space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-base font-bold text-slate-900 dark:text-white">
@@ -565,10 +565,10 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
                     </span>
                   </td>
                   <td className="px-4 py-3 text-slate-600 dark:text-slate-300 font-mono">
-                    {c.units.toLocaleString()}
+                    {c.units.toLocaleString('en-IN')}
                   </td>
                   <td className="px-4 py-3 text-slate-600 dark:text-slate-300 font-mono">
-                    {c.orders.toLocaleString()}
+                    {c.orders.toLocaleString('en-IN')}
                   </td>
                   <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white font-mono">
                     {inr(c.avg_order)}
@@ -584,7 +584,7 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
       {genderStats.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Card 1: Revenue by Gender Donut & Metrics Table */}
-          <div className="p-6 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 shadow-lg shadow-black/20 flex flex-col justify-between">
+          <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-lg dark:shadow-black/20 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -628,10 +628,10 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
                           </div>
                         </td>
                         <td className="px-3 py-2.5 text-slate-600 dark:text-slate-300 font-mono">
-                          {s.orders.toLocaleString()}
+                          {s.orders.toLocaleString('en-IN')}
                         </td>
                         <td className="px-3 py-2.5 text-slate-600 dark:text-slate-300 font-mono">
-                          {s.units.toLocaleString()}
+                          {s.units.toLocaleString('en-IN')}
                         </td>
                         <td className="px-3 py-2.5 font-semibold text-slate-900 dark:text-white">
                           {inr(s.revenue)}
@@ -654,7 +654,7 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
           </div>
 
           {/* Card 2: Gender x Category Grouped Bar Chart */}
-          <div className="p-6 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 shadow-lg shadow-black/20 flex flex-col justify-between">
+          <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-lg dark:shadow-black/20 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-4">
                 <div>

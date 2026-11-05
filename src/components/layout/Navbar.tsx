@@ -13,6 +13,7 @@ import { useData } from '../../contexts/DataContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { NavTab } from './Sidebar';
 import { GithubIcon } from '../common/GithubIcon';
+import { ThemeToggle } from '../common/ThemeToggle';
 
 interface NavbarProps {
   currentTab: NavTab;
@@ -176,8 +177,8 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <FileSpreadsheet className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
               <span className="truncate max-w-[120px] font-medium">{dataset?.filename || 'Dataset'}</span>
-              <span className="text-slate-400 dark:text-slate-500 font-mono">
-                {dataset?.total_rows?.toLocaleString()} rows
+              <span className="text-slate-400 dark:text-slate-500 font-mono" suppressHydrationWarning>
+                {dataset?.total_rows?.toLocaleString('en-IN')} rows
               </span>
             </button>
           ) : (
@@ -212,6 +213,9 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <GithubIcon className="w-4 h-4" />
           </a>
+
+          {/* Light / Dark Mode Toggle */}
+          <ThemeToggle size="sm" />
 
           {/* User Profile / Auth State in Navbar */}
           {isAuthenticated && user ? (

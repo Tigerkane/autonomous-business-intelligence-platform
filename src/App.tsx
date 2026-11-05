@@ -24,22 +24,22 @@ const ViewFallback = () => (
   <div className="space-y-6 animate-pulse select-none">
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div>
-        <div className="w-56 h-7 bg-slate-800/80 rounded-lg mb-2" />
-        <div className="w-80 max-w-full h-4 bg-slate-850 rounded" />
+        <div className="w-56 h-7 bg-slate-200 dark:bg-slate-800/80 rounded-lg mb-2" />
+        <div className="w-80 max-w-full h-4 bg-slate-100 dark:bg-slate-850 rounded" />
       </div>
-      <div className="w-32 h-9 bg-slate-800/60 rounded-xl" />
+      <div className="w-32 h-9 bg-slate-200 dark:bg-slate-800/60 rounded-xl" />
     </div>
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {[1, 2, 3, 4].map((i) => (
-        <div key={i} className="h-28 rounded-2xl bg-[#0e172e] border border-slate-800/80 p-5">
-          <div className="w-20 h-3 bg-slate-700/60 rounded mb-3" />
-          <div className="w-28 h-6 bg-slate-700/80 rounded" />
+        <div key={i} className="h-28 rounded-2xl bg-white dark:bg-[#0e172e] border border-slate-200 dark:border-slate-800/80 p-5">
+          <div className="w-20 h-3 bg-slate-200 dark:bg-slate-700/60 rounded mb-3" />
+          <div className="w-28 h-6 bg-slate-200 dark:bg-slate-700/80 rounded" />
         </div>
       ))}
     </div>
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div className="lg:col-span-2 h-72 rounded-2xl bg-[#0e172e] border border-slate-800/80 p-6" />
-      <div className="h-72 rounded-2xl bg-[#0e172e] border border-slate-800/80 p-6" />
+      <div className="lg:col-span-2 h-72 rounded-2xl bg-white dark:bg-[#0e172e] border border-slate-200 dark:border-slate-800/80 p-6" />
+      <div className="h-72 rounded-2xl bg-white dark:bg-[#0e172e] border border-slate-200 dark:border-slate-800/80 p-6" />
     </div>
   </div>
 );

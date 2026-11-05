@@ -28,7 +28,7 @@ const REPORT_TYPES = [
     icon: BarChart3,
     color: 'from-indigo-600 to-indigo-700',
     badge: 'Most Popular',
-    badgeColor: 'bg-indigo-500/10 text-indigo-500 border-indigo-500/20',
+    badgeColor: 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-500/20',
   },
   {
     id: 'sales',
@@ -38,7 +38,7 @@ const REPORT_TYPES = [
     icon: FileText,
     color: 'from-emerald-600 to-emerald-700',
     badge: 'Comprehensive',
-    badgeColor: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
+    badgeColor: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20',
   },
   {
     id: 'forecast',
@@ -48,7 +48,7 @@ const REPORT_TYPES = [
     icon: LineChart,
     color: 'from-amber-600 to-amber-700',
     badge: 'ML-Powered',
-    badgeColor: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
+    badgeColor: 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20',
   },
   {
     id: 'ai',
@@ -58,7 +58,7 @@ const REPORT_TYPES = [
     icon: Bot,
     color: 'from-purple-600 to-purple-700',
     badge: 'AI Generated',
-    badgeColor: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+    badgeColor: 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20',
   },
 ];
 
@@ -140,7 +140,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ onNavigate }) => {
           Executive PDF Document Studio
         </h2>
         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-          Generate publication-ready PDF reports from active dataset telemetry: {filename || 'retail_sales.csv'} ({dataset?.total_rows?.toLocaleString()} transactions).
+          Generate publication-ready PDF reports from active dataset telemetry: {filename || 'retail_sales.csv'} ({dataset?.total_rows?.toLocaleString('en-IN')} transactions).
         </p>
       </div>
 
@@ -162,7 +162,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ onNavigate }) => {
           return (
             <div
               key={report.id}
-              className="p-6 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 shadow-lg shadow-black/20 hover:border-indigo-500/50 hover:shadow-indigo-500/5 hover:-translate-y-0.5 transition-all flex flex-col justify-between"
+              className="p-6 rounded-2xl bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-lg dark:shadow-black/20 hover:border-indigo-500/50 hover:shadow-md dark:hover:shadow-indigo-500/5 hover:-translate-y-0.5 transition-all flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-start justify-between gap-4 mb-4">
@@ -181,7 +181,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ onNavigate }) => {
                 <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1.5">
                   {report.title}
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-6">
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mb-6">
                   {report.description}
                 </p>
               </div>
@@ -240,8 +240,8 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ onNavigate }) => {
       {/* Preview Modal */}
       {previewBlobUrl && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in">
-          <div className="relative w-full max-w-4xl h-[85vh] bg-slate-900 border border-slate-800 rounded-2xl flex flex-col shadow-2xl overflow-hidden">
-            <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+          <div className="relative w-full max-w-4xl h-[85vh] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col shadow-2xl overflow-hidden">
+            <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <FileText className="w-5 h-5 text-indigo-500" />
                 <h3 className="font-bold text-sm text-slate-900 dark:text-white">
