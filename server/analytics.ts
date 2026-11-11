@@ -721,130 +721,156 @@ const ANOMALY_WINDOW_RADIUS_DAYS = 15; // 31-day centered window
 const ANOMALY_MIN_PERIODS = 7;
 const ANOMALY_HIGH_Z = 5; // fixed severity band, independent of the sensitivity slider
 
+interface FlaggedAnomalyInternal {
+  date: string;
+  value: number;
+  expected: number;
+  deviation: string;
+  severity: 'High' | 'Medium';
+  score: number;
+  absScore: number;
+  driver: string;
+  driver_share: number;
+}
+
+interface CachedAnomalyComputation {
+  key: string;
+  series: { date: string; value: number; expected: number }[];
+  allFlagged: FlaggedAnomalyInternal[];
+}
+
+const anomalyComputationCache = new Map<string, CachedAnomalyComputation>();
+
 export function getAnomalies(uid: string, rows?: SaleRow[], limit = 500, threshold = 3.5) {
   const data = rows || getSalesRows(uid);
-  const dailyMap = new Map<string, number>();
-
-  for (const row of data) {
-    dailyMap.set(row.date, (dailyMap.get(row.date) || 0) + row.total_amount);
-  }
-
-  const sortedDates = Array.from(dailyMap.keys()).sort();
-  const n = sortedDates.length;
-  if (n < 14) {
-    return { data: [], total: 0, threshold, series: [] as { date: string; value: number; expected: number }[] };
-  }
-
-  const dailyVals = sortedDates.map((d) => dailyMap.get(d)!);
-  const dayNum = sortedDates.map((d) => Math.floor(Date.parse(`${d}T00:00:00Z`) / DAY_MS));
-
-  const expected: number[] = [];
-  const residuals: number[] = [];
-
-  let lo = 0;
-  let hi = 0;
-  for (let i = 0; i < n; i++) {
-    while (dayNum[lo] < dayNum[i] - ANOMALY_WINDOW_RADIUS_DAYS) lo++;
-    while (hi < n && dayNum[hi] <= dayNum[i] + ANOMALY_WINDOW_RADIUS_DAYS) hi++;
-    const windowSlice = dailyVals.slice(lo, hi);
-    const exp = windowSlice.length >= ANOMALY_MIN_PERIODS ? median(windowSlice) : dailyVals[i];
-    expected.push(exp);
-    residuals.push(dailyVals[i] - exp);
-  }
-
-  const medResid = median(residuals);
-  const absDeviations = residuals.map((r) => Math.abs(r - medResid));
-  let mad = median(absDeviations);
-  if (mad === 0) {
-    mad = stdDev(residuals) || 1.0;
-  }
-
   const cutoff = Math.max(1.0, threshold);
-  const flagged: {
-    date: string;
-    value: number;
-    expected: number;
-    deviation: string;
-    severity: 'High' | 'Medium';
-    score: number;
-    absScore: number;
-    driver: string;
-    driver_share: number;
-  }[] = [];
 
-  for (let i = 0; i < n; i++) {
-    const z = (0.6745 * (residuals[i] - medResid)) / mad;
-    if (Math.abs(z) >= cutoff) {
-      const val = dailyVals[i];
-      const exp = expected[i];
-      const pct = exp ? ((val - exp) / exp) * 100 : 0;
-      flagged.push({
-        date: sortedDates[i],
-        value: Math.round(val * 100) / 100,
-        expected: Math.round(exp * 100) / 100,
-        deviation: `${pct >= 0 ? '+' : ''}${Math.round(pct)}%`,
-        severity: Math.abs(z) >= ANOMALY_HIGH_Z ? 'High' : 'Medium',
-        score: Math.round(z * 10) / 10,
-        absScore: Math.abs(z),
-        driver: '',
-        driver_share: 0,
-      });
+  if (data.length < 14) {
+    return { data: [], total: 0, threshold: cutoff, series: [] as { date: string; value: number; expected: number }[] };
+  }
+
+  const cacheKey = rows
+    ? `custom:${data.length}:${data[0]?.date}:${data[data.length - 1]?.date}`
+    : `${uid}:${data.length}:${data[0]?.date}:${data[data.length - 1]?.date}`;
+
+  let cached = anomalyComputationCache.get(cacheKey);
+
+  if (!cached) {
+    const dailyMap = new Map<string, number>();
+
+    for (const row of data) {
+      dailyMap.set(row.date, (dailyMap.get(row.date) || 0) + row.total_amount);
     }
-  }
 
-  flagged.sort((a, b) => b.absScore - a.absScore);
-
-  // Which category drove each flagged day: the category whose revenue moved furthest from its own
-  // typical day (median daily revenue), in the same direction as the anomaly.
-  const catDay = new Map<string, Map<string, number>>();
-  for (const row of data) {
-    let m = catDay.get(row.product_category);
-    if (!m) {
-      m = new Map<string, number>();
-      catDay.set(row.product_category, m);
+    const sortedDates = Array.from(dailyMap.keys()).sort();
+    const n = sortedDates.length;
+    if (n < 14) {
+      return { data: [], total: 0, threshold: cutoff, series: [] as { date: string; value: number; expected: number }[] };
     }
-    m.set(row.date, (m.get(row.date) || 0) + row.total_amount);
-  }
-  const catTypical = new Map<string, number>();
-  for (const [cat, m] of catDay) {
-    catTypical.set(cat, median(sortedDates.map((d) => m.get(d) || 0)));
-  }
 
-  const topFlagged = flagged.slice(0, limit);
-  for (const item of topFlagged) {
-    const up = item.value >= item.expected;
-    let totalMove = 0;
-    let bestMove = 0;
-    let bestCat = '';
+    const dailyVals = sortedDates.map((d) => dailyMap.get(d)!);
+    const dayNum = sortedDates.map((d) => Math.floor(Date.parse(`${d}T00:00:00Z`) / DAY_MS));
+
+    const expected: number[] = [];
+    const residuals: number[] = [];
+
+    let lo = 0;
+    let hi = 0;
+    for (let i = 0; i < n; i++) {
+      while (dayNum[lo] < dayNum[i] - ANOMALY_WINDOW_RADIUS_DAYS) lo++;
+      while (hi < n && dayNum[hi] <= dayNum[i] + ANOMALY_WINDOW_RADIUS_DAYS) hi++;
+      const windowSlice = dailyVals.slice(lo, hi);
+      const exp = windowSlice.length >= ANOMALY_MIN_PERIODS ? median(windowSlice) : dailyVals[i];
+      expected.push(exp);
+      residuals.push(dailyVals[i] - exp);
+    }
+
+    const medResid = median(residuals);
+    const absDeviations = residuals.map((r) => Math.abs(r - medResid));
+    let mad = median(absDeviations);
+    if (mad === 0) {
+      mad = stdDev(residuals) || 1.0;
+    }
+
+    const catDay = new Map<string, Map<string, number>>();
+    for (const row of data) {
+      let m = catDay.get(row.product_category);
+      if (!m) {
+        m = new Map<string, number>();
+        catDay.set(row.product_category, m);
+      }
+      m.set(row.date, (m.get(row.date) || 0) + row.total_amount);
+    }
+    const catTypical = new Map<string, number>();
     for (const [cat, m] of catDay) {
-      const excess = (m.get(item.date) || 0) - (catTypical.get(cat) || 0);
-      const move = up ? excess : -excess;
-      if (move > 0) {
-        totalMove += move;
-        if (move > bestMove) {
-          bestMove = move;
-          bestCat = cat;
+      catTypical.set(cat, median(sortedDates.map((d) => m.get(d) || 0)));
+    }
+
+    const allFlagged: FlaggedAnomalyInternal[] = [];
+    for (let i = 0; i < n; i++) {
+      const z = (0.6745 * (residuals[i] - medResid)) / mad;
+      const absZ = Math.abs(z);
+      if (absZ >= 1.0) {
+        const val = dailyVals[i];
+        const exp = expected[i];
+        const pct = exp ? ((val - exp) / exp) * 100 : 0;
+        const up = val >= exp;
+
+        let totalMove = 0;
+        let bestMove = 0;
+        let bestCat = '';
+        for (const [cat, m] of catDay) {
+          const excess = (m.get(sortedDates[i]) || 0) - (catTypical.get(cat) || 0);
+          const move = up ? excess : -excess;
+          if (move > 0) {
+            totalMove += move;
+            if (move > bestMove) {
+              bestMove = move;
+              bestCat = cat;
+            }
+          }
         }
+
+        allFlagged.push({
+          date: sortedDates[i],
+          value: Math.round(val * 100) / 100,
+          expected: Math.round(exp * 100) / 100,
+          deviation: `${pct >= 0 ? '+' : ''}${Math.round(pct)}%`,
+          severity: absZ >= ANOMALY_HIGH_Z ? 'High' : 'Medium',
+          score: Math.round(z * 10) / 10,
+          absScore: absZ,
+          driver: bestCat || '-',
+          driver_share: totalMove > 0 ? Math.round((bestMove / totalMove) * 100) : 0,
+        });
       }
     }
-    item.driver = bestCat || '-';
-    item.driver_share = totalMove > 0 ? Math.round((bestMove / totalMove) * 100) : 0;
+
+    allFlagged.sort((a, b) => b.absScore - a.absScore);
+
+    const series = sortedDates.map((date, i) => ({
+      date,
+      value: Math.round(dailyVals[i] * 100) / 100,
+      expected: Math.round(expected[i] * 100) / 100,
+    }));
+
+    cached = { key: cacheKey, series, allFlagged };
+
+    if (anomalyComputationCache.size > 20) {
+      const firstKey = anomalyComputationCache.keys().next().value;
+      if (firstKey) anomalyComputationCache.delete(firstKey);
+    }
+    anomalyComputationCache.set(cacheKey, cached);
   }
 
+  const flagged = cached.allFlagged.filter((item) => item.absScore >= cutoff);
+  const topFlagged = flagged.slice(0, limit);
   const resultData = topFlagged.map(({ absScore, ...item }) => item);
-
-  // Full daily series (actual vs rolling median) so the page can draw the line chart with markers
-  const series = sortedDates.map((date, i) => ({
-    date,
-    value: Math.round(dailyVals[i] * 100) / 100,
-    expected: Math.round(expected[i] * 100) / 100,
-  }));
 
   return {
     data: resultData,
     total: flagged.length,
     threshold: cutoff,
-    series,
+    series: cached.series,
   };
 }
 

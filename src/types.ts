@@ -161,12 +161,15 @@ export interface AnomalyItem {
   deviation: string;
   severity: 'High' | 'Medium';
   score: number;
+  driver?: string;
+  driver_share?: number;
 }
 
 export interface AnomaliesData {
   data: AnomalyItem[];
   total: number;
   threshold?: number;
+  series?: { date: string; value: number; expected: number }[];
 }
 
 export interface LLMProvider {

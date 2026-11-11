@@ -98,8 +98,9 @@ interface ForecastAnomaliesViewProps {
 export const ForecastAnomaliesView: React.FC<ForecastAnomaliesViewProps> = ({ onNavigate }) => {
   const { loaded, version, theme } = useData();
   const [forecast, setForecast] = useState<ForecastData | null>(null);
-  const [anomalies, setAnomalies] = useState<AnomaliesData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [rawAnomalies, setRawAnomalies] = useState<AnomaliesData | null>(null);
+  const [forecastLoading, setForecastLoading] = useState(true);
+  const [anomaliesLoading, setAnomaliesLoading] = useState(true);
   const [forecastError, setForecastError] = useState<string | null>(null);
   const [threshold, setThreshold] = useState<number>(3.5);
   const [unusual, setUnusual] = useState<UnusualTransactionsData | null>(null);
@@ -111,52 +112,88 @@ export const ForecastAnomaliesView: React.FC<ForecastAnomaliesViewProps> = ({ on
 
   const isDark = theme === 'dark';
 
+  // 1. Fetch Forecast model (independent of anomaly threshold - never re-runs on slider move)
   useEffect(() => {
     if (!loaded) {
       setForecast(null);
-      setAnomalies(null);
-      setLoading(false);
+      setForecastError(null);
+      setForecastLoading(false);
       return;
     }
 
     let isMounted = true;
-    setLoading(true);
+    setForecastLoading(true);
 
-    Promise.all([
-      fetch('/api/forecast').then(async (res) => {
+    fetch('/api/forecast')
+      .then(async (res) => {
         if (!res.ok) {
           const body = await res.json().catch(() => ({}));
           throw new Error(body.detail || 'Forecast calculation unavailable.');
         }
         return res.json();
-      }),
-      fetch(`/api/anomalies?threshold=${threshold}&limit=500`).then((res) => res.json()),
-    ])
-      .then(([fc, an]) => {
+      })
+      .then((fc) => {
         if (isMounted) {
           setForecast(fc);
-          setAnomalies(an);
           setForecastError(null);
         }
       })
       .catch((err) => {
-        if (isMounted) {
-          setForecastError(err.message);
-          // fetch anomalies independently with current threshold
-          fetch(`/api/anomalies?threshold=${threshold}&limit=500`)
-            .then((r) => r.json())
-            .then((an) => setAnomalies(an))
-            .catch(() => {});
-        }
+        if (isMounted) setForecastError(err.message);
       })
       .finally(() => {
-        if (isMounted) setLoading(false);
+        if (isMounted) setForecastLoading(false);
       });
 
     return () => {
       isMounted = false;
     };
-  }, [loaded, version, threshold]);
+  }, [loaded, version]);
+
+  // 2. Fetch baseline anomaly dataset (base threshold 1.5 covers all slider values >= 2.5)
+  useEffect(() => {
+    if (!loaded) {
+      setRawAnomalies(null);
+      setAnomaliesLoading(false);
+      return;
+    }
+
+    let isMounted = true;
+    setAnomaliesLoading(true);
+
+    fetch('/api/anomalies?threshold=1.5&limit=500')
+      .then((res) => res.json())
+      .then((an) => {
+        if (isMounted && an && Array.isArray(an.data)) {
+          setRawAnomalies(an);
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load anomaly baseline:', err);
+      })
+      .finally(() => {
+        if (isMounted) setAnomaliesLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [loaded, version]);
+
+  // 3. Instant in-memory filtering: slider response is 0ms / 60 FPS
+  const anomalies = useMemo<AnomaliesData | null>(() => {
+    if (!rawAnomalies) return null;
+    const cutoff = Math.max(1.0, threshold);
+    const filtered = (rawAnomalies.data || []).filter((item) => Math.abs(item.score) >= cutoff);
+    return {
+      ...rawAnomalies,
+      data: filtered,
+      total: filtered.length,
+      threshold: cutoff,
+    };
+  }, [rawAnomalies, threshold]);
+
+  const loading = (forecastLoading && !forecast) || (anomaliesLoading && !rawAnomalies);
 
   // Unusual transactions (per-category IQR) - independent of the threshold slider
   useEffect(() => {
