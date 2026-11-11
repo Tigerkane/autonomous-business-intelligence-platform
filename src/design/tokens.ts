@@ -74,18 +74,34 @@ export const tokens = {
 } as const;
 
 export const CATEGORY_COLORS: Record<string, string> = {
-  Electronics: '#6366f1', // Indigo
-  Clothing: '#10b981',    // Emerald
-  Beauty: '#f59e0b',      // Amber
+  Electronics: '#6366f1',        // Indigo
+  Clothing: '#10b981',           // Emerald
+  Beauty: '#f59e0b',             // Amber
+  'Home & Kitchen': '#06b6d4',   // Cyan
+  Home: '#06b6d4',
+  Kitchen: '#06b6d4',
+  Sports: '#8b5cf6',             // Purple
+  'Sports & Outdoors': '#8b5cf6',
+  Books: '#ec4899',              // Pink
+  Stationery: '#ec4899',
+  Toys: '#f43f5e',               // Rose
+  Automotive: '#64748b',         // Slate
+  Grocery: '#84cc16',            // Lime
+  Health: '#14b8a6',             // Teal
+  Jewelry: '#d946ef',            // Fuchsia
 };
 
 export const FALLBACK_CATEGORY_PALETTE = [
   '#6366f1',
   '#10b981',
   '#f59e0b',
+  '#06b6d4',
   '#8b5cf6',
   '#ec4899',
-  '#06b6d4',
+  '#14b8a6',
+  '#f43f5e',
+  '#84cc16',
+  '#d946ef',
   '#3b82f6',
 ];
 
@@ -95,8 +111,19 @@ export const GENDER_COLORS: Record<string, string> = {
   Unknown: '#64748b',
 };
 
-export function getCategoryColor(category: string, index = 0): string {
+function hashString(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+}
+
+export function getCategoryColor(category: string, _index?: number): string {
   const trimmed = (category || '').trim();
+  if (!trimmed) return '#94a3b8';
+
   const direct = CATEGORY_COLORS[trimmed];
   if (direct) return direct;
 
@@ -104,7 +131,11 @@ export function getCategoryColor(category: string, index = 0): string {
   for (const [key, color] of Object.entries(CATEGORY_COLORS)) {
     if (key.toLowerCase() === lower) return color;
   }
-  return FALLBACK_CATEGORY_PALETTE[index % FALLBACK_CATEGORY_PALETTE.length];
+
+  // Deterministic color assignment so the same category ALWAYS gets the exact same color
+  // across Executive Dashboard, Forecast & Anomalies, and Sales Analysis
+  const hash = hashString(lower);
+  return FALLBACK_CATEGORY_PALETTE[hash % FALLBACK_CATEGORY_PALETTE.length];
 }
 
 export function getGenderColor(gender: string): string {

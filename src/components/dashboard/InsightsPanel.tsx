@@ -3,11 +3,11 @@ import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip, Lege
 import { Bar } from 'react-chartjs-2';
 import { PackageCheck, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
+import { getCategoryColor } from '../../design/tokens';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 const inr = (v: number) => '₹' + Math.round(v || 0).toLocaleString('en-IN');
-const COLORS: Record<string, string> = { Electronics: '#6366f1', Clothing: '#10b981', Beauty: '#f59e0b' };
 const PERIODS = [
   { id: '3m', label: '3 Months' },
   { id: 'quarter', label: 'Quarterly' },
@@ -46,10 +46,10 @@ export const InsightsPanel: React.FC = () => {
 
   const chartData = a && {
     labels: [...a.periods.map((p: any) => p.label), a.forecast_label || 'Next (forecast)'],
-    datasets: a.categories.map((c: string) => ({
+    datasets: a.categories.map((c: string, idx: number) => ({
       label: c,
       data: [...a.periods.map((p: any) => p.by_category[c]), a.forecast.by_category[c]],
-      backgroundColor: COLORS[c] || '#94a3b8',
+      backgroundColor: getCategoryColor(c, idx),
       borderRadius: 3,
       stack: 'rev',
     })),
@@ -120,7 +120,7 @@ export const InsightsPanel: React.FC = () => {
                 <div key={r.category} className="p-4 rounded-xl border border-slate-200 dark:border-white/10 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full" style={{ background: COLORS[r.category] || '#94a3b8' }} />
+                      <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: getCategoryColor(r.category) }} />
                       {r.category}
                     </span>
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${actionStyle(r.action)}`}>{r.action}</span>
