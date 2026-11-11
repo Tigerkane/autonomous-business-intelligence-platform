@@ -1,0 +1,7 @@
+Transaction ID,Date,Customer ID,Gender,Age,Product Category,Quantity,Price per Unit,Total Amount
+TXN-001,2026-10-01,CUST-001,Female,28,Electronics,1,1200.0,1200.0
+TXN-002,2026-10-02,CUST-002,Male,35,Clothing,2,500.0,1000.0
+TXN-003,not-a-date,CUST-003,Female,41,Beauty,1,250.0,250.0
+TXN-004,2026-10-04,CUST-004,Male,22,Electronics,1,799.0,-799.0
+TXN-001,2026-10-05,CUST-005,Female,31,Clothing,3,300.0,900.0
+TXN-006,2026-10-06,CUST-006,Male,45,Beauty,2,150.0,300.0
