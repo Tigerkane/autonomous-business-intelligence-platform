@@ -5,7 +5,6 @@ import {
   LineChart,
   Bot,
   Sliders,
-  Sparkles,
   ChevronRight,
 } from 'lucide-react';
 import { SectorOverviewData, getSectorOverview } from '../../api';
@@ -146,10 +145,10 @@ export const InteractiveLiveConsole: React.FC<InteractiveLiveConsoleProps> = ({
 
   if (!data) {
     return (
-      <div className="h-96 rounded-3xl bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-white/10 backdrop-blur-xl flex items-center justify-center p-8 text-xs text-slate-500 dark:text-slate-400">
+      <div className="h-96 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] flex items-center justify-center p-8 text-xs text-slate-500 dark:text-slate-400">
         <span className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-          Loading autonomous analytics engine...
+          <span className="w-2 h-2 rounded-full bg-indigo-500" />
+          Loading analytics engine...
         </span>
       </div>
     );
@@ -168,7 +167,7 @@ export const InteractiveLiveConsole: React.FC<InteractiveLiveConsoleProps> = ({
   const svgAxisLine = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)';
   const svgTextMuted = isDark ? 'rgba(255,255,255,0.45)' : 'rgba(15,23,42,0.55)';
   const svgTextActive = isDark ? '#ffffff' : '#0f172a';
-  const svgNodeBorder = isDark ? '#0a0f1e' : '#ffffff';
+  const svgNodeBorder = isDark ? '#000000' : '#ffffff';
 
   // SVG Chart geometry
   const svgWidth = 540;
@@ -207,11 +206,11 @@ export const InteractiveLiveConsole: React.FC<InteractiveLiveConsoleProps> = ({
   const dynamicAnomalyCount = points.filter((p) => isPointAnomaly(p)).length;
 
   return (
-    <div className="w-full rounded-3xl bg-white dark:bg-slate-800/40 backdrop-blur-xl border border-slate-200 dark:border-white/5 shadow-xl dark:shadow-2xl shadow-indigo-950/5 dark:shadow-indigo-950/20 overflow-hidden transition-all text-slate-800 dark:text-slate-200">
+    <div className="w-full rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] shadow-xs overflow-hidden text-slate-800 dark:text-slate-200">
       {/* Top Bar: Sector Tabs + Sample Data Notice */}
-      <div className="px-5 sm:px-7 py-3.5 bg-slate-50 dark:bg-slate-900/40 border-b border-slate-200 dark:border-white/5 flex flex-wrap items-center justify-between gap-3">
+      <div className="px-5 sm:px-7 py-3 bg-slate-50 dark:bg-[#232325] border-b border-slate-200 dark:border-white/[0.08] flex flex-wrap items-center justify-between gap-3">
         {/* Sector Segmented Switcher */}
-        <div className="flex items-center gap-1 p-0.5 rounded-xl bg-slate-200/80 dark:bg-slate-900/60" role="tablist">
+        <div className="flex items-center gap-1 p-0.5 rounded-lg bg-slate-200/80 dark:bg-[#141415]" role="tablist">
           {(
             [
               { id: 'apparel', label: 'Apparel & Footwear' },
@@ -224,9 +223,9 @@ export const InteractiveLiveConsole: React.FC<InteractiveLiveConsoleProps> = ({
               role="tab"
               aria-selected={selectedSector === s.id}
               onClick={() => setSelectedSector(s.id)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded text-xs font-medium transition-all cursor-pointer ${
                 selectedSector === s.id
-                  ? 'bg-indigo-600 text-white shadow-sm'
+                  ? 'bg-indigo-600 text-white shadow-xs'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
@@ -238,11 +237,8 @@ export const InteractiveLiveConsole: React.FC<InteractiveLiveConsoleProps> = ({
         {/* Live Indicator Badge */}
         <div className="flex items-center gap-2">
           <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-            </span>
-            <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Live Telemetry</span>
+            <span className="inline-block w-2 h-2 rounded-full bg-emerald-500" />
+            <span className="text-emerald-600 dark:text-emerald-400 font-medium">Live Telemetry</span>
             <span className="text-slate-400 dark:text-slate-500">· Real-time stream</span>
           </span>
         </div>
@@ -830,9 +826,8 @@ export const InteractiveLiveConsole: React.FC<InteractiveLiveConsoleProps> = ({
                         : 'bg-slate-50 dark:bg-slate-900/30 hover:bg-slate-100 dark:hover:bg-slate-900/50 border border-slate-200/80 dark:border-transparent text-slate-700 dark:text-slate-300'
                     }`}
                   >
-                    <div className="flex items-center gap-1.5 mb-1.5 text-[10px] uppercase font-bold text-slate-400">
-                      <Sparkles className="w-3 h-3 text-amber-400" />
-                      <span>Question Chip</span>
+                    <div className="mb-1 text-[11px] font-medium text-slate-400">
+                      <span>Query preset</span>
                     </div>
                     <span>{chip}</span>
                   </button>
@@ -841,21 +836,21 @@ export const InteractiveLiveConsole: React.FC<InteractiveLiveConsoleProps> = ({
             </div>
 
             {/* Live Computed Answer Box with Typewriter Effect */}
-            <div className="p-5 rounded-2xl bg-indigo-50 dark:bg-indigo-950/25 border border-indigo-100 dark:border-transparent space-y-3">
-              <div className="flex items-center justify-between text-xs font-bold text-indigo-700 dark:text-indigo-300">
+            <div className="p-5 rounded-xl bg-slate-50 dark:bg-[#232325] border border-slate-200 dark:border-white/[0.08] space-y-3">
+              <div className="flex items-center justify-between text-xs font-semibold text-slate-900 dark:text-white">
                 <div className="flex items-center gap-2">
                   <Bot className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                  <span>Autonomous Mathematical Aggregation (Ollama LLM Grounded)</span>
+                  <span>Mathematical aggregation</span>
                 </div>
-                <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  Deterministic Citations
+                <span className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  Verified citations
                 </span>
               </div>
 
-              <p className="text-xs sm:text-sm text-slate-800 dark:text-slate-200 leading-relaxed font-medium min-h-[44px]">
+              <p className="text-xs sm:text-sm text-slate-800 dark:text-slate-200 leading-relaxed font-normal min-h-[44px]">
                 {typedAnswer}
-                {isTyping && <span className="inline-block w-1.5 h-4 bg-indigo-600 dark:bg-indigo-400 ml-1 animate-pulse align-middle" />}
+                {isTyping && <span className="inline-block w-1 h-3.5 bg-indigo-600 dark:bg-indigo-400 ml-1 align-middle" />}
               </p>
 
               <div className="pt-2 flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-slate-500 dark:text-slate-400">

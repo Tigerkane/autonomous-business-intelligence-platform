@@ -5,7 +5,7 @@ import {
   Receipt,
   TrendingUp,
   TrendingDown,
-  Sparkles,
+  CreditCard,
   PieChart as PieIcon,
   Calendar,
   Users,
@@ -114,31 +114,31 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
           {[1, 2, 3, 4].map((i) => (
             <div
               key={i}
-              className="p-5 rounded-2xl bg-white dark:bg-[#0e172e] border border-slate-200 dark:border-slate-800/90 shadow-sm"
+              className="p-5 rounded-2xl bg-white dark:bg-[#0f0f10] border border-slate-200 dark:border-white/[0.08] shadow-sm"
             >
               <div className="flex items-center justify-between mb-3">
                 <div className="w-24 h-3 bg-slate-200 dark:bg-slate-700/60 rounded" />
                 <div className="w-8 h-8 rounded-xl bg-indigo-500/20" />
               </div>
               <div className="w-28 h-7 bg-slate-200 dark:bg-slate-700/80 rounded-lg mb-2" />
-              <div className="w-32 h-3 bg-slate-100 dark:bg-slate-800 rounded" />
+              <div className="w-32 h-3 bg-slate-100 dark:bg-white/[0.06] rounded" />
             </div>
           ))}
         </div>
 
         {/* Charts Grid Skeleton */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 p-6 rounded-2xl bg-white dark:bg-[#0e172e] border border-slate-200 dark:border-slate-800/90 h-80 flex flex-col justify-between">
+          <div className="lg:col-span-2 p-6 rounded-2xl bg-white dark:bg-[#0f0f10] border border-slate-200 dark:border-white/[0.08] h-80 flex flex-col justify-between">
             <div className="flex justify-between items-center">
               <div className="w-40 h-4 bg-slate-200 dark:bg-slate-700 rounded" />
-              <div className="w-24 h-7 bg-slate-200 dark:bg-slate-800 rounded-lg" />
+              <div className="w-24 h-7 bg-slate-200 dark:bg-white/[0.06] rounded-lg" />
             </div>
-            <div className="w-full h-48 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/60" />
+            <div className="w-full h-48 rounded-xl bg-slate-50 dark:bg-black/60 border border-slate-200 dark:border-white/[0.08]" />
           </div>
-          <div className="p-6 rounded-2xl bg-white dark:bg-[#0e172e] border border-slate-200 dark:border-slate-800/90 h-80 flex flex-col justify-between">
+          <div className="p-6 rounded-2xl bg-white dark:bg-[#0f0f10] border border-slate-200 dark:border-white/[0.08] h-80 flex flex-col justify-between">
             <div className="w-32 h-4 bg-slate-200 dark:bg-slate-700 rounded" />
-            <div className="w-36 h-36 rounded-full border-[16px] border-slate-200 dark:border-slate-800 self-center my-auto" />
-            <div className="w-full h-10 bg-slate-100 dark:bg-slate-800/60 rounded-xl" />
+            <div className="w-36 h-36 rounded-full border-[16px] border-slate-200 dark:border-white/[0.08] self-center my-auto" />
+            <div className="w-full h-10 bg-slate-100 dark:bg-white/[0.06] rounded-xl" />
           </div>
         </div>
       </div>
@@ -158,14 +158,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
   const trendLabels =
     trendGrain === 'weekly'
       ? data.weekly.map((w) => {
-          const d = new Date(w.date);
-          return `${d.getUTCDate()} ${d.toLocaleString('en-US', { month: 'short' })}`;
-        })
+        const d = new Date(w.date);
+        return `${d.getUTCDate()} ${d.toLocaleString('en-US', { month: 'short' })}`;
+      })
       : data.monthly.filter((m) => !m.partial).map((m) => {
-          const [y, mon] = m.month.split('-');
-          const d = new Date(Number(y), Number(mon) - 1, 1);
-          return d.toLocaleString('en-US', { month: 'short', year: '2-digit' });
-        });
+        const [y, mon] = m.month.split('-');
+        const d = new Date(Number(y), Number(mon) - 1, 1);
+        return d.toLocaleString('en-US', { month: 'short', year: '2-digit' });
+      });
 
   const trendValues =
     trendGrain === 'weekly'
@@ -208,7 +208,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: isDark ? '#0f172a' : '#1e293b',
+        backgroundColor: isDark ? '#000000' : '#1e293b',
         titleColor: '#f8fafc',
         bodyColor: '#cbd5e1',
         borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
@@ -272,7 +272,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: isDark ? '#0f172a' : '#1e293b',
+        backgroundColor: isDark ? '#000000' : '#1e293b',
         padding: 10,
         cornerRadius: 8,
         callbacks: {
@@ -305,7 +305,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: isDark ? '#0f172a' : '#1e293b',
+        backgroundColor: isDark ? '#000000' : '#1e293b',
         callbacks: {
           label: (ctx: any) => ` ₹${Math.round(ctx.parsed.y).toLocaleString('en-IN')}`,
         },
@@ -327,171 +327,167 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto animate-fade-in">
+    <div className="space-y-6 max-w-7xl mx-auto">
       {/* Top 4 KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Revenue */}
-        <div className="p-5 rounded-2xl bg-white dark:bg-white/[0.03] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-sm dark:shadow-lg dark:shadow-black/10 hover:border-indigo-500/30 hover:shadow-indigo-500/5 transition-all duration-300">
+        <div className="p-5 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] shadow-xs">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
-                Total Revenue
+              <p className="text-xs font-normal text-slate-500 dark:text-slate-400 mb-1">
+                Total revenue
               </p>
-              <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+              <h3 className="text-2xl font-semibold text-slate-900 dark:text-white tracking-tight tabular-nums">
                 {inr(data.kpis.total_sales)}
               </h3>
               {data.kpis.total_profit !== undefined && (
                 <div className="flex items-center gap-1.5 mt-1.5 text-xs">
-                  <span className="font-semibold text-emerald-600 dark:text-emerald-400 font-mono">
+                  <span className="font-medium text-emerald-600 dark:text-emerald-400 tabular-nums">
                     {inr(data.kpis.total_profit)}
                   </span>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-500/20">
+                  <span className="text-[11px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium border border-emerald-500/20 tabular-nums">
                     {data.kpis.profit_margin}% margin
                   </span>
                 </div>
               )}
               {data.trends.revenue !== undefined && (
                 <div
-                  className={`flex items-center gap-1 mt-2 text-xs font-semibold ${
-                    data.trends.revenue > 0
-                      ? 'text-emerald-500'
-                      : data.trends.revenue < 0
-                      ? 'text-rose-500'
+                  className={`flex items-center gap-1 mt-2 text-xs font-medium ${data.trends.revenue > 0
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : data.trends.revenue < 0
+                      ? 'text-rose-600 dark:text-rose-400'
                       : 'text-slate-400'
-                  }`}
+                    }`}
                 >
                   {data.trends.revenue > 0 ? (
                     <TrendingUp className="w-3.5 h-3.5" />
                   ) : (
                     <TrendingDown className="w-3.5 h-3.5" />
                   )}
-                  <span>
+                  <span className="tabular-nums">
                     {data.trends.revenue > 0 ? '+' : ''}
                     {data.trends.revenue}%
                   </span>
-                  <span className="text-slate-400 font-normal">vs prev month</span>
+                  <span className="text-slate-500 dark:text-slate-400 font-normal">vs prev month</span>
                 </div>
               )}
             </div>
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white flex items-center justify-center shrink-0 shadow-lg shadow-indigo-500/25">
-              <DollarSign className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-[#232325] text-slate-600 dark:text-slate-300 flex items-center justify-center shrink-0 border border-slate-200/80 dark:border-white/[0.06]">
+              <DollarSign className="w-4 h-4" />
             </div>
           </div>
         </div>
 
         {/* Transactions */}
-        <div className="p-5 rounded-2xl bg-white dark:bg-white/[0.03] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-sm dark:shadow-lg dark:shadow-black/10 hover:border-emerald-500/30 hover:shadow-emerald-500/5 transition-all duration-300">
+        <div className="p-5 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] shadow-xs">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
-                Orders / Transactions
+              <p className="text-xs font-normal text-slate-500 dark:text-slate-400 mb-1">
+                Orders and transactions
               </p>
-              <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+              <h3 className="text-2xl font-semibold text-slate-900 dark:text-white tracking-tight tabular-nums">
                 {data.kpis.total_transactions.toLocaleString('en-IN')}
               </h3>
               {data.trends.transactions !== undefined && (
                 <div
-                  className={`flex items-center gap-1 mt-2 text-xs font-semibold ${
-                    data.trends.transactions > 0
-                      ? 'text-emerald-500'
-                      : data.trends.transactions < 0
-                      ? 'text-rose-500'
+                  className={`flex items-center gap-1 mt-2 text-xs font-medium ${data.trends.transactions > 0
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : data.trends.transactions < 0
+                      ? 'text-rose-600 dark:text-rose-400'
                       : 'text-slate-400'
-                  }`}
+                    }`}
                 >
                   {data.trends.transactions > 0 ? (
                     <TrendingUp className="w-3.5 h-3.5" />
                   ) : (
                     <TrendingDown className="w-3.5 h-3.5" />
                   )}
-                  <span>
+                  <span className="tabular-nums">
                     {data.trends.transactions > 0 ? '+' : ''}
                     {data.trends.transactions}%
                   </span>
-                  <span className="text-slate-400 font-normal">orders</span>
+                  <span className="text-slate-500 dark:text-slate-400 font-normal">orders</span>
                 </div>
               )}
             </div>
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shrink-0 shadow-lg shadow-emerald-500/25">
-              <Receipt className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-[#232325] text-slate-600 dark:text-slate-300 flex items-center justify-center shrink-0 border border-slate-200/80 dark:border-white/[0.06]">
+              <Receipt className="w-4 h-4" />
             </div>
           </div>
         </div>
 
         {/* Units Sold */}
-        <div className="p-5 rounded-2xl bg-white dark:bg-white/[0.03] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-sm dark:shadow-lg dark:shadow-black/10 hover:border-amber-500/30 hover:shadow-amber-500/5 transition-all duration-300">
+        <div className="p-5 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] shadow-xs">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
-                Units Sold
+              <p className="text-xs font-normal text-slate-500 dark:text-slate-400 mb-1">
+                Units sold
               </p>
-              <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+              <h3 className="text-2xl font-semibold text-slate-900 dark:text-white tracking-tight tabular-nums">
                 {data.kpis.total_quantity.toLocaleString('en-IN')}
               </h3>
               {data.trends.units !== undefined && (
                 <div
-                  className={`flex items-center gap-1 mt-2 text-xs font-semibold ${
-                    data.trends.units > 0
-                      ? 'text-emerald-500'
-                      : data.trends.units < 0
-                      ? 'text-rose-500'
+                  className={`flex items-center gap-1 mt-2 text-xs font-medium ${data.trends.units > 0
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : data.trends.units < 0
+                      ? 'text-rose-600 dark:text-rose-400'
                       : 'text-slate-400'
-                  }`}
+                    }`}
                 >
                   {data.trends.units > 0 ? (
                     <TrendingUp className="w-3.5 h-3.5" />
                   ) : (
                     <TrendingDown className="w-3.5 h-3.5" />
                   )}
-                  <span>
+                  <span className="tabular-nums">
                     {data.trends.units > 0 ? '+' : ''}
                     {data.trends.units}%
                   </span>
-                  <span className="text-slate-400 font-normal">volume</span>
+                  <span className="text-slate-500 dark:text-slate-400 font-normal">volume</span>
                 </div>
               )}
             </div>
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shrink-0 shadow-lg shadow-amber-500/25">
-              <ShoppingCart className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-[#232325] text-slate-600 dark:text-slate-300 flex items-center justify-center shrink-0 border border-slate-200/80 dark:border-white/[0.06]">
+              <ShoppingCart className="w-4 h-4" />
             </div>
           </div>
         </div>
 
         {/* Avg. Transaction Value */}
-        <div className="p-5 rounded-2xl bg-white dark:bg-white/[0.03] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-sm dark:shadow-lg dark:shadow-black/10 hover:border-purple-500/30 hover:shadow-purple-500/5 transition-all duration-300">
+        <div className="p-5 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] shadow-xs">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
-                Avg. Basket Size
+              <p className="text-xs font-normal text-slate-500 dark:text-slate-400 mb-1">
+                Average basket size
               </p>
-              <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+              <h3 className="text-2xl font-semibold text-slate-900 dark:text-white tracking-tight tabular-nums">
                 {inr(data.kpis.average_transaction)}
               </h3>
               {data.trends.avg !== undefined && (
                 <div
-                  className={`flex items-center gap-1 mt-2 text-xs font-semibold ${
-                    data.trends.avg > 0
-                      ? 'text-emerald-500'
-                      : data.trends.avg < 0
-                      ? 'text-rose-500'
+                  className={`flex items-center gap-1 mt-2 text-xs font-medium ${data.trends.avg > 0
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : data.trends.avg < 0
+                      ? 'text-rose-600 dark:text-rose-400'
                       : 'text-slate-400'
-                  }`}
+                    }`}
                 >
                   {data.trends.avg > 0 ? (
                     <TrendingUp className="w-3.5 h-3.5" />
                   ) : (
                     <TrendingDown className="w-3.5 h-3.5" />
                   )}
-                  <span>
+                  <span className="tabular-nums">
                     {data.trends.avg > 0 ? '+' : ''}
                     {data.trends.avg}%
                   </span>
-                  <span className="text-slate-400 font-normal">per transaction</span>
+                  <span className="text-slate-500 dark:text-slate-400 font-normal">per transaction</span>
                 </div>
               )}
             </div>
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-purple-500 to-fuchsia-600 text-white flex items-center justify-center shrink-0 shadow-lg shadow-purple-500/25">
-              <Sparkles className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-[#232325] text-slate-600 dark:text-slate-300 flex items-center justify-center shrink-0 border border-slate-200/80 dark:border-white/[0.06]">
+              <CreditCard className="w-4 h-4" />
             </div>
           </div>
         </div>
@@ -502,7 +498,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
         {/* Left Column (8 cols): Primary Analytical Core */}
         <div className="lg:col-span-8 space-y-6">
           {/* Revenue & Profit Trajectory Hub */}
-          <div className="p-6 rounded-2xl bg-white dark:bg-white/[0.03] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-sm dark:shadow-lg dark:shadow-black/10 hover:border-slate-300 dark:hover:border-white/[0.14] transition-all duration-300 flex flex-col">
+          <div className="p-6 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] shadow-xs flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
               <div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -520,21 +516,19 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                 <div className="flex items-center p-0.5 rounded-xl bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08]">
                   <button
                     onClick={() => setTrendMetric('revenue')}
-                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                      trendMetric === 'revenue'
-                        ? 'bg-indigo-600 text-white shadow-xs'
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                    }`}
+                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${trendMetric === 'revenue'
+                      ? 'bg-indigo-600 text-white shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                      }`}
                   >
                     Revenue
                   </button>
                   <button
                     onClick={() => setTrendMetric('profit')}
-                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                      trendMetric === 'profit'
-                        ? 'bg-emerald-600 text-white shadow-xs'
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                    }`}
+                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${trendMetric === 'profit'
+                      ? 'bg-emerald-600 text-white shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                      }`}
                   >
                     Profit
                   </button>
@@ -543,21 +537,19 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                 <div className="flex items-center p-0.5 rounded-xl bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08]">
                   <button
                     onClick={() => setTrendGrain('weekly')}
-                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                      trendGrain === 'weekly'
-                        ? 'bg-indigo-600 text-white shadow-xs'
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                    }`}
+                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${trendGrain === 'weekly'
+                      ? 'bg-indigo-600 text-white shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                      }`}
                   >
                     Weekly
                   </button>
                   <button
                     onClick={() => setTrendGrain('monthly')}
-                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                      trendGrain === 'monthly'
-                        ? 'bg-indigo-600 text-white shadow-xs'
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                    }`}
+                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${trendGrain === 'monthly'
+                      ? 'bg-indigo-600 text-white shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                      }`}
                   >
                     Monthly
                   </button>
@@ -573,7 +565,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
           </div>
 
           {/* Executive Category Profitability & Contribution Breakdown Table */}
-          <div className="p-6 rounded-2xl bg-white dark:bg-white/[0.03] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-sm dark:shadow-lg dark:shadow-black/10 hover:border-slate-300 dark:hover:border-white/[0.14] transition-all duration-300 space-y-4">
+          <div className="p-6 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] shadow-xs space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-white">
@@ -672,7 +664,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
           </div>
 
           {/* Customer Demographics Bar Chart */}
-          <div className="p-6 rounded-2xl bg-white dark:bg-white/[0.03] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-sm dark:shadow-lg dark:shadow-black/10 hover:border-slate-300 dark:hover:border-white/[0.14] transition-all duration-300">
+          <div className="p-6 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] shadow-xs">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -756,7 +748,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
         {/* Right Column (4 cols): Intelligence Rail & Action Center */}
         <div className="lg:col-span-4 space-y-6">
           {/* Category Mix & Donut Hub */}
-          <div className="p-6 rounded-2xl bg-white dark:bg-white/[0.03] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-sm dark:shadow-lg dark:shadow-black/10 hover:border-slate-300 dark:hover:border-white/[0.14] transition-all duration-300 flex flex-col justify-between">
+          <div className="p-6 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] shadow-xs flex flex-col justify-between">
             <div>
               <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
                 <div>
@@ -773,21 +765,19 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                 <div className="flex items-center p-0.5 rounded-lg bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08]">
                   <button
                     onClick={() => setCategoryMetric('revenue')}
-                    className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all ${
-                      !isCategoryProfit
-                        ? 'bg-indigo-600 text-white shadow-xs'
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                    }`}
+                    className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all ${!isCategoryProfit
+                      ? 'bg-indigo-600 text-white shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                      }`}
                   >
                     Revenue
                   </button>
                   <button
                     onClick={() => setCategoryMetric('profit')}
-                    className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all ${
-                      isCategoryProfit
-                        ? 'bg-emerald-600 text-white shadow-xs'
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                    }`}
+                    className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all ${isCategoryProfit
+                      ? 'bg-emerald-600 text-white shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                      }`}
                   >
                     Profit
                   </button>
@@ -797,10 +787,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
               <div className="relative h-48 w-full flex items-center justify-center my-3">
                 <Doughnut data={donutData} options={donutOptions} />
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                    {isCategoryProfit ? 'Total Profit' : 'Total Revenue'}
+                  <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                    {isCategoryProfit ? 'Total profit' : 'Total revenue'}
                   </span>
-                  <span className="text-base font-extrabold text-slate-900 dark:text-white">
+                  <span className="text-base font-semibold text-slate-900 dark:text-white tabular-nums">
                     {inr(isCategoryProfit ? (data.kpis.total_profit ?? 0) : data.kpis.total_sales)}
                   </span>
                   {isCategoryProfit && data.kpis.profit_margin !== undefined && (
@@ -867,57 +857,57 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
           </div>
 
           {/* Executive Intelligence Command Cards */}
-          <div className="space-y-3.5 flex flex-col justify-between">
+          <div className="space-y-3 flex flex-col justify-between">
             <div
               onClick={() => onNavigate('forecast-anomalies')}
-              className="group cursor-pointer p-5 rounded-2xl bg-white dark:bg-[#0e172e] dark:bg-gradient-to-r dark:from-indigo-950/70 dark:via-slate-900/70 dark:to-indigo-950/50 backdrop-blur-xl border border-slate-200/90 dark:border-indigo-500/25 hover:border-indigo-400 dark:hover:border-indigo-400/60 hover:shadow-lg hover:shadow-indigo-500/10 transition-all duration-300 text-slate-900 dark:text-white shadow-xs"
+              className="group cursor-pointer p-5 rounded-xl bg-white dark:bg-[#19191b] hover:bg-slate-50 dark:hover:bg-[#232325] border border-slate-200 dark:border-white/[0.08] transition-colors text-slate-900 dark:text-white shadow-xs"
             >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-                  Predictive Horizon
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-xs font-medium text-indigo-600 dark:text-indigo-400">
+                  Predictive horizon
                 </span>
-                <ArrowRight className="w-4 h-4 text-indigo-600 dark:text-indigo-400 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-indigo-500 group-hover:translate-x-0.5 transition-all" />
               </div>
-              <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-1">
-                Forecast & Anomaly Detection
+              <h4 className="font-semibold text-slate-900 dark:text-white text-sm mb-1">
+                Forecast & anomaly detection
               </h4>
-              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
                 6-month predictive trajectory with 31-day rolling median anomaly flagging.
               </p>
             </div>
 
             <div
               onClick={() => onNavigate('ask-data')}
-              className="group cursor-pointer p-5 rounded-2xl bg-white dark:bg-[#0e172e] dark:bg-gradient-to-r dark:from-purple-950/70 dark:via-slate-900/70 dark:to-purple-950/50 backdrop-blur-xl border border-slate-200/90 dark:border-purple-500/25 hover:border-purple-400 dark:hover:border-purple-400/60 hover:shadow-lg hover:shadow-purple-500/10 transition-all duration-300 text-slate-900 dark:text-white shadow-xs"
+              className="group cursor-pointer p-5 rounded-xl bg-white dark:bg-[#19191b] hover:bg-slate-50 dark:hover:bg-[#232325] border border-slate-200 dark:border-white/[0.08] transition-colors text-slate-900 dark:text-white shadow-xs"
             >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">
-                  AI Business Reasoning
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-xs font-medium text-indigo-600 dark:text-indigo-400">
+                  Natural language reasoning
                 </span>
-                <ArrowRight className="w-4 h-4 text-purple-600 dark:text-purple-400 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-indigo-500 group-hover:translate-x-0.5 transition-all" />
               </div>
-              <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-1">
-                Autonomous AI Analyst
+              <h4 className="font-semibold text-slate-900 dark:text-white text-sm mb-1">
+                Autonomous data analyst
               </h4>
-              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                Ask questions about trends, margins, and customer behavior with natural language.
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                Ask questions about trends, margins, and customer behavior in plain language.
               </p>
             </div>
 
             <div
               onClick={() => onNavigate('reports')}
-              className="group cursor-pointer p-5 rounded-2xl bg-white dark:bg-[#0e172e] dark:bg-gradient-to-r dark:from-emerald-950/70 dark:via-slate-900/70 dark:to-emerald-950/50 backdrop-blur-xl border border-slate-200/90 dark:border-emerald-500/25 hover:border-emerald-400 dark:hover:border-emerald-400/60 hover:shadow-lg hover:shadow-emerald-500/10 transition-all duration-300 text-slate-900 dark:text-white shadow-xs"
+              className="group cursor-pointer p-5 rounded-xl bg-white dark:bg-[#19191b] hover:bg-slate-50 dark:hover:bg-[#232325] border border-slate-200 dark:border-white/[0.08] transition-colors text-slate-900 dark:text-white shadow-xs"
             >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                  Executive PDF Studio
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-xs font-medium text-indigo-600 dark:text-indigo-400">
+                  Executive PDF studio
                 </span>
-                <ArrowRight className="w-4 h-4 text-emerald-600 dark:text-emerald-400 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-indigo-500 group-hover:translate-x-0.5 transition-all" />
               </div>
-              <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-1">
-                Download PDF Reports
+              <h4 className="font-semibold text-slate-900 dark:text-white text-sm mb-1">
+                Download PDF reports
               </h4>
-              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
                 Generate vector-grade executive summaries and stakeholder reports.
               </p>
             </div>

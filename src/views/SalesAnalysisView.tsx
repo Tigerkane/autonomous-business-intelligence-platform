@@ -105,19 +105,19 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="p-6 rounded-2xl bg-white dark:bg-[#0e172e] border border-slate-200 dark:border-slate-800/90 h-64 flex flex-col justify-between">
+            <div key={i} className="p-6 rounded-2xl bg-white dark:bg-[#0f0f10] border border-slate-200 dark:border-white/[0.08] h-64 flex flex-col justify-between">
               <div className="flex justify-between items-center">
                 <div className="w-28 h-4 bg-slate-200 dark:bg-slate-700 rounded" />
-                <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800" />
+                <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-white/[0.06]" />
               </div>
               <div className="w-36 h-8 bg-slate-200 dark:bg-slate-700/80 rounded" />
-              <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded" />
-              <div className="w-48 h-3 bg-slate-100 dark:bg-slate-800/70 rounded" />
+              <div className="w-full h-2 bg-slate-100 dark:bg-white/[0.06] rounded" />
+              <div className="w-48 h-3 bg-slate-100 dark:bg-white/[0.06] rounded" />
             </div>
           ))}
         </div>
 
-        <div className="p-6 rounded-2xl bg-white dark:bg-[#0e172e] border border-slate-200 dark:border-slate-800/90 h-80" />
+        <div className="p-6 rounded-2xl bg-white dark:bg-[#0f0f10] border border-slate-200 dark:border-white/[0.08] h-80" />
       </div>
     );
   }
@@ -179,7 +179,7 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: isDark ? '#0f172a' : '#1e293b',
+        backgroundColor: isDark ? '#000000' : '#1e293b',
         callbacks: {
           label: (ctx: any) => ` Revenue: ₹${Math.round(ctx.parsed.y).toLocaleString('en-IN')}`,
         },
@@ -235,7 +235,7 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
         },
       },
       tooltip: {
-        backgroundColor: isDark ? '#0f172a' : '#1e293b',
+        backgroundColor: isDark ? '#000000' : '#1e293b',
         callbacks: {
           label: (ctx: any) => ` ${ctx.dataset.label}: ₹${Math.round(ctx.parsed.y).toLocaleString('en-IN')}`,
         },
@@ -282,7 +282,7 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: isDark ? '#0f172a' : '#1e293b',
+        backgroundColor: isDark ? '#000000' : '#1e293b',
         callbacks: {
           label: (ctx: any) => ` Avg Daily Sales: ₹${Math.round(ctx.parsed.y).toLocaleString('en-IN')}`,
         },
@@ -333,7 +333,7 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: isDark ? '#0f172a' : '#1e293b',
+        backgroundColor: isDark ? '#000000' : '#1e293b',
         callbacks: {
           label: (ctx: any) => ` ${ctx.label}: ₹${Math.round(ctx.parsed).toLocaleString('en-IN')}`,
         },
@@ -365,7 +365,7 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
         },
       },
       tooltip: {
-        backgroundColor: isDark ? '#0f172a' : '#1e293b',
+        backgroundColor: isDark ? '#000000' : '#1e293b',
         callbacks: {
           label: (ctx: any) => ` ${ctx.dataset.label}: ₹${Math.round(ctx.parsed.y).toLocaleString('en-IN')}`,
         },
@@ -392,21 +392,21 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto animate-fade-in">
+    <div className="space-y-6 max-w-7xl mx-auto">
       {/* Automated Key Insights Banner */}
       {data.insights.length > 0 && (
-        <div className="p-5 rounded-2xl bg-indigo-50/70 dark:bg-[#0e172e] dark:bg-gradient-to-r dark:from-indigo-950/60 dark:via-slate-900/60 dark:to-indigo-950/50 border border-indigo-200/80 dark:border-indigo-500/25 shadow-xs text-slate-900 dark:text-white">
+        <div className="p-5 rounded-xl bg-slate-50 dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] shadow-xs text-slate-900 dark:text-white">
           <div className="flex items-center gap-2 mb-3">
             <Lightbulb className="w-4 h-4 text-amber-500 dark:text-amber-400" />
-            <h3 className="text-xs font-black uppercase tracking-wider text-indigo-600 dark:text-indigo-300">
-              Autonomous Highlights & Trends
+            <h3 className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+              Autonomous highlights and trends
             </h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {data.insights.map((insight, idx) => (
               <div
                 key={idx}
-                className="p-3 rounded-xl bg-white dark:bg-white/5 border border-indigo-100 dark:border-white/5 text-xs text-slate-700 dark:text-slate-200 leading-relaxed font-medium shadow-xs"
+                className="p-3 rounded-lg bg-white dark:bg-[#232325] border border-slate-200/80 dark:border-white/[0.06] text-xs text-slate-700 dark:text-slate-200 leading-relaxed font-normal shadow-xs"
               >
                 {insight}
               </div>
@@ -418,7 +418,7 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
       {/* Row 1: Trajectory + Weekday Pattern */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left: Revenue Trend (2 cols) */}
-        <div className="lg:col-span-2 p-6 rounded-2xl bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-lg dark:shadow-black/20">
+        <div className="lg:col-span-2 p-6 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] shadow-xs">
           <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
             <div>
               <h3 className="text-base font-bold text-slate-900 dark:text-white">
@@ -458,7 +458,7 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
         </div>
 
         {/* Right: Weekday Distribution */}
-        <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-lg dark:shadow-black/20">
+        <div className="p-6 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] shadow-xs">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-base font-bold text-slate-900 dark:text-white">
@@ -477,7 +477,7 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
       </div>
 
       {/* Row 2: Stacked Category Breakdown Chart */}
-      <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-lg dark:shadow-black/20">
+      <div className="p-6 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] shadow-xs">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-base font-bold text-slate-900 dark:text-white">
@@ -495,7 +495,7 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
       </div>
 
       {/* Row 3: Category Performance Breakdown Table */}
-      <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-lg dark:shadow-black/20 space-y-4">
+      <div className="p-6 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] shadow-xs space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-base font-bold text-slate-900 dark:text-white">
@@ -584,7 +584,7 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
       {genderStats.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Card 1: Revenue by Gender Donut & Metrics Table */}
-          <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-lg dark:shadow-black/20 flex flex-col justify-between">
+          <div className="p-6 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] shadow-xs flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -608,11 +608,11 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
                     <tr className="bg-slate-50 dark:bg-white/[0.03] border-b border-slate-200/80 dark:border-white/10 text-slate-500 dark:text-slate-400">
-                      <th className="px-3 py-2 font-bold uppercase text-[10px]">Gender</th>
-                      <th className="px-3 py-2 font-bold uppercase text-[10px]">Orders</th>
-                      <th className="px-3 py-2 font-bold uppercase text-[10px]">Units</th>
-                      <th className="px-3 py-2 font-bold uppercase text-[10px]">Revenue</th>
-                      <th className="px-3 py-2 font-bold uppercase text-[10px]">Avg Basket</th>
+                      <th className="px-3 py-2 font-medium text-[11px]">Gender</th>
+                      <th className="px-3 py-2 font-medium text-[11px]">Orders</th>
+                      <th className="px-3 py-2 font-medium text-[11px]">Units</th>
+                      <th className="px-3 py-2 font-medium text-[11px]">Revenue</th>
+                      <th className="px-3 py-2 font-medium text-[11px]">Avg basket</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-white/5">
@@ -654,7 +654,7 @@ export const SalesAnalysisView: React.FC<SalesAnalysisViewProps> = ({ onNavigate
           </div>
 
           {/* Card 2: Gender x Category Grouped Bar Chart */}
-          <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-lg dark:shadow-black/20 flex flex-col justify-between">
+          <div className="p-6 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] shadow-xs flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-4">
                 <div>

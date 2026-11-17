@@ -12,7 +12,6 @@ import {
   BarChart3,
   Database,
   ChevronDown,
-  Sparkles,
   Menu,
   X,
   Zap,
@@ -29,111 +28,9 @@ import { ThemeToggle } from '../components/common/ThemeToggle';
 import { InteractiveLiveConsole } from '../components/dashboard/InteractiveLiveConsole';
 
 /* ------------------------------------------------------------------ */
-/* Floating Dots Background (Canvas) — Spread across entire page       */
+/* Background particle layer disabled per unslop craft guidelines    */
 /* ------------------------------------------------------------------ */
-const FloatingParticles: React.FC<{ className?: string }> = ({ className = '' }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    let animId: number;
-    interface DotParticle {
-      x: number;
-      y: number;
-      vx: number;
-      vy: number;
-      r: number;
-      opacity: number;
-      baseOpacity: number;
-      pulseSpeed: number;
-      pulseOffset: number;
-      color: string;
-    }
-    const particles: DotParticle[] = [];
-
-    const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = window.innerWidth * dpr;
-      canvas.height = window.innerHeight * dpr;
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.scale(dpr, dpr);
-    };
-    resize();
-    window.addEventListener('resize', resize);
-
-    // Harmonious palette precisely matching the interactive console & dark theme
-    const palette = [
-      'rgba(129, 140, 248,', // soft indigo (accuracy & chart line)
-      'rgba(167, 139, 250,', // vibrant violet
-      'rgba(56, 189, 248,',  // electric cyan
-      'rgba(52, 211, 153,',  // emerald green (growth & live badges)
-      'rgba(244, 114, 182,', // rose accent (outlier spikes)
-    ];
-
-    // Spread floating dots across the whole screen till end
-    const count = Math.min(100, Math.max(50, Math.floor((window.innerWidth * window.innerHeight) / 12000)));
-    for (let i = 0; i < count; i++) {
-      const baseOp = Math.random() * 0.45 + 0.2;
-      const color = palette[Math.floor(Math.random() * palette.length)];
-      particles.push({
-        x: Math.random() * window.innerWidth,
-        y: Math.random() * window.innerHeight,
-        vx: (Math.random() - 0.5) * 0.35,
-        vy: (Math.random() - 0.5) * 0.35,
-        r: Math.random() * 2.0 + 0.8,
-        opacity: baseOp,
-        baseOpacity: baseOp,
-        pulseSpeed: Math.random() * 0.02 + 0.01,
-        pulseOffset: Math.random() * Math.PI * 2,
-        color,
-      });
-    }
-
-    let time = 0;
-    const draw = () => {
-      time += 1;
-      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-
-      for (const p of particles) {
-        p.x += p.vx;
-        p.y += p.vy;
-        if (p.x < 0) p.x = window.innerWidth;
-        if (p.x > window.innerWidth) p.x = 0;
-        if (p.y < 0) p.y = window.innerHeight;
-        if (p.y > window.innerHeight) p.y = 0;
-
-        // Gentle organic twinkle
-        const currentOpacity = p.baseOpacity + Math.sin(time * p.pulseSpeed + p.pulseOffset) * 0.15;
-        const clampedOpacity = Math.max(0.12, Math.min(0.85, currentOpacity));
-
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `${p.color} ${clampedOpacity})`;
-        ctx.fill();
-      }
-
-      animId = requestAnimationFrame(draw);
-    };
-    draw();
-
-    return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener('resize', resize);
-    };
-  }, []);
-
-  return (
-    <canvas
-      ref={canvasRef}
-      className={`fixed inset-0 w-full h-full pointer-events-none z-30 transition-opacity duration-700 ${className}`}
-      style={{ opacity: 0.95 }}
-    />
-  );
-};
+const FloatingParticles: React.FC<{ className?: string }> = () => null;
 
 /* ------------------------------------------------------------------ */
 /* Stat badge used in dynamic metrics row below hero                   */
@@ -148,22 +45,19 @@ const StatBadge: React.FC<{
 }> = ({ icon, value, suffix = '', label, sublabel, live = false }) => {
   return (
     <div className="flex items-center gap-3.5 group">
-      <div className="w-11 h-11 rounded-2xl bg-indigo-500/10 dark:bg-indigo-400/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform duration-300 shadow-xs">
+      <div className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-[#232325] flex items-center justify-center text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-white/[0.06] shrink-0">
         {icon}
       </div>
       <div>
-        <div className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tabular-nums tracking-tight flex items-center gap-2">
+        <div className="text-lg font-semibold text-slate-900 dark:text-white tabular-nums tracking-tight flex items-center gap-2">
           <span suppressHydrationWarning>{typeof value === 'number' ? value.toLocaleString('en-IN') : value}{suffix}</span>
           {live && (
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-            </span>
+            <span className="inline-block w-2 h-2 rounded-full bg-emerald-500" />
           )}
         </div>
-        <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">{label}</div>
+        <div className="text-xs font-normal text-slate-500 dark:text-slate-400">{label}</div>
         {sublabel && (
-          <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">{sublabel}</div>
+          <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">{sublabel}</div>
         )}
       </div>
     </div>
@@ -171,37 +65,50 @@ const StatBadge: React.FC<{
 };
 
 /* ------------------------------------------------------------------ */
-/* Feature Card with soft elevation & glow, NO harsh borders          */
+/* Feature Card with clean graphite surface & hairlines               */
 /* ------------------------------------------------------------------ */
 const FeatureCard: React.FC<{
   icon: React.ReactNode;
   title: string;
   description: string;
   accentColor: string;
-  glowColor: string;
+  glowColor?: string;
+  titleHoverColor: string;
+  iconHoverColor: string;
+  borderHoverColor: string;
   cta: string;
   onClick: () => void;
-}> = ({ icon, title, description, accentColor, glowColor, cta, onClick }) => (
+}> = ({
+  icon,
+  title,
+  description,
+  accentColor,
+  titleHoverColor,
+  iconHoverColor,
+  borderHoverColor,
+  cta,
+  onClick,
+}) => (
   <div
     onClick={onClick}
-    className="homepage-feature-card relative p-6 rounded-3xl bg-white/85 dark:bg-slate-800/60 backdrop-blur-sm shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group overflow-hidden"
+    className={`p-6 rounded-xl bg-white dark:bg-[#19191b] hover:bg-slate-50 dark:hover:bg-[#232325] border border-slate-200 dark:border-white/[0.08] ${borderHoverColor} shadow-xs transition-all duration-200 cursor-pointer group`}
   >
-    {/* Ambient hover glow */}
-    <div
-      className="absolute -inset-1 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl -z-10"
-      style={{ background: glowColor }}
-    />
-
     <div className="flex items-center justify-between mb-4">
-      <div className={`w-11 h-11 rounded-2xl flex items-center justify-center font-bold ${accentColor} group-hover:scale-110 transition-transform duration-300 shadow-xs`}>
+      <div
+        className={`w-9 h-9 rounded-lg bg-slate-100 dark:bg-[#232325] flex items-center justify-center text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-white/[0.06] ${iconHoverColor} transition-colors duration-200`}
+      >
         {icon}
       </div>
-      <span className={`text-[11px] font-semibold ${accentColor} opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all duration-300 flex items-center gap-1`}>
+      <span
+        className={`text-xs font-medium ${accentColor} opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center gap-1`}
+      >
         <span>{cta}</span>
         <ArrowRight className="w-3 h-3" />
       </span>
     </div>
-    <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-300">
+    <h3
+      className={`text-base font-semibold text-slate-900 dark:text-white mb-2 ${titleHoverColor} transition-colors duration-200`}
+    >
       {title}
     </h3>
     <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
@@ -219,20 +126,20 @@ const StepCard: React.FC<{
   title: string;
   description: string;
   icon: React.ReactNode;
-}> = ({ stepNumber, stepColor, title, description, icon }) => (
-  <div className="relative p-7 rounded-3xl bg-white/85 dark:bg-slate-800/60 backdrop-blur-sm shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
-    <div className="flex items-center justify-between mb-5">
-      <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black text-white ${stepColor} shadow-md`}>
+}> = ({ stepNumber, title, description, icon }) => (
+  <div className="p-6 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] shadow-xs group">
+    <div className="flex items-center justify-between mb-4">
+      <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-semibold text-white bg-slate-900 dark:bg-slate-100 dark:text-slate-900">
         {stepNumber}
       </div>
-      <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+      <span className="text-xs font-mono text-slate-400 dark:text-slate-500">
         Phase {stepNumber}
       </span>
     </div>
-    <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-700/50 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
+    <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-[#232325] flex items-center justify-center mb-4 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-white/[0.06]">
       {icon}
     </div>
-    <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2">{title}</h3>
+    <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-2">{title}</h3>
     <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{description}</p>
   </div>
 );
@@ -288,6 +195,57 @@ const MARQUEE_ITEMS = [
   { icon: '👥', text: 'Dual-Dimension Customer Demographics' },
   { icon: '📈', text: 'Out-of-Sample 80% Confidence Trajectories' },
 ];
+
+/* ------------------------------------------------------------------ */
+/* Smooth Isolated Hero Typewriter Component                          */
+/* ------------------------------------------------------------------ */
+const TYPING_PHRASES = [
+  'strategic decisions',
+  'predictive forecasts',
+  'inventory foresight',
+  'anomaly alerts',
+  'executive intelligence',
+];
+
+const HeroTypewriter: React.FC = React.memo(() => {
+  const [phraseIndex, setPhraseIndex] = useState(0);
+  const [typedText, setTypedText] = useState(TYPING_PHRASES[0]);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const currentPhrase = TYPING_PHRASES[phraseIndex];
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    if (!isDeleting) {
+      if (typedText === currentPhrase) {
+        timeoutId = setTimeout(() => setIsDeleting(true), 2800);
+      } else {
+        timeoutId = setTimeout(() => {
+          setTypedText(currentPhrase.slice(0, typedText.length + 1));
+        }, 70);
+      }
+    } else {
+      if (typedText === '') {
+        setIsDeleting(false);
+        setPhraseIndex((prev) => (prev + 1) % TYPING_PHRASES.length);
+      } else {
+        timeoutId = setTimeout(() => {
+          setTypedText(currentPhrase.slice(0, typedText.length - 1));
+        }, 35);
+      }
+    }
+
+    return () => clearTimeout(timeoutId);
+  }, [typedText, isDeleting, phraseIndex]);
+
+  return (
+    <span className="block text-indigo-600 dark:text-indigo-400 font-bold h-[1.18em] leading-[1.18em] overflow-hidden">
+      <span>{typedText}</span>
+      <span className="typewriter-cursor text-indigo-500 dark:text-indigo-400" aria-hidden="true" />
+    </span>
+  );
+});
+HeroTypewriter.displayName = 'HeroTypewriter';
 
 /* ------------------------------------------------------------------ */
 /* Main HomepageView Component                                         */
@@ -418,7 +376,7 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
   ];
 
   return (
-    <div className="relative min-h-screen bg-slate-50 dark:bg-[#0a0f1e] text-slate-900 dark:text-slate-100 selection:bg-indigo-600 selection:text-white overflow-x-hidden transition-colors">
+    <div className="relative min-h-screen bg-slate-50 dark:bg-black text-slate-900 dark:text-slate-100 selection:bg-indigo-600 selection:text-white overflow-x-hidden transition-colors">
       {/* Global ambient background glow that extends smoothly till the end of the entire page */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="homepage-gradient-orb homepage-gradient-orb-1" />
@@ -427,14 +385,10 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
         <div className="homepage-gradient-orb homepage-gradient-orb-4" />
       </div>
 
-      {/* Floating dots spread across entire page till end — No lines */}
-      <FloatingParticles />
-
-      {/* Top Scroll-Driven Progress Bar — smoothly fades in only once scrolled */}
+      {/* Top Scroll-Driven Progress Bar */}
       <motion.div
-        className={`fixed top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400 z-50 origin-left shadow-[0_0_12px_rgba(99,102,241,0.85)] transition-opacity duration-300 ${
-          showScrollTop ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
+        className={`fixed top-0 left-0 right-0 h-[2px] bg-indigo-600 z-50 origin-left transition-opacity duration-200 ${showScrollTop ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
         style={{ scaleX }}
       />
 
@@ -442,11 +396,10 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
       {/* 1. STICKY TOP NAV                                            */}
       {/* ============================================================ */}
       <header
-        className={`sticky top-0 z-40 animate-opening-nav transition-all duration-500 ${
-          navScrolled
-            ? 'backdrop-blur-xl bg-white/85 dark:bg-[#0a0f1e]/85 shadow-md shadow-indigo-950/5 border-b border-slate-200/80 dark:border-white/5'
-            : 'bg-transparent'
-        }`}
+        className={`sticky top-0 z-40 transition-colors duration-200 ${navScrolled
+          ? 'bg-white dark:bg-[#141415] border-b border-slate-200 dark:border-white/[0.08] shadow-xs'
+          : 'bg-transparent'
+          }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-6">
           {/* Logo */}
@@ -466,11 +419,10 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
                 <a
                   key={item.label}
                   href={item.href}
-                  className={`relative py-1 transition-colors duration-300 ${
-                    isActive
-                      ? 'text-indigo-600 dark:text-indigo-400 font-bold after:w-full'
-                      : 'hover:text-slate-900 dark:hover:text-white text-slate-600 dark:text-slate-400 after:w-0'
-                  } after:absolute after:bottom-0 after:left-0 after:h-[2px] after:bg-indigo-500 after:transition-all after:duration-300 hover:after:w-full`}
+                  className={`relative py-1 transition-colors duration-300 ${isActive
+                    ? 'text-indigo-600 dark:text-indigo-400 font-bold after:w-full'
+                    : 'hover:text-slate-900 dark:hover:text-white text-slate-600 dark:text-slate-400 after:w-0'
+                    } after:absolute after:bottom-0 after:left-0 after:h-[2px] after:bg-indigo-500 after:transition-all after:duration-300 hover:after:w-full`}
                 >
                   {item.label}
                 </a>
@@ -599,31 +551,25 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
             {/* Left Content with fluid opening entrance */}
             <div className="lg:col-span-7 space-y-6 text-center lg:text-left animate-opening-hero">
               {/* Tag pill */}
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 dark:bg-indigo-400/10 text-xs font-semibold text-indigo-600 dark:text-indigo-400 homepage-tag-glow shadow-xs">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Autonomous BI Platform — Retail Data Intelligence</span>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-[#232325] text-xs font-medium text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/[0.08]">
+                <span>Autonomous enterprise retail intelligence</span>
               </div>
 
-              {/* Main heading */}
-              <h1
-                className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-900 dark:text-white leading-[1.08]"
-                style={{ textWrap: 'balance' } as any}
-              >
-                Turn a sales CSV into{' '}
-                <span className="homepage-gradient-text">
-                  strategic decisions
-                </span>.
+              {/* Main heading with custom display font & isolated smooth typewriter */}
+              <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 dark:text-white leading-[1.12]">
+                <span className="block">Turn a sales CSV into</span>
+                <HeroTypewriter />
               </h1>
 
               <p className="text-base sm:text-lg text-slate-600 dark:text-slate-400 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                Upload retail sales transactions and instantly receive autonomous KPIs, walk-forward forecasting, anomaly detection, plain-English Q&A, and publication-ready PDF reports.
+                Upload retail sales transactions and receive verified KPIs, walk-forward forecasting, anomaly detection, plain-English Q&A, and publication-ready PDF reports.
               </p>
 
               {/* Primary CTA */}
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-1">
                 <button
                   onClick={handlePrimaryLaunch}
-                  className="homepage-cta-primary inline-flex items-center gap-2.5 px-8 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-xl shadow-indigo-600/25 hover:shadow-indigo-500/40 transition-all duration-300 cursor-pointer hover:scale-[1.03]"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm transition-colors cursor-pointer"
                 >
                   <span>{isAuthenticated ? 'Open Analytics Workspace' : 'Get Started Free'}</span>
                   <ArrowRight className="w-4 h-4" />
@@ -631,17 +577,14 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
               </div>
             </div>
 
-            {/* Right: Live Autonomous Telemetry Card with fluid opening bloom */}
-            <div className="lg:col-span-5 flex items-center justify-center animate-opening-card">
-              <div className="w-full max-w-[440px] homepage-hero-card p-6 rounded-3xl bg-white/85 dark:bg-slate-800/60 backdrop-blur-xl shadow-2xl shadow-indigo-950/10 dark:shadow-indigo-500/5">
+            {/* Right: Live Autonomous Telemetry Card */}
+            <div className="lg:col-span-5 flex items-center justify-center">
+              <div className="w-full max-w-[440px] p-6 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] shadow-xs">
                 {/* Card Header */}
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
-                    <span className="relative flex h-2.5 w-2.5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
-                    </span>
-                    <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                    <span className="inline-block w-2 h-2 rounded-full bg-emerald-500" />
+                    <span className="text-xs font-medium text-slate-700 dark:text-slate-200">
                       Live Telemetry Stream
                     </span>
                   </div>
@@ -649,21 +592,19 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
                   <div className="flex items-center gap-1 p-0.5 rounded-lg bg-slate-100 dark:bg-slate-700/60 text-[11px] font-semibold">
                     <button
                       onClick={() => setHeroMetric('revenue')}
-                      className={`px-2.5 py-1 rounded-md transition-all duration-300 cursor-pointer ${
-                        heroMetric === 'revenue'
-                          ? 'bg-indigo-600 text-white shadow-sm'
-                          : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                      }`}
+                      className={`px-2.5 py-1 rounded-md transition-all duration-300 cursor-pointer ${heroMetric === 'revenue'
+                        ? 'bg-indigo-600 text-white shadow-sm'
+                        : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                        }`}
                     >
                       Revenue
                     </button>
                     <button
                       onClick={() => setHeroMetric('orders')}
-                      className={`px-2.5 py-1 rounded-md transition-all duration-300 cursor-pointer ${
-                        heroMetric === 'orders'
-                          ? 'bg-indigo-600 text-white shadow-sm'
-                          : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                      }`}
+                      className={`px-2.5 py-1 rounded-md transition-all duration-300 cursor-pointer ${heroMetric === 'orders'
+                        ? 'bg-indigo-600 text-white shadow-sm'
+                        : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                        }`}
                     >
                       Orders
                     </button>
@@ -687,8 +628,8 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
                 </div>
                 <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 mb-4 font-mono">
                   <span>Continuous live stream</span>
-                  <span className="text-emerald-500 font-semibold flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-emerald-500 font-medium flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                     Real-time
                   </span>
                 </div>
@@ -760,14 +701,14 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
       {/* 2c. CONTINUOUS SCROLLING CAPABILITIES MARQUEE                */}
       {/* ============================================================ */}
       <section className="py-6 overflow-hidden relative select-none">
-        <div className="absolute left-0 inset-y-0 w-28 bg-gradient-to-r from-slate-50 dark:from-[#0a0f1e] to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 inset-y-0 w-28 bg-gradient-to-l from-slate-50 dark:from-[#0a0f1e] to-transparent z-10 pointer-events-none" />
+        <div className="absolute left-0 inset-y-0 w-28 bg-gradient-to-r from-slate-50 dark:from-black to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 inset-y-0 w-28 bg-gradient-to-l from-slate-50 dark:from-black to-transparent z-10 pointer-events-none" />
 
         <div className="homepage-marquee-track flex items-center gap-4 py-2">
           {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((item, idx) => (
             <div
               key={idx}
-              className="flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-white dark:bg-white/[0.04] hover:bg-slate-100 dark:hover:bg-white/[0.08] border border-slate-200 dark:border-white/10 backdrop-blur-md text-xs font-semibold text-slate-800 dark:text-slate-300 transition-colors shrink-0 shadow-xs hover:border-indigo-500/40"
+              className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-lg bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] text-xs font-medium text-slate-800 dark:text-slate-300 transition-colors shrink-0 shadow-xs"
             >
               <span className="text-sm">{item.icon}</span>
               <span>{item.text}</span>
@@ -797,6 +738,9 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
                 title="Executive Dashboard"
                 description="Automated MoM KPIs, weekly revenue area trends (3M/6M/All), product category breakdown, and dual-dimension customer segmentation donut."
                 accentColor="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"
+                titleHoverColor="group-hover:text-indigo-600 dark:group-hover:text-indigo-400"
+                iconHoverColor="group-hover:text-indigo-600 dark:group-hover:text-indigo-400 group-hover:bg-indigo-500/10 group-hover:border-indigo-500/20"
+                borderHoverColor="hover:border-indigo-500/30 dark:hover:border-indigo-500/40"
                 glowColor="rgba(99, 102, 241, 0.08)"
                 cta="Explore"
                 onClick={() => onLaunchPlatform('dashboard')}
@@ -808,6 +752,9 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
                 title="Scored Forecasts"
                 description="Walk-forward backtesting evaluates candidate algorithms, assigns Out-of-Sample MAPE scores, and projects future trajectories with shaded 80% confidence bands."
                 accentColor="bg-teal-500/10 text-teal-600 dark:text-teal-400"
+                titleHoverColor="group-hover:text-teal-600 dark:group-hover:text-teal-400"
+                iconHoverColor="group-hover:text-teal-600 dark:group-hover:text-teal-400 group-hover:bg-teal-500/10 group-hover:border-teal-500/20"
+                borderHoverColor="hover:border-teal-500/30 dark:hover:border-teal-500/40"
                 glowColor="rgba(20, 184, 166, 0.08)"
                 cta="View Forecast"
                 onClick={() => onLaunchPlatform('forecast-anomalies')}
@@ -819,6 +766,9 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
                 title="Anomaly Detection"
                 description="Flags unusual revenue days against a rolling 31-day median baseline using a modified z-score (threshold 3.5), and unusual transactions per product category using IQR fences."
                 accentColor="bg-rose-500/10 text-rose-600 dark:text-rose-400"
+                titleHoverColor="group-hover:text-rose-600 dark:group-hover:text-rose-400"
+                iconHoverColor="group-hover:text-rose-600 dark:group-hover:text-rose-400 group-hover:bg-rose-500/10 group-hover:border-rose-500/20"
+                borderHoverColor="hover:border-rose-500/30 dark:hover:border-rose-500/40"
                 glowColor="rgba(244, 63, 94, 0.08)"
                 cta="View Anomalies"
                 onClick={() => onLaunchPlatform('forecast-anomalies')}
@@ -830,6 +780,9 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
                 title="Ask in Plain English"
                 description="Connects to a local Ollama model. Maps questions into mathematical metrics and responds with zero hallucination."
                 accentColor="bg-purple-500/10 text-purple-600 dark:text-purple-400"
+                titleHoverColor="group-hover:text-purple-600 dark:group-hover:text-purple-400"
+                iconHoverColor="group-hover:text-purple-600 dark:group-hover:text-purple-400 group-hover:bg-purple-500/10 group-hover:border-purple-500/20"
+                borderHoverColor="hover:border-purple-500/30 dark:hover:border-purple-500/40"
                 glowColor="rgba(168, 85, 247, 0.08)"
                 cta="Ask AI"
                 onClick={() => onLaunchPlatform('ask-data')}
@@ -841,6 +794,9 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
                 title="PDF Reports"
                 description="Generates vector PDF stakeholder briefs with executive scorecards, sales breakdown tables, forecast curves, and strategic insights ready to print or email."
                 accentColor="bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                titleHoverColor="group-hover:text-amber-600 dark:group-hover:text-amber-400"
+                iconHoverColor="group-hover:text-amber-600 dark:group-hover:text-amber-400 group-hover:bg-amber-500/10 group-hover:border-amber-500/20"
+                borderHoverColor="hover:border-amber-500/30 dark:hover:border-amber-500/40"
                 glowColor="rgba(245, 158, 11, 0.08)"
                 cta="Generate"
                 onClick={() => onLaunchPlatform('reports')}
@@ -851,8 +807,11 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
                 icon={<ShieldCheck className="w-5 h-5" />}
                 title="Private Accounts"
                 description="Dedicated multi-tenant isolation, cryptographic token verification, client-side CAPTCHA verification, and isolated session dataset workspaces."
-                accentColor="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                glowColor="rgba(16, 185, 129, 0.08)"
+                accentColor="bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400"
+                titleHoverColor="group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-400"
+                iconHoverColor="group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-400 group-hover:bg-fuchsia-500/10 group-hover:border-fuchsia-500/20"
+                borderHoverColor="hover:border-fuchsia-500/30 dark:hover:border-fuchsia-500/40"
+                glowColor="rgba(217, 70, 239, 0.08)"
                 cta="Sign In"
                 onClick={() => openAuthModal('signin')}
               />
@@ -867,10 +826,10 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
       <section id="interactive-demo" className="py-12 sm:py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <ScrollReveal direction="up" className="text-center max-w-2xl mx-auto mb-8">
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-              Interactive Live Demo
+            <span className="text-xs font-mono font-medium text-indigo-600 dark:text-indigo-400">
+              Interactive live demo
             </span>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-slate-900 dark:text-white mt-1">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-tight text-slate-900 dark:text-white mt-1">
               Explore the Autonomous Intelligence Engine
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">
@@ -893,10 +852,10 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
       <section id="how-it-works" className="py-12 sm:py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <ScrollReveal direction="up" className="text-center max-w-2xl mx-auto mb-10">
-            <span className="inline-block text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 mb-2">
-              Simple Workflow
+            <span className="inline-block text-xs font-medium text-indigo-600 dark:text-indigo-400 mb-2">
+              Workflow
             </span>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white leading-tight">
+            <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900 dark:text-white leading-tight">
               Three Steps to Foresight
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">
@@ -942,10 +901,10 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
       <section id="faq" className="py-12 sm:py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <ScrollReveal direction="up" className="text-center max-w-xl mx-auto mb-10">
-            <span className="inline-block text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 mb-2">
-              Got Questions?
+            <span className="inline-block text-xs font-medium text-indigo-600 dark:text-indigo-400 mb-2">
+              Frequently asked questions
             </span>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white leading-tight">
+            <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900 dark:text-white leading-tight">
               Frequently Asked Questions
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">
@@ -959,11 +918,10 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
               return (
                 <div
                   key={idx}
-                  className={`rounded-2xl transition-all duration-300 overflow-hidden shadow-xs hover:shadow-md ${
-                    isOpen
-                      ? 'bg-white dark:bg-slate-800/80 shadow-md shadow-indigo-500/5'
-                      : 'bg-white/75 dark:bg-slate-800/40 hover:bg-white dark:hover:bg-slate-800/60'
-                  }`}
+                  className={`rounded-xl border border-slate-200 dark:border-white/[0.08] overflow-hidden shadow-xs transition-colors ${isOpen
+                    ? 'bg-white dark:bg-[#19191b]'
+                    : 'bg-white dark:bg-[#19191b] hover:bg-slate-50 dark:hover:bg-[#232325]'
+                    }`}
                 >
                   <button
                     onClick={() => setOpenFaq(isOpen ? null : idx)}
@@ -974,17 +932,15 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
                       {faq.q}
                     </span>
                     <div
-                      className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all duration-300 ${
-                        isOpen ? 'bg-indigo-600 text-white rotate-180' : 'bg-slate-100 dark:bg-slate-700 text-slate-400'
-                      }`}
+                      className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all duration-300 ${isOpen ? 'bg-indigo-600 text-white rotate-180' : 'bg-slate-100 dark:bg-slate-700 text-slate-400'
+                        }`}
                     >
                       <ChevronDown className="w-4 h-4" />
                     </div>
                   </button>
                   <div
-                    className={`transition-all duration-300 ease-in-out overflow-hidden ${
-                      isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-                    }`}
+                    className={`transition-all duration-300 ease-in-out overflow-hidden ${isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                      }`}
                   >
                     <div className="px-5 sm:px-6 pb-6 pt-1 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                       {faq.a}
@@ -1003,10 +959,10 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
       <section id="team" className="py-12 sm:py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <ScrollReveal direction="up" className="text-center max-w-xl mx-auto mb-10">
-            <span className="inline-block text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 mb-2">
-              The Team
+            <span className="inline-block text-xs font-medium text-indigo-600 dark:text-indigo-400 mb-2">
+              Project team
             </span>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+            <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900 dark:text-white">
               Project Team
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">
@@ -1022,15 +978,15 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
               { name: 'Navya', initials: 'N', role: 'BI Analytics & UX Intelligence', color: 'bg-violet-600 text-white', roleColor: 'text-violet-600 dark:text-violet-400' },
             ].map((member, idx) => (
               <ScrollReveal key={member.name} delay={idx * 0.08} direction="up">
-                <div className="p-6 rounded-3xl bg-white/75 dark:bg-slate-800/40 backdrop-blur-sm flex items-center gap-4 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
-                  <div className={`w-14 h-14 rounded-2xl ${member.color} flex items-center justify-center font-bold text-base shrink-0 shadow-sm group-hover:scale-105 transition-transform duration-300`}>
+                <div className="p-5 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] flex items-center gap-4 shadow-xs">
+                  <div className={`w-11 h-11 rounded-lg ${member.color} flex items-center justify-center font-medium text-sm shrink-0`}>
                     {member.initials}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-base font-bold text-slate-900 dark:text-white leading-tight">
+                    <h3 className="text-sm font-semibold text-slate-900 dark:text-white leading-tight">
                       {member.name}
                     </h3>
-                    <p className={`text-sm font-semibold ${member.roleColor} mt-1 whitespace-normal break-words leading-relaxed`}>
+                    <p className={`text-xs ${member.roleColor} mt-0.5 whitespace-normal break-words leading-relaxed`}>
                       {member.role}
                     </p>
                   </div>
@@ -1047,23 +1003,19 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
       <section className="py-6">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
           <ScrollReveal direction="up" delay={0.1}>
-            <div className="homepage-cta-banner relative px-6 py-5 sm:px-8 sm:py-6 rounded-2xl overflow-hidden shadow-lg">
-              {/* Animated gradient background */}
-              <div className="absolute inset-0 homepage-cta-gradient" />
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/90 via-indigo-700/80 to-violet-700/90" />
-
+            <div className="relative px-6 py-5 sm:px-8 sm:py-6 rounded-xl bg-slate-900 dark:bg-[#19191b] border border-slate-800 dark:border-white/[0.08] overflow-hidden shadow-xs">
               <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-4">
                 <div className="space-y-1 text-center md:text-left">
-                  <h2 className="text-base sm:text-lg font-bold text-white leading-tight">
+                  <h2 className="text-base sm:text-lg font-semibold text-white leading-tight">
                     Ready to turn your sales CSV into foresight?
                   </h2>
-                  <p className="text-xs text-indigo-100/80 max-w-sm leading-relaxed">
+                  <p className="text-xs text-slate-400 max-w-sm leading-relaxed">
                     Upload your retail sales data and receive executive decision intelligence.
                   </p>
                 </div>
                 <button
                   onClick={handlePrimaryLaunch}
-                  className="px-5 py-2.5 rounded-xl bg-white text-indigo-700 hover:bg-indigo-50 font-bold text-xs transition-all duration-300 shrink-0 shadow-md hover:shadow-lg cursor-pointer hover:scale-[1.02]"
+                  className="px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs transition-colors shrink-0 cursor-pointer"
                 >
                   Get Started Free
                 </button>
@@ -1111,7 +1063,7 @@ export const HomepageView: React.FC<HomepageViewProps> = ({ onLaunchPlatform }) 
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.8, y: 16 }}
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="fixed bottom-6 right-6 z-40 p-2.5 rounded-full bg-white/90 dark:bg-[#0d162e]/90 hover:bg-indigo-600 dark:hover:bg-indigo-600 text-slate-800 dark:text-white shadow-xl dark:shadow-2xl backdrop-blur-xl border border-slate-200 dark:border-indigo-500/30 transition-all duration-300 hover:scale-110 group cursor-pointer"
+          className="fixed bottom-6 right-6 z-40 p-2.5 rounded-full bg-white dark:bg-[#19191b] hover:bg-slate-50 dark:hover:bg-[#232325] text-slate-800 dark:text-white border border-slate-200 dark:border-white/[0.08] shadow-xs transition-colors group cursor-pointer"
           title="Scroll back to top"
           aria-label="Scroll back to top"
         >

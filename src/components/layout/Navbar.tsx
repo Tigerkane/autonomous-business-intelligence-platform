@@ -106,14 +106,14 @@ export const Navbar: React.FC<NavbarProps> = ({
   }, [accountMenuOpen]);
 
   return (
-    <header className="sticky top-0 z-20 h-16 px-4 md:px-8 flex items-center backdrop-blur-md bg-white/90 dark:bg-[#060b19]/90 border-b border-slate-200 dark:border-slate-800 transition-colors">
+    <header className="sticky top-0 z-20 h-16 px-4 md:px-8 flex items-center bg-white dark:bg-black border-b border-slate-200 dark:border-white/[0.08] transition-colors">
       <div className="flex items-center justify-between gap-4 w-full">
         {/* Left: Sidebar Toggle & Page Title */}
         <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
           {/* Mobile hamburger menu */}
           <button
             onClick={onOpenMobile}
-            className="md:hidden p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            className="md:hidden p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
             aria-label="Open navigation menu"
           >
             <Menu className="w-5 h-5" />
@@ -125,8 +125,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               onClick={onToggleSidebar}
               className={`hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border transition-all text-xs font-medium cursor-pointer ${
                 sidebarHidden
-                  ? 'border-indigo-400 dark:border-indigo-600 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 shadow-2xs hover:bg-indigo-100 dark:hover:bg-indigo-900/60'
-                  : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
+                  ? 'border-indigo-400 dark:border-indigo-600 bg-indigo-50 dark:bg-zinc-900 text-indigo-700 dark:text-indigo-300 shadow-2xs hover:bg-indigo-100 dark:hover:bg-zinc-800'
+                  : 'border-slate-200 dark:border-white/[0.08] bg-white dark:bg-black text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06]'
               }`}
               title={sidebarHidden ? "Show sidebar (Ctrl+B)" : "Hide sidebar (Ctrl+B)"}
               aria-label={sidebarHidden ? "Show sidebar" : "Hide sidebar"}
@@ -172,7 +172,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           {loaded ? (
             <button
               onClick={onGoToUpload}
-              className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs text-slate-700 dark:text-slate-200 hover:border-slate-400 dark:hover:border-slate-600 transition-colors"
+              className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-black text-xs text-slate-700 dark:text-slate-200 hover:border-slate-400 dark:hover:border-slate-600 transition-colors"
               title="Click to view dataset records"
             >
               <FileSpreadsheet className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
@@ -184,7 +184,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           ) : (
             <button
               onClick={onGoToUpload}
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-black text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/[0.06] transition-colors"
             >
               <FileSpreadsheet className="w-3.5 h-3.5 text-slate-400" />
               <span>Upload CSV Data</span>

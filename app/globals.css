@@ -5,6 +5,7 @@
 @layer base {
   :root {
     --font-sans: 'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-display: 'Space Grotesk', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
     --bg-main: #f8fafc;
@@ -21,12 +22,12 @@
   }
 
   .dark {
-    --bg-main: #0a0f1e;
-    --bg-surface: #0e172e;
-    --bg-raised: #1e293b;
-    --border-color: #334155;
-    --text-primary: #e2e8f0;
-    --text-muted: #94a3b8;
+    --bg-main: #000000;
+    --bg-surface: #0f0f10;
+    --bg-raised: #19191b;
+    --border-color: rgba(255, 255, 255, 0.08);
+    --text-primary: #ededed;
+    --text-muted: #85858b;
     --primary: #6366f1;
     --primary-hover: #4f46e5;
     --primary-soft: #818cf8;
@@ -60,6 +61,29 @@
 
 .tabular-nums {
   font-variant-numeric: tabular-nums;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+@keyframes typewriter-blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+.typewriter-cursor {
+  display: inline-block;
+  width: 3px;
+  height: 0.85em;
+  margin-left: 4px;
+  vertical-align: -0.05em;
+  background-color: currentColor;
+  animation: typewriter-blink 0.85s steps(2, start) infinite;
 }
 
 /* Custom styled range input (dark slate track, indigo thumb) */
@@ -214,79 +238,17 @@ html.theme-transition *::after {
   transform: none;
 }
 
-/* Gradient text for hero heading accent */
+/* Solid text for hero heading accent (unslop) */
 .homepage-gradient-text {
-  background: linear-gradient(135deg, #6366f1 0%, #a78bfa 40%, #818cf8 70%, #6366f1 100%);
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: homepage-gradient-shift 4s ease-in-out infinite;
+  color: #4f46e5;
+}
+.dark .homepage-gradient-text {
+  color: #818cf8;
 }
 
-@keyframes homepage-gradient-shift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-}
-
-/* Ambient gradient orbs across entire page till end */
+/* Ambient gradient orbs disabled per unslop craft guidelines */
 .homepage-gradient-orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(100px);
-  opacity: 0.3;
-  will-change: transform;
-  pointer-events: none;
-}
-.dark .homepage-gradient-orb {
-  opacity: 0.22;
-}
-.homepage-gradient-orb-1 {
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.45), transparent 70%);
-  top: -80px;
-  left: -80px;
-  animation: homepage-orb-float-1 16s ease-in-out infinite;
-}
-.homepage-gradient-orb-2 {
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(168, 85, 247, 0.35), transparent 70%);
-  top: 35%;
-  right: -60px;
-  animation: homepage-orb-float-2 18s ease-in-out infinite;
-}
-.homepage-gradient-orb-3 {
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.3), transparent 70%);
-  top: 70%;
-  left: -40px;
-  animation: homepage-orb-float-3 14s ease-in-out infinite;
-}
-.homepage-gradient-orb-4 {
-  width: 550px;
-  height: 550px;
-  background: radial-gradient(circle, rgba(129, 140, 248, 0.3), transparent 70%);
-  bottom: -60px;
-  right: 10%;
-  animation: homepage-orb-float-1 20s ease-in-out infinite;
-}
-
-@keyframes homepage-orb-float-1 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(40px, 30px) scale(1.05); }
-  66% { transform: translate(-20px, 50px) scale(0.98); }
-}
-@keyframes homepage-orb-float-2 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(-30px, -40px) scale(1.08); }
-  66% { transform: translate(20px, -20px) scale(0.95); }
-}
-@keyframes homepage-orb-float-3 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(30px, -35px) scale(1.04); }
+  display: none !important;
 }
 
 /* ============================================================ */
@@ -409,57 +371,19 @@ html.theme-transition *::after {
               0 8px 24px rgba(0, 0, 0, 0.06);
 }
 
-/* Tag pill glow */
+/* Tag pill (unslop) */
 .homepage-tag-glow {
-  animation: homepage-tag-pulse 3s ease-in-out infinite;
-}
-@keyframes homepage-tag-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
-  50% { box-shadow: 0 0 20px 4px rgba(99, 102, 241, 0.1); }
+  box-shadow: none;
 }
 
-/* CTA primary button shimmer */
+/* CTA primary button */
 .homepage-cta-primary {
   position: relative;
-  overflow: hidden;
-}
-.homepage-cta-primary::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(
-    to right,
-    transparent 0%,
-    rgba(255, 255, 255, 0.15) 50%,
-    transparent 100%
-  );
-  transform: rotate(30deg);
-  animation: homepage-shimmer 3s ease-in-out infinite;
-}
-@keyframes homepage-shimmer {
-  0% { transform: translateX(-100%) rotate(30deg); }
-  100% { transform: translateX(100%) rotate(30deg); }
 }
 
-/* CTA banner animated gradient background */
+/* CTA banner surface */
 .homepage-cta-gradient {
-  background: linear-gradient(
-    -45deg,
-    #4f46e5 0%,
-    #6366f1 25%,
-    #7c3aed 50%,
-    #6366f1 75%,
-    #4f46e5 100%
-  );
-  background-size: 400% 400%;
-  animation: homepage-cta-bg-shift 8s ease infinite;
-}
-@keyframes homepage-cta-bg-shift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+  background: #141415;
 }
 
 /* Continuous horizontal scrolling marquee */
@@ -479,23 +403,9 @@ html.theme-transition *::after {
   animation-play-state: paused;
 }
 
-/* Feature card hover glow animation */
-.homepage-feature-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-  background: radial-gradient(
-    600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-    rgba(99, 102, 241, 0.06),
-    transparent 40%
-  );
-  pointer-events: none;
-}
-.homepage-feature-card:hover::before {
-  opacity: 1;
+/* Feature card (unslop) */
+.homepage-feature-card {
+  transition: border-color 0.15s ease-out;
 }
 
 /* Reduced motion: disable all homepage animations */

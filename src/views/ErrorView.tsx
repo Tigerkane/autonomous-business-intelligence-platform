@@ -18,8 +18,8 @@ export const ErrorView: React.FC<ErrorViewProps> = ({
   const is404 = type === '404';
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0f172a] text-slate-900 dark:text-slate-100 flex flex-col justify-between transition-colors">
-      <header className="px-6 py-4 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-[#1e293b]/70 backdrop-blur-sm">
+    <div className="min-h-screen bg-slate-50 dark:bg-black text-slate-900 dark:text-slate-100 flex flex-col justify-between transition-colors">
+      <header className="px-6 py-4 flex items-center justify-between border-b border-slate-200 dark:border-white/[0.08] bg-white/70 dark:bg-black/70 backdrop-blur-sm">
         <BrandLogo size="sm" variant="full" />
         <button
           onClick={onNavigateHome}

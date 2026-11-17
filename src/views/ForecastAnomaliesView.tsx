@@ -5,7 +5,6 @@ import {
   Activity,
   CheckCircle2,
   Calendar,
-  Sparkles,
   ShieldAlert,
   HelpCircle,
   Sliders,
@@ -208,7 +207,7 @@ export const ForecastAnomaliesView: React.FC<ForecastAnomaliesViewProps> = ({ on
       .then((d) => {
         if (isMounted && d && Array.isArray(d.data)) setUnusual(d);
       })
-      .catch(() => {});
+      .catch(() => { });
     return () => {
       isMounted = false;
     };
@@ -409,15 +408,15 @@ export const ForecastAnomaliesView: React.FC<ForecastAnomaliesViewProps> = ({ on
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="p-5 rounded-2xl bg-white dark:bg-[#0e172e] border border-slate-200 dark:border-slate-800/90 h-32 flex flex-col justify-between">
+            <div key={i} className="p-5 rounded-2xl bg-white dark:bg-[#0f0f10] border border-slate-200 dark:border-white/[0.08] h-32 flex flex-col justify-between">
               <div className="w-28 h-3 bg-slate-200 dark:bg-slate-700 rounded" />
               <div className="w-36 h-7 bg-slate-200 dark:bg-slate-700/80 rounded" />
-              <div className="w-48 h-3 bg-slate-100 dark:bg-slate-800/70 rounded" />
+              <div className="w-48 h-3 bg-slate-100 dark:bg-white/[0.06] rounded" />
             </div>
           ))}
         </div>
 
-        <div className="p-6 rounded-2xl bg-white dark:bg-[#0e172e] border border-slate-200 dark:border-slate-800/90 h-96" />
+        <div className="p-6 rounded-2xl bg-white dark:bg-[#0f0f10] border border-slate-200 dark:border-white/[0.08] h-96" />
       </div>
     );
   }
@@ -434,7 +433,7 @@ export const ForecastAnomaliesView: React.FC<ForecastAnomaliesViewProps> = ({ on
         },
       },
       tooltip: {
-        backgroundColor: isDark ? '#0f172a' : '#1e293b',
+        backgroundColor: isDark ? '#000000' : '#1e293b',
         callbacks: {
           label: (ctx: any) =>
             ctx.parsed.y !== null
@@ -471,7 +470,7 @@ export const ForecastAnomaliesView: React.FC<ForecastAnomaliesViewProps> = ({ on
         },
       },
       tooltip: {
-        backgroundColor: isDark ? '#0f172a' : '#1e293b',
+        backgroundColor: isDark ? '#000000' : '#1e293b',
         callbacks: {
           title: (items: any[]) => (items[0] ? items[0].label : ''),
           label: (ctx: any) => {
@@ -508,66 +507,66 @@ export const ForecastAnomaliesView: React.FC<ForecastAnomaliesViewProps> = ({ on
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto animate-fade-in">
+    <div className="space-y-6 max-w-7xl mx-auto">
       <InsightsPanel />
 
       {/* Top ML Diagnostic Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Forecast Model */}
-        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-lg dark:shadow-black/20">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
-            Selected Algorithm
+        <div className="p-5 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] shadow-xs">
+          <p className="text-xs font-normal text-slate-500 dark:text-slate-400 mb-1">
+            Selected algorithm
           </p>
-          <h4 className="text-xl font-black text-slate-900 dark:text-white truncate">
+          <h4 className="text-xl font-semibold text-slate-900 dark:text-white truncate">
             {forecast?.model || 'Linear Regression'}
           </h4>
-          <span className="text-xs text-indigo-500 font-semibold mt-1 inline-block">
+          <span className="text-xs text-indigo-500 font-medium mt-1 inline-block">
             Walk-forward cross-validated
           </span>
         </div>
 
         {/* Backtest MAPE & Accuracy */}
-        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-lg dark:shadow-black/20">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
+        <div className="p-5 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] shadow-xs">
+          <p className="text-xs font-normal text-slate-500 dark:text-slate-400 mb-1">
             Backtest MAPE
           </p>
-          <h4 className="text-xl font-black text-indigo-500 dark:text-indigo-400 font-mono">
+          <h4 className="text-xl font-semibold text-indigo-500 dark:text-indigo-400 font-mono tabular-nums">
             {forecast ? `${forecast.mape}%` : '—'}
           </h4>
-          <span className="text-xs text-slate-400 font-medium mt-1 inline-block">
+          <span className="text-xs text-slate-400 font-normal mt-1 inline-block">
             Cross-validation accuracy: {forecast ? `${forecast.accuracy}%` : '—'}
           </span>
         </div>
 
         {/* Next Month Predicted */}
-        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-lg dark:shadow-black/20">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
-            Next Month Target
+        <div className="p-5 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] shadow-xs">
+          <p className="text-xs font-normal text-slate-500 dark:text-slate-400 mb-1">
+            Next month target
           </p>
-          <h4 className="text-xl font-black text-slate-900 dark:text-white">
+          <h4 className="text-xl font-semibold text-slate-900 dark:text-white tabular-nums">
             {forecast ? inr(forecast.next_month_predicted) : '—'}
           </h4>
-          <span className="text-xs text-slate-400 font-medium mt-1 inline-block">
-            Horizon: 6 Months Ahead
+          <span className="text-xs text-slate-400 font-normal mt-1 inline-block">
+            Horizon: 6 months ahead
           </span>
         </div>
 
         {/* Anomalies Detected */}
-        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-lg dark:shadow-black/20">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
-            Anomalous Days
+        <div className="p-5 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] shadow-xs">
+          <p className="text-xs font-normal text-slate-500 dark:text-slate-400 mb-1">
+            Anomalous days
           </p>
-          <h4 className="text-xl font-black text-amber-500">
+          <h4 className="text-xl font-semibold text-amber-500 tabular-nums">
             {anomalies ? `${anomalies.total} Days` : '0'}
           </h4>
-          <span className="text-xs text-slate-400 font-medium mt-1 inline-block">
+          <span className="text-xs text-slate-400 font-normal mt-1 inline-block">
             Displaying all {sortedAnomalies.length} in table
           </span>
         </div>
       </div>
 
       {/* Predictive Forecast Chart */}
-      <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-lg dark:shadow-black/20">
+      <div className="p-6 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] shadow-xs">
         <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
           <div>
             <h3 className="text-base font-bold text-slate-900 dark:text-white">
@@ -602,8 +601,8 @@ export const ForecastAnomaliesView: React.FC<ForecastAnomaliesViewProps> = ({ on
             {forecast.model === 'Recent 3-month average'
               ? 'Why the line is flat: the backtest compared a linear trend with a recent 3-month average, and the average had the lower error on held-out months, so it was selected.'
               : 'Why this model: the backtest compared a linear trend with a recent 3-month average, and ' +
-                forecast.model.toLowerCase() +
-                ' had the lower error on held-out months, so it was selected.'}
+              forecast.model.toLowerCase() +
+              ' had the lower error on held-out months, so it was selected.'}
           </p>
         )}
 
@@ -617,7 +616,7 @@ export const ForecastAnomaliesView: React.FC<ForecastAnomaliesViewProps> = ({ on
 
       {/* Daily revenue with anomaly markers */}
       {dailyChartData && (
-        <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-lg dark:shadow-black/20">
+        <div className="p-6 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] shadow-xs">
           <div className="mb-4">
             <h3 className="text-base font-bold text-slate-900 dark:text-white">
               Daily Revenue with Flagged Days
@@ -634,7 +633,7 @@ export const ForecastAnomaliesView: React.FC<ForecastAnomaliesViewProps> = ({ on
       )}
 
       {/* Anomalies Detection Table & Explanation */}
-      <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-lg dark:shadow-black/20 space-y-4">
+      <div className="p-6 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] shadow-xs space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -786,11 +785,10 @@ export const ForecastAnomaliesView: React.FC<ForecastAnomaliesViewProps> = ({ on
                     </td>
                     <td className="px-4 py-3">
                       <span
-                        className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
-                          item.severity === 'High'
-                            ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20'
-                            : 'bg-amber-500/10 text-amber-500 border border-amber-500/20'
-                        }`}
+                        className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${item.severity === 'High'
+                          ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20'
+                          : 'bg-amber-500/10 text-amber-500 border border-amber-500/20'
+                          }`}
                       >
                         {item.severity}
                       </span>
@@ -831,7 +829,7 @@ export const ForecastAnomaliesView: React.FC<ForecastAnomaliesViewProps> = ({ on
       </div>
 
       {/* Unusual Transactions (per-category IQR) */}
-      <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-lg dark:shadow-black/20 space-y-4">
+      <div className="p-6 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] shadow-xs space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -850,11 +848,10 @@ export const ForecastAnomaliesView: React.FC<ForecastAnomaliesViewProps> = ({ on
               <button
                 type="button"
                 onClick={() => setTxCategory('All')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  txCategory === 'All'
-                    ? 'bg-indigo-600 text-white shadow-xs'
-                    : 'bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/60'
-                }`}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${txCategory === 'All'
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/60'
+                  }`}
               >
                 All ({unusual?.total || 0})
               </button>
@@ -866,11 +863,10 @@ export const ForecastAnomaliesView: React.FC<ForecastAnomaliesViewProps> = ({ on
                     key={c}
                     type="button"
                     onClick={() => setTxCategory(c)}
-                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
-                      active
-                        ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs'
-                        : 'bg-slate-100/80 dark:bg-slate-800/40 text-slate-600 dark:text-slate-300 hover:bg-slate-200/80 dark:hover:bg-slate-700/60 border-slate-200 dark:border-slate-700/60'
-                    }`}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${active
+                      ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs'
+                      : 'bg-slate-100/80 dark:bg-slate-800/40 text-slate-600 dark:text-slate-300 hover:bg-slate-200/80 dark:hover:bg-slate-700/60 border-slate-200 dark:border-slate-700/60'
+                      }`}
                     style={active ? { borderColor: catColor } : undefined}
                   >
                     <span
@@ -944,11 +940,10 @@ export const ForecastAnomaliesView: React.FC<ForecastAnomaliesViewProps> = ({ on
                     </td>
                     <td className="px-4 py-3">
                       <span
-                        className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
-                          t.direction === 'High'
-                            ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20'
-                            : 'bg-amber-500/10 text-amber-500 border border-amber-500/20'
-                        }`}
+                        className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${t.direction === 'High'
+                          ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20'
+                          : 'bg-amber-500/10 text-amber-500 border border-amber-500/20'
+                          }`}
                       >
                         {t.direction}
                       </span>

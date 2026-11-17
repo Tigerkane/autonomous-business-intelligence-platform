@@ -237,7 +237,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onAuthSuccess }) => {
         <div className="mb-5">
           <div className="flex items-center justify-between gap-2 mb-3">
             <BrandIcon size={34} withBadge />
-            <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800/60 px-2 py-0.5 rounded-md flex items-center gap-1">
+            <span className="text-xs font-mono text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-white/[0.06] border border-indigo-200 dark:border-white/10 px-2 py-0.5 rounded flex items-center gap-1">
               <ShieldCheck className="w-3 h-3" />
               <span>Secure Authentication</span>
             </span>

@@ -31,15 +31,15 @@ const ViewFallback = () => (
     </div>
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {[1, 2, 3, 4].map((i) => (
-        <div key={i} className="h-28 rounded-2xl bg-white dark:bg-[#0e172e] border border-slate-200 dark:border-slate-800/80 p-5">
+        <div key={i} className="h-28 rounded-2xl bg-white dark:bg-[#0f0f10] border border-slate-200 dark:border-white/[0.08] p-5">
           <div className="w-20 h-3 bg-slate-200 dark:bg-slate-700/60 rounded mb-3" />
           <div className="w-28 h-6 bg-slate-200 dark:bg-slate-700/80 rounded" />
         </div>
       ))}
     </div>
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div className="lg:col-span-2 h-72 rounded-2xl bg-white dark:bg-[#0e172e] border border-slate-200 dark:border-slate-800/80 p-6" />
-      <div className="h-72 rounded-2xl bg-white dark:bg-[#0e172e] border border-slate-200 dark:border-slate-800/80 p-6" />
+      <div className="lg:col-span-2 h-72 rounded-2xl bg-white dark:bg-[#0f0f10] border border-slate-200 dark:border-white/[0.08] p-6" />
+      <div className="h-72 rounded-2xl bg-white dark:bg-[#0f0f10] border border-slate-200 dark:border-white/[0.08] p-6" />
     </div>
   </div>
 );
@@ -202,7 +202,7 @@ function AppContent() {
 
   // Otherwise, render full Enterprise AI Platform workspace layout
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0f172a] text-slate-900 dark:text-slate-100 transition-colors font-sans">
+    <div className="min-h-screen bg-slate-50 dark:bg-black text-slate-900 dark:text-slate-100 transition-colors font-sans">
       <Sidebar
         currentTab={currentTab}
         onSelectTab={(tab) => setCurrentTab(tab)}

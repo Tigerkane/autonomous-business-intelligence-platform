@@ -1,9 +1,9 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Send,
   Bot,
   User,
-  Sparkles,
   Copy,
   Check,
   Cpu,
@@ -140,33 +140,33 @@ export const AskYourDataView: React.FC<AskYourDataViewProps> = ({ onNavigate }) 
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-140px)] max-w-5xl mx-auto animate-fade-in">
+    <div className="flex flex-col h-[calc(100vh-140px)] max-w-5xl mx-auto">
       {/* Top Controls Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 p-4 mb-3 rounded-2xl bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-lg dark:shadow-black/20">
+      <div className="flex flex-wrap items-center justify-between gap-4 p-4 mb-3 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] shadow-xs">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
-            <Bot className="w-5 h-5" />
+          <div className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-[#232325] text-slate-700 dark:text-slate-300 flex items-center justify-center shrink-0 border border-slate-200/80 dark:border-white/[0.06]">
+            <Bot className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-              Autonomous AI Data Analyst
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+              Data analyst assistant
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Natural language intelligence with full dataset telemetry context
+              Natural language questions answered against current sales dataset
             </p>
           </div>
         </div>
 
         {/* Model Selector */}
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+          <span className="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
             <Cpu className="w-3.5 h-3.5 text-indigo-500" />
             Model:
           </span>
           <select
             value={selectedProvider}
             onChange={(e) => setSelectedProvider(e.target.value)}
-            className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-xs font-semibold text-slate-800 dark:text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
+            className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-[#232325] border border-slate-200 dark:border-white/10 text-xs font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
           >
             {providers.map((p) => (
               <option key={p.id} value={p.id}>
@@ -179,8 +179,8 @@ export const AskYourDataView: React.FC<AskYourDataViewProps> = ({ onNavigate }) 
 
       {/* Ollama Cloud Live Session API Key Input */}
       {selectedProvider === 'ollama_cloud' && (
-        <div className="mb-3 px-3.5 py-2.5 rounded-xl bg-indigo-50/80 dark:bg-indigo-950/30 border border-indigo-200/80 dark:border-indigo-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
-          <div className="flex items-center gap-2 text-indigo-900 dark:text-indigo-200">
+        <div className="mb-3 px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
+          <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
             <Key className="w-4 h-4 shrink-0 text-indigo-500" />
             <span>
               {providers.find((p) => p.id === 'ollama_cloud')?.configured
@@ -204,10 +204,10 @@ export const AskYourDataView: React.FC<AskYourDataViewProps> = ({ onNavigate }) 
                 }
               }}
               placeholder="Paste Ollama API key..."
-              className="px-3 py-1 rounded-lg bg-white dark:bg-slate-900 border border-indigo-300/80 dark:border-indigo-700 text-xs text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 w-52 sm:w-64 shadow-2xs font-mono"
+              className="px-3 py-1 rounded-lg bg-white dark:bg-[#232325] border border-slate-200 dark:border-white/10 text-xs text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 w-52 sm:w-64 font-mono"
             />
             {apiKeyInput ? (
-              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1 shrink-0">
+              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1 shrink-0">
                 <Check className="w-3.5 h-3.5" /> Ready
               </span>
             ) : null}
@@ -216,15 +216,14 @@ export const AskYourDataView: React.FC<AskYourDataViewProps> = ({ onNavigate }) 
       )}
 
       {/* What the solver can answer */}
-      <p className="px-1 mb-2 text-[11px] text-slate-500 dark:text-slate-400">
+      <p className="px-1 mb-2 text-xs text-slate-500 dark:text-slate-400">
         The default solver answers exact questions about categories, age and gender, customers, monthly
-        trends, average order value, totals, the forecast and anomalies. For example: "Which product
-        category has the lowest revenue?"
+        trends, average order value, totals, the forecast and anomalies.
       </p>
 
       {/* Suggested Questions Strip */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-2 no-scrollbar">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 shrink-0">
+        <span className="text-xs font-normal text-slate-500 dark:text-slate-400 shrink-0">
           Suggested:
         </span>
         {SUGGESTIONS.map((q, idx) => (
@@ -232,7 +231,7 @@ export const AskYourDataView: React.FC<AskYourDataViewProps> = ({ onNavigate }) 
             key={idx}
             onClick={() => handleSend(q)}
             disabled={loading}
-            className="shrink-0 px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 hover:border-indigo-500/60 hover:text-indigo-600 dark:hover:text-indigo-400 text-xs text-slate-700 dark:text-slate-300 transition-colors shadow-2xs disabled:opacity-50"
+            className="shrink-0 px-3 py-1 rounded-full bg-slate-100 dark:bg-[#232325] border border-slate-200/80 dark:border-white/[0.06] hover:border-indigo-500/60 hover:text-indigo-600 dark:hover:text-indigo-400 text-xs text-slate-700 dark:text-slate-300 transition-colors disabled:opacity-50 cursor-pointer"
           >
             {q}
           </button>
@@ -240,7 +239,7 @@ export const AskYourDataView: React.FC<AskYourDataViewProps> = ({ onNavigate }) 
       </div>
 
       {/* Message Stream */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 rounded-2xl bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80 shadow-inner">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] shadow-xs">
         {messages.map((msg) => {
           const isUser = msg.role === 'user';
           return (
@@ -249,30 +248,27 @@ export const AskYourDataView: React.FC<AskYourDataViewProps> = ({ onNavigate }) 
               className={`flex items-start gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}
             >
               <div
-                className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-xs ${
-                  isUser
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-purple-600 text-white'
-                }`}
+                className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-xs ${isUser
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-purple-600 text-white'
+                  }`}
               >
                 {isUser ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
               </div>
 
               <div
-                className={`max-w-[80%] rounded-2xl px-5 py-3.5 shadow-xs ${
-                  isUser
-                    ? 'bg-indigo-600 text-white rounded-tr-none'
-                    : 'bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 text-slate-900 dark:text-slate-100 rounded-tl-none'
-                }`}
+                className={`max-w-[80%] rounded-2xl px-5 py-3.5 shadow-xs ${isUser
+                  ? 'bg-indigo-600 text-white rounded-tr-none'
+                  : 'bg-slate-100 dark:bg-black border border-slate-200 dark:border-white/[0.08] text-slate-900 dark:text-slate-100 rounded-tl-none'
+                  }`}
               >
                 <div className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap font-sans">
                   {msg.content}
                 </div>
 
                 <div
-                  className={`flex items-center justify-between gap-3 mt-2 text-[10px] ${
-                    isUser ? 'text-indigo-200' : 'text-slate-400'
-                  }`}
+                  className={`flex items-center justify-between gap-3 mt-2 text-[10px] ${isUser ? 'text-indigo-200' : 'text-slate-400'
+                    }`}
                 >
                   <span>{msg.time}</span>
                   {!isUser && (
@@ -306,7 +302,7 @@ export const AskYourDataView: React.FC<AskYourDataViewProps> = ({ onNavigate }) 
             <div className="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center shrink-0">
               <Bot className="w-4 h-4" />
             </div>
-            <div className="bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 rounded-2xl rounded-tl-none px-5 py-3.5 shadow-xs">
+            <div className="bg-slate-100 dark:bg-black border border-slate-200 dark:border-white/[0.08] rounded-2xl rounded-tl-none px-5 py-3.5 shadow-xs">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-purple-500 animate-bounce" />
                 <div className="w-2 h-2 rounded-full bg-purple-500 animate-bounce [animation-delay:0.2s]" />
@@ -337,14 +333,14 @@ export const AskYourDataView: React.FC<AskYourDataViewProps> = ({ onNavigate }) 
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask a question about sales revenue, trends, categories, or anomalies..."
             disabled={loading}
-            className="w-full pl-4 pr-12 py-3 rounded-xl bg-white dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 shadow-xs focus:outline-none focus:border-indigo-500 disabled:opacity-50"
+            className="w-full pl-4 pr-12 py-2.5 rounded-lg bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 shadow-xs focus:outline-none focus:border-indigo-500 disabled:opacity-50"
           />
         </div>
 
         <button
           type="submit"
           disabled={!input.trim() || loading}
-          className="p-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-600/20 transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0"
+          className="p-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-colors disabled:opacity-50 cursor-pointer"
         >
           <Send className="w-4 h-4" />
         </button>

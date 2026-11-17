@@ -3,7 +3,6 @@ import {
   UploadCloud,
   FileSpreadsheet,
   Download,
-  Sparkles,
   CheckCircle2,
   FileText,
   AlertCircle,
@@ -138,11 +137,11 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 
       {/* Quick Action Cards: Demo Dataset or Download Template */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="p-5 rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200/80 dark:border-white/10 flex flex-col justify-between">
+        <div className="p-5 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] flex flex-col justify-between shadow-xs">
           <div>
-            <div className="flex items-center gap-2 font-bold text-xs text-slate-900 dark:text-white mb-1.5">
-              <Sparkles className="w-4 h-4 text-emerald-500" />
-              <span>Instant Test Dataset</span>
+            <div className="flex items-center gap-2 font-medium text-xs text-slate-900 dark:text-white mb-1.5">
+              <Database className="w-4 h-4 text-emerald-500" />
+              <span>Sample retail dataset</span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
               Don't have a CSV ready? Generate 1,000 realistic retail transactions (Electronics, Clothing, Beauty) with seasonal patterns and anomalies.
@@ -151,18 +150,18 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           <button
             onClick={handleDemo}
             disabled={uploading || refreshing}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition-all disabled:opacity-50"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium transition-colors disabled:opacity-50"
           >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Generate Demo Dataset (1,000 Rows)</span>
+            <Database className="w-3.5 h-3.5" />
+            <span>Generate demo dataset (1,000 rows)</span>
           </button>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200/80 dark:border-white/10 flex flex-col justify-between">
+        <div className="p-5 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] flex flex-col justify-between shadow-xs">
           <div>
-            <div className="flex items-center gap-2 font-bold text-xs text-slate-900 dark:text-white mb-1.5">
+            <div className="flex items-center gap-2 font-medium text-xs text-slate-900 dark:text-white mb-1.5">
               <Download className="w-4 h-4 text-indigo-500" />
-              <span>CSV Header Template</span>
+              <span>CSV header template</span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
               Download the standard CSV template with pre-filled sample rows to format your data in Excel or Google Sheets.
@@ -170,7 +169,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           </div>
           <button
             onClick={downloadTemplate}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-slate-300 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-slate-200 text-xs font-bold transition-colors"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-slate-300 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-slate-200 text-xs font-medium transition-colors"
           >
             <FileText className="w-3.5 h-3.5" />
             <span>Download CSV Template</span>
@@ -179,9 +178,9 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       </div>
 
       {/* Supported Columns Guide */}
-      <div className="p-5 rounded-2xl bg-slate-100/70 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/10 text-xs text-slate-600 dark:text-slate-400">
-        <span className="font-bold uppercase tracking-wider text-[10px] text-slate-500 dark:text-slate-400 block mb-2">
-          Required Column Schema
+      <div className="p-5 rounded-xl bg-slate-50 dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] text-xs text-slate-600 dark:text-slate-400 shadow-xs">
+        <span className="font-medium text-xs text-slate-500 dark:text-slate-400 block mb-2">
+          Required column schema
         </span>
         <div className="flex flex-wrap gap-2">
           {[

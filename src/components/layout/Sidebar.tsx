@@ -103,9 +103,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   ];
 
   const content = (
-    <div className="flex flex-col h-full bg-white dark:bg-[#060b19] border-r border-slate-200 dark:border-slate-800 select-none">
+    <div className="flex flex-col h-full bg-white dark:bg-black border-r border-slate-200 dark:border-white/[0.08] select-none">
       {/* Brand Header */}
-      <div className="h-16 px-4 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 shrink-0">
+      <div className="h-16 px-4 flex items-center justify-between border-b border-slate-200 dark:border-white/[0.08] shrink-0">
         <button
           onClick={() => {
             onSelectTab('home');
@@ -119,7 +119,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {onToggleSidebar && (
             <button
               onClick={onToggleSidebar}
-              className="hidden md:flex p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              className="hidden md:flex p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#232325] transition-colors cursor-pointer"
               title="Hide sidebar (Ctrl+B)"
               aria-label="Hide sidebar"
             >
@@ -151,8 +151,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
               aria-current={isActive ? 'page' : undefined}
               className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                 isActive
-                  ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/60 hover:text-slate-900 dark:hover:text-white'
+                  ? 'bg-slate-100 dark:bg-[#232325] text-slate-900 dark:text-white font-medium'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-[#19191b] hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               <div className="flex items-center gap-2.5 min-w-0">
@@ -175,9 +175,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </nav>
 
       {/* User Session Footer */}
-      <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20 shrink-0">
+      <div className="p-4 border-t border-slate-200 dark:border-white/[0.08] bg-slate-50/50 dark:bg-transparent shrink-0">
         {/* Dataset / Server status telemetry */}
-        <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mb-3 pb-2.5 border-b border-slate-200 dark:border-slate-800/80">
+        <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mb-3 pb-2.5 border-b border-slate-200 dark:border-white/[0.06]">
           <span className="flex items-center gap-1.5">
             <span className={`w-1.5 h-1.5 rounded-full ${backendUp ? 'bg-emerald-500' : 'bg-rose-500'}`} />
             <span className="text-[11px]">Server {backendUp ? 'Connected' : 'Offline'}</span>

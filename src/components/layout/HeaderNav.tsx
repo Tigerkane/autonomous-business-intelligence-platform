@@ -15,7 +15,6 @@ import {
   ShieldCheck,
   Menu,
   X,
-  Sparkles,
   FileSpreadsheet,
 } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
@@ -46,7 +45,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({ currentTab, onSelectTab })
   ];
 
   return (
-    <header className="sticky top-0 z-40 bg-white/85 dark:bg-[#070d1e]/85 backdrop-blur-md border-b border-slate-200/80 dark:border-white/10 transition-colors">
+    <header className="sticky top-0 z-40 bg-white dark:bg-black border-b border-slate-200 dark:border-white/[0.08] transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-4">
           {/* Brand Logo */}

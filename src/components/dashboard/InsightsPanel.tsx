@@ -63,10 +63,10 @@ export const InsightsPanel: React.FC = () => {
       : 'bg-amber-500/15 text-amber-600 dark:text-amber-400';
 
   return (
-    <div className="p-5 rounded-2xl bg-white dark:bg-[#0d1527] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-5">
+    <div className="p-5 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] shadow-xs space-y-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h3 className="text-base font-black text-slate-900 dark:text-white">Period Analysis &amp; Stock Recommendation</h3>
+          <h3 className="text-base font-semibold text-slate-900 dark:text-white">Period analysis &amp; stock recommendation</h3>
           <p className="text-xs text-slate-500 dark:text-slate-400">
             Past results grouped by period, used to predict the next period and guide stocking.
           </p>
@@ -93,7 +93,7 @@ export const InsightsPanel: React.FC = () => {
           <div className="flex items-start gap-3 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
             <PackageCheck className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Prediction</p>
+              <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Inventory recommendation</p>
               <p className="text-sm font-semibold text-slate-900 dark:text-white">{s.headline}</p>
             </div>
           </div>

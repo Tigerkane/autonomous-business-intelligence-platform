@@ -7,7 +7,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Table as TableIcon,
-  Sparkles,
+  Database,
   Search,
   ArrowRight,
   Download,
@@ -249,14 +249,14 @@ export const UploadDatasetView: React.FC<UploadDatasetViewProps> = ({ onNavigate
 
       {/* When Dataset is Loaded: Active Dataset Stats & Preview Table */}
       {loaded && dataset && (
-        <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-lg dark:shadow-black/20 space-y-6">
+        <div className="p-6 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] shadow-xs space-y-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-                <FileSpreadsheet className="w-6 h-6" />
+              <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                <FileSpreadsheet className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                <h3 className="text-base font-semibold text-slate-900 dark:text-white">
                   {filename || 'retail_sales.csv'}
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -271,14 +271,14 @@ export const UploadDatasetView: React.FC<UploadDatasetViewProps> = ({ onNavigate
               <button
                 onClick={() => refresh()}
                 disabled={refreshing}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 text-xs font-bold text-slate-700 dark:text-slate-200 transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 text-xs font-medium text-slate-700 dark:text-slate-200 transition-colors"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
                 Refresh
               </button>
               <button
                 onClick={() => setShowRemoveModal(true)}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-rose-200 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-xs font-bold text-rose-600 dark:text-rose-400 transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-rose-200 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-xs font-medium text-rose-600 dark:text-rose-400 transition-colors"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 Remove Data
@@ -288,35 +288,35 @@ export const UploadDatasetView: React.FC<UploadDatasetViewProps> = ({ onNavigate
 
           {/* Quick Metrics Strip */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/5">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-                Total Rows
+            <div className="p-4 rounded-lg bg-slate-50 dark:bg-[#232325] border border-slate-200/80 dark:border-white/[0.06]">
+              <p className="text-xs font-normal text-slate-500 dark:text-slate-400 mb-1">
+                Total rows
               </p>
-              <p className="text-xl font-black text-slate-900 dark:text-white">
+              <p className="text-xl font-semibold text-slate-900 dark:text-white tabular-nums">
                 {dataset.total_rows?.toLocaleString('en-IN')}
               </p>
             </div>
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/5">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-                Units Sold
+            <div className="p-4 rounded-lg bg-slate-50 dark:bg-[#232325] border border-slate-200/80 dark:border-white/[0.06]">
+              <p className="text-xs font-normal text-slate-500 dark:text-slate-400 mb-1">
+                Units sold
               </p>
-              <p className="text-xl font-black text-slate-900 dark:text-white">
+              <p className="text-xl font-semibold text-slate-900 dark:text-white tabular-nums">
                 {dataset.total_quantity?.toLocaleString('en-IN')}
               </p>
             </div>
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/5">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-                Total Sales Revenue
+            <div className="p-4 rounded-lg bg-slate-50 dark:bg-[#232325] border border-slate-200/80 dark:border-white/[0.06]">
+              <p className="text-xs font-normal text-slate-500 dark:text-slate-400 mb-1">
+                Total sales revenue
               </p>
-              <p className="text-xl font-black text-slate-900 dark:text-white">
+              <p className="text-xl font-semibold text-slate-900 dark:text-white tabular-nums">
                 {inr(dataset.total_sales)}
               </p>
             </div>
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/5">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-                Avg. Basket Size
+            <div className="p-4 rounded-lg bg-slate-50 dark:bg-[#232325] border border-slate-200/80 dark:border-white/[0.06]">
+              <p className="text-xs font-normal text-slate-500 dark:text-slate-400 mb-1">
+                Average basket size
               </p>
-              <p className="text-xl font-black text-slate-900 dark:text-white">
+              <p className="text-xl font-semibold text-slate-900 dark:text-white tabular-nums">
                 {inr(dataset.average_transaction)}
               </p>
             </div>
@@ -338,19 +338,19 @@ export const UploadDatasetView: React.FC<UploadDatasetViewProps> = ({ onNavigate
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div className="p-4 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/5">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1 flex items-center gap-1">
-                    <Calendar className="w-3 h-3" /> Date Range
+                  <p className="text-xs font-normal text-slate-500 dark:text-slate-400 mb-1 flex items-center gap-1">
+                    <Calendar className="w-3 h-3" /> Date range
                   </p>
-                  <p className="text-sm font-black text-slate-900 dark:text-white">
+                  <p className="text-sm font-semibold text-slate-900 dark:text-white">
                     {fmtDate(quality.date_start)} → {fmtDate(quality.date_end)}
                   </p>
                   <p className="text-[11px] text-slate-400 mt-0.5">{quality.span_days} days</p>
                 </div>
                 <div className="p-4 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/5">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                  <p className="text-xs font-normal text-slate-500 dark:text-slate-400 mb-1">
                     History
                   </p>
-                  <p className="text-xl font-black text-slate-900 dark:text-white">
+                  <p className="text-xl font-semibold text-slate-900 dark:text-white tabular-nums">
                     {quality.months_with_data} months
                   </p>
                   <p className="text-[11px] text-slate-400 mt-0.5">
@@ -358,10 +358,10 @@ export const UploadDatasetView: React.FC<UploadDatasetViewProps> = ({ onNavigate
                   </p>
                 </div>
                 <div className="p-4 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/5">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-                    Valid Rows
+                  <p className="text-xs font-normal text-slate-500 dark:text-slate-400 mb-1">
+                    Valid rows
                   </p>
-                  <p className="text-xl font-black text-slate-900 dark:text-white">
+                  <p className="text-xl font-semibold text-slate-900 dark:text-white tabular-nums">
                     {quality.rows_kept.toLocaleString('en-IN')}
                   </p>
                   <p className="text-[11px] text-slate-400 mt-0.5">
@@ -373,10 +373,10 @@ export const UploadDatasetView: React.FC<UploadDatasetViewProps> = ({ onNavigate
                   </p>
                 </div>
                 <div className="p-4 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/5">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-                    Volume
+                  <p className="text-xs font-normal text-slate-500 dark:text-slate-400 mb-1">
+                    Daily volume
                   </p>
-                  <p className="text-xl font-black text-slate-900 dark:text-white">
+                  <p className="text-xl font-semibold text-slate-900 dark:text-white tabular-nums">
                     {quality.avg_transactions_per_day}/day
                   </p>
                   <p className="text-[11px] text-slate-400 mt-0.5">avg transactions</p>
@@ -385,7 +385,7 @@ export const UploadDatasetView: React.FC<UploadDatasetViewProps> = ({ onNavigate
 
               {quality.source === 'upload' && (
                 <div className="space-y-2">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
                     Blank cells in your file
                   </p>
                   {Object.values(quality.missing_values).every((n) => n === 0) ? (
@@ -503,7 +503,7 @@ export const UploadDatasetView: React.FC<UploadDatasetViewProps> = ({ onNavigate
                       {previewColumns.map((col) => (
                         <th
                           key={col}
-                          className="px-4 py-3 font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 text-[10px]"
+                          className="px-4 py-2.5 font-medium text-slate-500 dark:text-slate-400 text-xs"
                         >
                           {col.replace(/_/g, ' ')}
                         </th>
@@ -537,10 +537,10 @@ export const UploadDatasetView: React.FC<UploadDatasetViewProps> = ({ onNavigate
       )}
 
       {/* Upload Dropzone */}
-      <div className="p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-lg dark:shadow-black/20 space-y-4">
+      <div className="p-6 sm:p-8 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] shadow-xs space-y-4">
         <div>
-          <h3 className="text-base font-bold text-slate-900 dark:text-white">
-            {loaded ? 'Replace Active Dataset' : 'Upload Retail Sales CSV'}
+          <h3 className="text-base font-semibold text-slate-900 dark:text-white">
+            {loaded ? 'Replace active dataset' : 'Upload retail sales CSV'}
           </h3>
           <p className="text-xs text-slate-500 dark:text-slate-400">
             {loaded
@@ -563,10 +563,10 @@ export const UploadDatasetView: React.FC<UploadDatasetViewProps> = ({ onNavigate
             }
           }}
           onClick={() => fileInputRef.current?.click()}
-          className={`cursor-pointer border-2 border-dashed rounded-2xl p-8 sm:p-12 text-center transition-all ${
+          className={`cursor-pointer border-2 border-dashed rounded-xl p-8 sm:p-12 text-center transition-colors ${
             isDragging
-              ? 'border-indigo-500 bg-indigo-500/10 ring-4 ring-indigo-500/20'
-              : 'border-slate-300 dark:border-slate-800 hover:border-indigo-500/60 hover:bg-slate-50 dark:hover:bg-white/[0.02]'
+              ? 'border-indigo-500 bg-indigo-500/5'
+              : 'border-slate-300 dark:border-slate-800 hover:border-indigo-500/60 hover:bg-slate-50 dark:hover:bg-[#232325]'
           }`}
         >
           <input
@@ -581,27 +581,27 @@ export const UploadDatasetView: React.FC<UploadDatasetViewProps> = ({ onNavigate
             }}
           />
 
-          <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto mb-3">
-            <UploadCloud className="w-7 h-7" />
+          <div className="w-11 h-11 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto mb-3">
+            <UploadCloud className="w-6 h-6" />
           </div>
 
-          <p className="text-sm font-bold text-slate-800 dark:text-white mb-1">
+          <p className="text-sm font-semibold text-slate-800 dark:text-white mb-1">
             {uploading ? 'Processing and standardizing dataset...' : 'Click to browse or drag & drop CSV'}
           </p>
           <p className="text-xs text-slate-400 max-w-sm mx-auto mb-4">
             Required: Transaction ID, Date, Customer ID, Gender, Age, Product Category, Quantity, Price per Unit, Total Amount &bull; <span className="text-indigo-500 dark:text-indigo-400 font-medium">Optional: Unit Cost</span>
           </p>
 
-          <span className="inline-block px-3 py-1 rounded-full bg-slate-100 dark:bg-white/5 text-[11px] font-semibold text-slate-600 dark:text-slate-400">
-            Files processed in-memory
+          <span className="inline-block px-2.5 py-0.5 rounded text-[11px] font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-[#232325]">
+            Processed in memory
           </span>
         </div>
 
         {/* Action Buttons: Demo Generation & Template */}
-        <div className="pt-4 border-t border-slate-100 dark:border-white/5 flex flex-wrap items-center justify-between gap-4">
+        <div className="pt-4 border-t border-slate-100 dark:border-white/[0.06] flex flex-wrap items-center justify-between gap-4">
           <button
             onClick={downloadTemplate}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 text-xs font-bold text-slate-700 dark:text-slate-300 transition-colors"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 text-xs font-medium text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" />
             <span>Download CSV Header Template</span>
@@ -610,9 +610,9 @@ export const UploadDatasetView: React.FC<UploadDatasetViewProps> = ({ onNavigate
           <button
             onClick={handleDemoClick}
             disabled={uploading || refreshing}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition-all disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs transition-colors disabled:opacity-50 cursor-pointer"
           >
-            <Sparkles className="w-3.5 h-3.5" />
+            <Database className="w-3.5 h-3.5" />
             <span>Generate Demo Dataset (1,000 Rows)</span>
           </button>
         </div>

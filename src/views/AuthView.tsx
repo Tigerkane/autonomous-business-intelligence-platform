@@ -155,7 +155,7 @@ export const AuthView: React.FC<AuthViewProps> = ({
   };
 
   return (
-    <div className="relative min-h-screen bg-slate-50 dark:bg-[#0a0f1e] text-slate-900 dark:text-slate-100 flex flex-col justify-between selection:bg-indigo-600 selection:text-white p-4 sm:p-6 overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-slate-50 dark:bg-black text-slate-900 dark:text-slate-100 flex flex-col justify-between selection:bg-indigo-600 selection:text-white p-4 sm:p-6 overflow-hidden transition-colors">
       {/* Top Header Bar */}
       <header className="max-w-md mx-auto w-full pt-2 flex items-center justify-between">
         <button
@@ -171,13 +171,13 @@ export const AuthView: React.FC<AuthViewProps> = ({
         </div>
       </header>
 
-      {/* Main Centered Compact Card ("The small one") */}
+      {/* Main Centered Compact Card */}
       <main className="flex-1 flex items-center justify-center my-6">
-        <div className="w-full max-w-md rounded-3xl bg-white dark:bg-slate-800/40 backdrop-blur-xl border border-slate-200 dark:border-white/10 shadow-xl dark:shadow-2xl p-6 sm:p-8 space-y-5">
+        <div className="w-full max-w-md rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] shadow-xs p-6 sm:p-8 space-y-5">
           {/* Header */}
           <div className="text-center space-y-1">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 text-[10px] font-mono uppercase tracking-wider mb-2">
-              <ShieldCheck className="w-3 h-3" />
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300 text-xs font-mono mb-2">
+              <ShieldCheck className="w-3 h-3 text-indigo-500" />
               <span>Secure Authentication</span>
             </div>
             <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">

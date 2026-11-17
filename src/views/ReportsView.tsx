@@ -162,26 +162,26 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ onNavigate }) => {
           return (
             <div
               key={report.id}
-              className="p-6 rounded-2xl bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-lg dark:shadow-black/20 hover:border-indigo-500/50 hover:shadow-md dark:hover:shadow-indigo-500/5 hover:-translate-y-0.5 transition-all flex flex-col justify-between"
+              className="p-6 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] shadow-xs flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-start justify-between gap-4 mb-4">
                   <div
-                    className={`w-12 h-12 rounded-xl bg-gradient-to-tr ${report.color} flex items-center justify-center text-white shadow-xs`}
+                    className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-[#232325] text-slate-700 dark:text-slate-300 flex items-center justify-center shrink-0 border border-slate-200/80 dark:border-white/[0.06]"
                   >
-                    <Icon className="w-6 h-6" />
+                    <Icon className="w-5 h-5" />
                   </div>
                   <span
-                    className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${report.badgeColor}`}
+                    className="text-[11px] font-mono px-2 py-0.5 rounded border border-slate-200 dark:border-white/[0.08] text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-white/[0.04]"
                   >
                     {report.badge}
                   </span>
                 </div>
 
-                <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1.5">
+                <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-1.5">
                   {report.title}
                 </h3>
-                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mb-6">
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-6">
                   {report.description}
                 </p>
               </div>
@@ -190,7 +190,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ onNavigate }) => {
                 {/* Generation Progress Bar */}
                 {isGenerating && (
                   <div className="mb-4">
-                    <div className="flex justify-between text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">
+                    <div className="flex justify-between text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1">
                       <span>Synthesizing vector PDF...</span>
                       <span>{progress}%</span>
                     </div>
@@ -207,12 +207,12 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ onNavigate }) => {
                   <button
                     onClick={() => handleGenerate(report.id, report.title, false)}
                     disabled={isGenerating}
-                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm shadow-indigo-600/20 transition-all disabled:opacity-50"
+                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs transition-colors disabled:opacity-50 cursor-pointer"
                   >
                     {isDone ? (
                       <>
-                        <CheckCircle className="w-4 h-4 text-emerald-300" />
-                        <span>Downloaded!</span>
+                        <CheckCircle className="w-4 h-4 text-emerald-400" />
+                        <span>Downloaded</span>
                       </>
                     ) : (
                       <>

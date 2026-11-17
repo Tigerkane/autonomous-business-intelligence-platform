@@ -29,37 +29,29 @@ import { useAuth } from '../contexts/AuthContext';
 import { LLMProvider } from '../types';
 import { RemoveDataModal } from '../components/common/RemoveDataModal';
 
-/* Glassmorphism card wrapper */
+/* Card wrapper */
 const GlassCard: React.FC<{ children: React.ReactNode; className?: string; glowColor?: string }> = ({
   children,
   className = '',
-  glowColor = 'indigo',
 }) => {
-  const glowMap: Record<string, string> = {
-    indigo: 'hover:shadow-indigo-500/10',
-    purple: 'hover:shadow-purple-500/10',
-    emerald: 'hover:shadow-emerald-500/10',
-    amber: 'hover:shadow-amber-500/10',
-    rose: 'hover:shadow-rose-500/10',
-  };
   return (
     <div
-      className={`relative p-6 rounded-2xl bg-white dark:bg-white/[0.03] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-sm dark:shadow-lg dark:shadow-black/10 ${glowMap[glowColor] || ''} hover:border-slate-300 dark:hover:border-white/[0.14] hover:shadow-md dark:hover:shadow-xl transition-all duration-300 ${className}`}
+      className={`p-6 rounded-xl bg-white dark:bg-[#19191b] border border-slate-200 dark:border-white/[0.08] shadow-xs transition-colors ${className}`}
     >
       {children}
     </div>
   );
 };
 
-/* Gradient icon container */
+/* Icon container */
 const GradientIcon: React.FC<{
   icon: React.ElementType;
-  gradient: string;
-}> = ({ icon: Icon, gradient }) => (
+  gradient?: string;
+}> = ({ icon: Icon }) => (
   <div
-    className={`w-11 h-11 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center shrink-0 shadow-lg`}
+    className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-[#232325] text-slate-700 dark:text-slate-300 flex items-center justify-center shrink-0 border border-slate-200/80 dark:border-white/[0.06]"
   >
-    <Icon className="w-5 h-5 text-white" />
+    <Icon className="w-4 h-4" />
   </div>
 );
 
@@ -106,14 +98,13 @@ export const SettingsView: React.FC = () => {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto animate-fade-in">
-      {/* Header with gradient accent */}
-      <div className="relative">
-        <div className="absolute -top-4 -left-4 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-        <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight relative">
-          System & Model Diagnostics
+      {/* Header */}
+      <div>
+        <h2 className="text-2xl font-semibold text-slate-900 dark:text-white tracking-tight">
+          System & model diagnostics
         </h2>
-        <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 relative">
-          Telemetry of analytical engines, language model integrations, and runtime data configuration.
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+          Diagnostics of analytical engines, language model providers, and session configuration.
         </p>
       </div>
 
@@ -136,9 +127,9 @@ export const SettingsView: React.FC = () => {
         <div className="border-t border-slate-200 dark:border-white/[0.06] pt-5">
           {isAuthenticated && user ? (
             <div className="space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08]">
+              <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-slate-50 dark:bg-[#232325] border border-slate-200 dark:border-white/[0.08]">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white flex items-center justify-center font-bold text-base shrink-0 overflow-hidden shadow-lg shadow-indigo-500/25 ring-2 ring-indigo-400/20">
+                  <div className="w-10 h-10 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-medium text-sm shrink-0 overflow-hidden">
                     {user.avatar ? (
                       <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
                     ) : (
@@ -147,15 +138,15 @@ export const SettingsView: React.FC = () => {
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-sm text-slate-900 dark:text-white">
+                      <span className="font-semibold text-sm text-slate-900 dark:text-white">
                         {user.name}
                       </span>
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold text-[10px] border border-emerald-500/20">
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-medium text-[10px] border border-emerald-500/20">
                         Active
                       </span>
                     </div>
-                    <p className="text-xs text-slate-600 dark:text-slate-400">{user.email}</p>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{user.email}</p>
+                    <p className="text-[11px] text-slate-400 dark:text-slate-500">
                       {user.role} · {user.company}
                     </p>
                   </div>
@@ -184,23 +175,23 @@ export const SettingsView: React.FC = () => {
           ) : (
             <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08]">
               <div>
-                <p className="text-sm font-bold text-slate-900 dark:text-white">
-                  No Active User Session
+                <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                  No active user session
                 </p>
-                <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-                  Sign in or create an account with CAPTCHA verification to enable isolated per-user dataset workspaces.
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Sign in or create an account with verification to enable isolated workspaces.
                 </p>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => openAuthModal('signup')}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-300 dark:border-white/10 bg-slate-100 dark:bg-white/[0.04] text-slate-800 dark:text-white hover:bg-slate-200 dark:hover:bg-white/[0.08] font-semibold text-xs shadow-xs transition-all"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-300 dark:border-white/10 bg-slate-100 dark:bg-[#232325] text-slate-800 dark:text-white hover:bg-slate-200 dark:hover:bg-[#2c2c30] font-medium text-xs transition-colors"
                 >
                   <span>Register</span>
                 </button>
                 <button
                   onClick={() => openAuthModal('signin')}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 text-white hover:from-indigo-400 hover:to-violet-500 font-semibold text-xs shadow-lg shadow-indigo-500/25 transition-all"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs transition-colors"
                 >
                   <User className="w-3.5 h-3.5" />
                   <span>Sign In</span>
@@ -395,7 +386,7 @@ export const SettingsView: React.FC = () => {
                   : 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/20'
               }`}
             >
-              <span className={`w-1.5 h-1.5 rounded-full ${backendUp ? 'bg-emerald-500 dark:bg-emerald-400 animate-pulse' : 'bg-rose-500 dark:bg-rose-400'}`} />
+              <span className={`w-1.5 h-1.5 rounded-full ${backendUp ? 'bg-emerald-500 dark:bg-emerald-400' : 'bg-rose-500 dark:bg-rose-400'}`} />
               {backendUp ? 'Online & Healthy' : 'Offline'}
             </span>
           </div>
